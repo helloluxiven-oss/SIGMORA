@@ -213,7 +213,12 @@ html,body{height:100%;background:var(--void);color:var(--t1);font-family:var(--f
 .nb-y{background:rgba(251,191,36,0.15);color:var(--gold)}
 /* Admin-only nav items */
 .admin-only{display:none}
-.role-admin .admin-only,.role-super_admin .admin-only{display:flex}
+.role-admin .nav-group.admin-only,
+.role-super_admin .nav-group.admin-only{display:block}
+.role-admin .ni.admin-only,
+.role-super_admin .ni.admin-only,
+.role-admin .nlbl.admin-only,
+.role-super_admin .nlbl.admin-only{display:flex}
 
 .sf{margin-top:auto;border-top:1px solid var(--b2);flex-shrink:0}
 .sf-wallet{
@@ -1320,17 +1325,17 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     <div class="ni admin-only" onclick="nav('add-property',this)"><span class="ni-ic">⊕</span><span class="ni-lbl">List Property</span><span class="nbadge nb-y">ADMIN</span></div>
   </div>
 
-  <div class="nav-group">
-    <div class="nlbl">Entrepreneur Fund</div>
-    <div class="ni" onclick="nav('startups',this)"><span class="ni-ic">◈</span><span class="ni-lbl">Startup Deals</span></div>
-    <div class="ni" onclick="nav('apply-funding',this)"><span class="ni-ic">⊞</span><span class="ni-lbl">Apply for Funding</span></div>
+  <div class="nav-group admin-only">
+    <div class="nlbl admin-only">Entrepreneur Fund</div>
+    <div class="ni admin-only" onclick="nav('startups',this)"><span class="ni-ic">◈</span><span class="ni-lbl">Startup Deals</span></div>
+    <div class="ni admin-only" onclick="nav('apply-funding',this)"><span class="ni-ic">⊞</span><span class="ni-lbl">Apply for Funding</span></div>
     <div class="ni" onclick="nav('fund-portfolio',this)"><span class="ni-ic">◉</span><span class="ni-lbl">Fund Portfolio</span></div>
   </div>
 
-  <div class="nav-group">
-    <div class="nlbl">Prop Trading</div>
-    <div class="ni" onclick="nav('trading',this)"><span class="ni-ic">▲</span><span class="ni-lbl">Live Trading Desk</span></div>
-    <div class="ni" onclick="nav('liquidity',this)"><span class="ni-ic">◑</span><span class="ni-lbl">Liquidity Pool</span></div>
+  <div class="nav-group admin-only">
+    <div class="nlbl admin-only">Prop Trading</div>
+    <div class="ni admin-only" onclick="nav('trading',this)"><span class="ni-ic">▲</span><span class="ni-lbl">Live Trading Desk</span></div>
+    <div class="ni admin-only" onclick="nav('liquidity',this)"><span class="ni-ic">◑</span><span class="ni-lbl">Liquidity Pool</span></div>
     <div class="ni" onclick="nav('traders',this)"><span class="ni-ic">◐</span><span class="ni-lbl">Trader Roster</span></div>
   </div>
 
@@ -1464,14 +1469,170 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <!-- ═══ WALLET ═══ -->
   <div class="page" id="pg-wallet">
     <div class="sh"><div class="sh-l"><div class="sh-title">My Wallet</div><div class="sh-sub">Manage your funds and view transaction history</div></div></div>
+    <div id="wallet-kyc-banner" style="display:none;margin-bottom:16px"></div>
     <div class="wh">
       <div class="wh-lbl">TOTAL BALANCE</div>
       <div class="wh-bal">$<span id="w-balance">0.00</span></div>
-      <div class="wh-sub" id="w-addr-display">Connect your wallet to see address</div>
+      <div class="wh-sub" id="w-addr-display">Deposit USDT to start investing</div>
       <div class="wh-acts">
-        <button class="wha dep" onclick="openDepositModal()">↓ Deposit</button>
-        <button class="wha wit">↑ Withdraw</button>
-        <button class="wha wit" onclick="openWalletModal()">◎ Connect Wallet</button>
+        <button class="wha dep" onclick="openDepositModal()">↓ Deposit USDT</button>
+        <button class="wha wit" onclick="openWithdrawModal()">↑ Withdraw</button>
+      </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="deposit-modal" style="display:none;position:fixed;inset:0;z-index:1000;
+      background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+      align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--b1);border-radius:20px;
+        padding:32px;width:100%;max-width:460px;position:relative">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+          <div>
+            <div style="font-size:18px;font-weight:800">Deposit USDT</div>
+            <div style="font-size:12px;color:var(--t4);margin-top:2px">BEP-20 (Binance Smart Chain) only</div>
+          </div>
+          <button onclick="closeDepositModal()"
+            style="background:var(--b2);border:none;color:var(--t2);width:32px;height:32px;
+            border-radius:8px;cursor:pointer;font-size:16px">✕</button>
+        </div>
+
+        <!-- KYC Gate inside deposit modal -->
+        <div id="deposit-kyc-gate" style="display:none"></div>
+
+        <!-- Network warning -->
+        <div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);
+          border-radius:10px;padding:12px;margin-bottom:20px;
+          display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:16px">⚠️</span>
+          <div style="font-size:12px;color:var(--gold);line-height:1.6">
+            Send only <b>USDT on BEP-20 (BSC)</b> network to this address.
+            Sending other coins or using wrong network will result in permanent loss.
+          </div>
+        </div>
+
+        <!-- QR + Address -->
+        <div style="text-align:center;margin-bottom:20px">
+          <!-- QR Code (generated via API) -->
+          <div style="display:inline-block;padding:12px;background:#fff;border-radius:12px;margin-bottom:16px">
+            <img id="deposit-qr" src="" alt="QR Code"
+              style="width:160px;height:160px;display:block"/>
+          </div>
+          <div style="font-size:10px;color:var(--t4);letter-spacing:1px;
+            text-transform:uppercase;font-family:var(--f-mono);margin-bottom:8px">
+            Platform USDT Address (BEP-20)
+          </div>
+          <div style="background:var(--b2);border-radius:10px;padding:12px 16px;
+            display:flex;align-items:center;gap:10px">
+            <div id="deposit-address" style="font-family:var(--f-mono);font-size:11px;
+              color:var(--neon);word-break:break-all;flex:1;text-align:left">
+              Loading address...
+            </div>
+            <button onclick="copyDepositAddress()"
+              style="background:var(--v1);border:none;color:#fff;padding:6px 12px;
+              border-radius:7px;cursor:pointer;font-size:11px;white-space:nowrap;flex-shrink:0">
+              Copy
+            </button>
+          </div>
+        </div>
+
+        <!-- Amount input -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
+            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">
+            Amount You're Sending (USDT)
+          </div>
+          <input id="deposit-amount-input" type="number" min="10" step="1"
+            placeholder="Minimum $10 USDT"
+            style="width:100%;background:var(--b2);border:1px solid var(--b3);
+            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:14px;
+            font-family:var(--f-mono);box-sizing:border-box"/>
+          <div style="font-size:11px;color:var(--t4);margin-top:6px">
+            You'll receive: <b id="deposit-sgm-preview" style="color:var(--neon)">0 SGM</b>
+            · Tier: <b id="deposit-tier-preview" style="color:var(--v2)">—</b>
+          </div>
+        </div>
+
+        <!-- TX Hash input — required proof -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
+            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">
+            Transaction Hash (required)
+            <span style="color:var(--rose)">*</span>
+          </div>
+          <input id="deposit-txhash-input" type="text"
+            placeholder="Paste your BSC TX hash: 0x..."
+            style="width:100%;background:var(--b2);border:1px solid var(--b3);
+            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:11px;
+            font-family:var(--f-mono);box-sizing:border-box"/>
+          <div style="font-size:10px;color:var(--t4);margin-top:5px;line-height:1.5">
+            After sending USDT, find your TX hash in your wallet or on
+            <a href="https://bscscan.com" target="_blank" style="color:var(--neon)">bscscan.com</a>
+          </div>
+        </div>
+
+        <!-- Submit button -->
+        <button onclick="submitDepositRequest()" id="deposit-submit-btn"
+          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--v1),var(--v2));
+          border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;
+          cursor:pointer;margin-bottom:12px">
+          Submit Deposit Request
+        </button>
+
+        <!-- Instructions -->
+        <div style="font-size:11px;color:var(--t4);line-height:1.7;text-align:center">
+          Send USDT first → paste TX hash → submit. Admin verifies on BSCScan and
+          credits your wallet within <b style="color:var(--t2)">30 minutes</b>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdraw-modal" style="display:none;position:fixed;inset:0;z-index:1000;
+      background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+      align-items:center;justify-content:center">
+      <div style="background:var(--surface);border:1px solid var(--b1);border-radius:20px;
+        padding:32px;width:100%;max-width:420px;position:relative">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+          <div>
+            <div style="font-size:18px;font-weight:800">Withdraw USDT</div>
+            <div style="font-size:12px;color:var(--t4);margin-top:2px">Minimum $20 · BEP-20 only</div>
+          </div>
+          <button onclick="closeWithdrawModal()"
+            style="background:var(--b2);border:none;color:var(--t2);width:32px;height:32px;
+            border-radius:8px;cursor:pointer;font-size:16px">✕</button>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
+            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Your USDT Address (BEP-20)</div>
+          <input id="withdraw-address-input" type="text"
+            placeholder="0x... (BEP-20 USDT address)"
+            style="width:100%;background:var(--b2);border:1px solid var(--b3);
+            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:12px;
+            font-family:var(--f-mono);box-sizing:border-box"/>
+        </div>
+        <div style="margin-bottom:20px">
+          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
+            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">
+            Amount (USDT) · Balance: $<span id="withdraw-bal-display">0.00</span>
+          </div>
+          <input id="withdraw-amount-input" type="number" min="20" step="1"
+            placeholder="Minimum $20"
+            style="width:100%;background:var(--b2);border:1px solid var(--b3);
+            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:14px;
+            font-family:var(--f-mono);box-sizing:border-box"/>
+        </div>
+        <button onclick="submitWithdrawRequest()" id="withdraw-submit-btn"
+          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--mint),#0d9268);
+          border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+          margin-bottom:12px">
+          Submit Withdrawal Request
+        </button>
+        <div style="font-size:11px;color:var(--t4);line-height:1.7;text-align:center">
+          Withdrawals processed within <b style="color:var(--t2)">24 hours</b>. 
+          1% network fee applies.
+        </div>
       </div>
     </div>
     <div class="g3" id="wallet-stats">
@@ -1564,6 +1725,9 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div class="sh-sub">Purchase property tokens with USDT or SGM platform currency</div>
       </div>
     </div>
+    <!-- KYC gate for buy tokens -->
+    <div id="buy-kyc-gate" style="display:none;margin-bottom:16px"></div>
+
     <!-- Tier progress banner -->
     <div id="tier-banner" style="display:none;margin-bottom:16px;padding:16px 20px;
       border-radius:14px;border:1px solid var(--b1);
@@ -2042,7 +2206,61 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Today's Payouts</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="rev-today">—</div></div>
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total TVL</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px" id="rev-tvl">—</div></div>
     </div>
-    <div class="card">
+    
+    <!-- Pending Deposits — Admin Panel -->
+    <div class="card" style="margin-bottom:16px;border-color:rgba(0,245,212,0.2)">
+      <div class="card-hd">
+        <div class="card-title">
+          <span class="cdot" style="background:var(--neon)"></span>
+          Pending Deposit Requests
+          <span id="pending-dep-count" style="background:var(--rose);color:#fff;
+            font-size:10px;padding:2px 8px;border-radius:10px;margin-left:6px">0</span>
+        </div>
+        <button onclick="loadPendingDeposits()" class="btn btn-ghost" style="font-size:11px">
+          🔄 Refresh
+        </button>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Amount (USDT)</th>
+            <th>SGM</th>
+            <th>TX Hash</th>
+            <th>Submitted</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="pending-deposits-table">
+          <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--t4)">
+            Loading...
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pending Withdrawals — Admin Panel -->
+    <div class="card" style="margin-bottom:16px;border-color:rgba(244,63,94,0.2)">
+      <div class="card-hd">
+        <div class="card-title">
+          <span class="cdot" style="background:var(--rose)"></span>
+          Pending Withdrawal Requests
+          <span id="pending-wd-count" style="background:var(--rose);color:#fff;
+            font-size:10px;padding:2px 8px;border-radius:10px;margin-left:6px">0</span>
+        </div>
+        <button onclick="loadPendingWithdrawals()" class="btn btn-ghost" style="font-size:11px">🔄 Refresh</button>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr><th>User</th><th>Amount</th><th>Net (after fee)</th><th>Address</th><th>Submitted</th><th>Action</th></tr>
+        </thead>
+        <tbody id="pending-withdrawals-table">
+          <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--t4)">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+<div class="card">
       <div class="card-hd">
         <div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Recent Payouts</div>
         <div class="card-action" onclick="adminRunPayouts()">▶ RUN PAYOUTS</div>
@@ -2080,6 +2298,11 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <!-- ═══ SETTINGS ═══ -->
   <div class="page" id="pg-settings">
     <div class="sh"><div class="sh-l"><div class="sh-title">Settings</div><div class="sh-sub">Account preferences & platform configuration</div></div></div>
+    <!-- KYC Status Card — always visible in settings -->
+    <div id="settings-kyc-card" style="margin-bottom:16px">
+      <!-- filled by renderSettingsKYC() -->
+    </div>
+
     <div class="g2">
       <div class="card">
         <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Profile Settings</div></div>
@@ -2519,6 +2742,7 @@ function showAuthScreen() {
   // Stop tickers
   if (window._tickerInterval) { clearInterval(window._tickerInterval); window._tickerInterval = null; }
   if (window._priceInterval)  { clearInterval(window._priceInterval);  window._priceInterval  = null; }
+  stopRealtimeListeners();
 
   // ── Screen swap — auth ALWAYS visible, app ALWAYS hidden ───────
   const authEl = $('auth-screen');
@@ -2555,25 +2779,92 @@ function showAuthScreen() {
 async function showDashboard(user) {
   currentUser = user;
 
-  // Swap screens immediately — user sees the app with zero delay
+  // ── 1. Swap screens instantly ──────────────────────────────────
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
   if (authEl) authEl.classList.add('hidden');
   if (appEl)  appEl.classList.remove('hidden');
 
-  // Non-blocking: record login time
-  sb.rpc('touch_last_login').catch(() => {});
+  // ── 2. Instant skeleton from JWT — zero DB wait ────────────────
+  const emailFallback = user.email?.split('@')[0] || 'User';
+  const sfAv = $('sf-av');
+  if (sfAv) { sfAv.textContent = emailFallback.slice(0,2).toUpperCase(); sfAv.style.animation = 'pulse 1.5s ease-in-out infinite'; }
+  setText('sf-name', emailFallback);
+  setText('sf-role', 'Loading…');
+  setText('sf-bal',  '—');
+  ['kpi-bal','kpi-invested','kpi-earned','kpi-props'].forEach(id => { const el=$(id); if(el) el.textContent='—'; });
 
-  // Start live price ticker (no DB needed)
+  // ── 3. Start tickers — no DB needed ───────────────────────────
   startTicker();
   startPriceUpdates();
+  sb.rpc('touch_last_login').catch(() => {});
 
-  // Load profile + dashboard in sequence (profile feeds dashboard data)
-  await loadUserProfile();
-  await loadDashboard();
+  // ── 4. SINGLE RPC fetches everything in one round trip ─────────
+  // get_dashboard_summary returns: profile + properties + activity
+  // This replaces loadUserProfile() + loadDashboardData() calls
+  const { data: summary, error } = await sb.rpc('get_dashboard_summary');
 
-  // Non-blocking: update notification badge
+  if (!error && summary) {
+    // Bind profile
+    const profile = summary.profile || {};
+    userProfile = profile;
+
+    // Sidebar
+    const displayName = profile.full_name || emailFallback;
+    if (sfAv) { sfAv.textContent = displayName.slice(0,2).toUpperCase(); sfAv.style.animation = 'none'; }
+    setText('sf-name', displayName);
+    setText('sf-role', (profile.role||'user').replace(/_/g,' ').toUpperCase());
+    setText('sf-bal',  fmtUSD(profile.wallet_balance_usd));
+    const sfAddr = $('sf-addr');
+    if (sfAddr) sfAddr.textContent = profile.wallet_address
+      ? profile.wallet_address.slice(0,6)+'…'+profile.wallet_address.slice(-4) : 'Not connected';
+
+    // Role CSS — sets admin sections visible
+    document.body.className = document.body.className.replace(/role-\S+/g,'').trim();
+    document.body.classList.add('role-'+(profile.role||'user'));
+    if (['admin','super_admin'].includes(profile.role)) {
+      document.querySelectorAll('.admin-only').forEach(el => {
+        el.style.display = el.classList.contains('nav-group') ? 'block' : 'flex';
+      });
+    }
+
+    // KPI cards
+    const kpiBal  = $('kpi-bal');      if (kpiBal)  kpiBal.textContent  = fmtUSD(profile.wallet_balance_usd);
+    const kpiInv  = $('kpi-invested'); if (kpiInv)  kpiInv.textContent  = fmtUSD(profile.total_invested_usd);
+    const kpiEarn = $('kpi-earned');   if (kpiEarn) kpiEarn.textContent = fmtUSD(profile.total_earned_usd);
+    const kpiProps= $('kpi-props');    if (kpiProps) kpiProps.textContent= summary.prop_count||0;
+    const navBadge= $('nav-prop-badge');if(navBadge) navBadge.textContent= summary.prop_count||0;
+
+    // Properties + activity
+    allProperties = summary.properties || [];
+    renderDashboardProps(allProperties);
+    renderDashboardActivity(summary.activity || []);
+
+    // SGM tier
+    renderTierUI();
+
+    // Settings form pre-fill
+    const sv = (id, val) => { const el=$(id); if(el) el.value = val||''; };
+    sv('set-name', profile.full_name); sv('set-email', profile.email||user.email);
+    sv('set-phone', profile.phone); sv('set-country', profile.country);
+    sv('set-city', profile.city); sv('set-wallet', profile.wallet_address);
+
+    // Chart non-blocking
+    setTimeout(() => loadPortfolioChart(), 50);
+
+  } else {
+    // Fallback if RPC fails
+    await loadUserProfile();
+    await loadDashboardData();
+  }
+
+  // ── 5. Non-blocking extras ─────────────────────────────────────
   loadNotificationCount().catch(() => {});
+  startRealtimeListeners();
+  renderKYCBanner();
+  if (['admin','super_admin'].includes(userProfile?.role)) {
+    refreshAdminBadges().catch(() => {});
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -2666,9 +2957,16 @@ async function loadUserProfile() {
   // ── Render tier badge + SGM balance ──────────────────────────────
   renderTierUI();
 
-  // ── Role-based CSS (controls admin nav visibility) ─────────────
+  // ── Role-based CSS — CRITICAL: controls admin nav visibility ────
+  const userRole = profile.role || 'user';
   document.body.className = document.body.className.replace(/\brole-\S+/g, '').trim();
-  document.body.classList.add('role-' + (profile.role || 'user'));
+  document.body.classList.add('role-' + userRole);
+  // Force admin sections visible immediately for admin roles
+  if (userRole === 'admin' || userRole === 'super_admin') {
+    document.querySelectorAll('.admin-only').forEach(el => {
+      el.style.display = el.classList.contains('nav-group') ? 'block' : 'flex';
+    });
+  }
 
   // ── Pre-fill settings form ──────────────────────────────────────
   const setVal = (id, val) => { const el = $(id); if (el) el.value = val || ''; };
@@ -2762,41 +3060,60 @@ function openWalletModal() { openModal('modal-wallet'); }
 // DASHBOARD
 // ═══════════════════════════════════════════════
 async function loadDashboard() {
-  if (!userProfile) await loadUserProfile();
-  const u = userProfile || {};
+  await loadDashboardData();
+}
 
-  // KPI cards from profile (instant — no extra query)
-  const kpiBal = $('kpi-bal'); if (kpiBal) kpiBal.textContent = fmtUSD(u.wallet_balance_usd);
-  const kpiInv = $('kpi-invested'); if (kpiInv) kpiInv.textContent = fmtUSD(u.total_invested_usd);
-  const kpiEarn = $('kpi-earned'); if (kpiEarn) kpiEarn.textContent = fmtUSD(u.total_earned_usd);
+async function loadDashboardData() {
+  // Single RPC — returns profile + properties + activity in ONE call
+  const { data, error } = await sb.rpc('get_dashboard_summary');
 
-  // Fire all 3 DB queries in parallel instead of sequentially
-  const [countRes, propsRes, actRes] = await Promise.all([
-    sb.from('properties').select('*',{count:'exact',head:true}).eq('status','active'),
-    sb.from('properties').select('*').eq('status','active').eq('featured',true).order('sort_order').limit(3),
-    sb.from('roi_payouts').select('*, properties(name)').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(6),
-  ]);
-
-  const kpiProps = $('kpi-props'); if (kpiProps) kpiProps.textContent = countRes.count||0;
-  const navBadge = $('nav-prop-badge'); if (navBadge) navBadge.textContent = countRes.count||0;
-
-  allProperties = propsRes.data||[];
-  renderDashboardProps(allProperties);
-  renderDashboardActivity(actRes.data||[]);
-
-  // Admin stats — fire-and-forget (non-blocking)
-  if (['admin','super_admin'].includes(u.role)) {
-    sb.rpc('get_dashboard_stats').then(({ data: stats }) => {
-      if (!stats) return;
-      const umTotal = $('um-total'); if (umTotal) umTotal.textContent = stats.total_users||0;
-      const umKyc = $('um-kyc'); if (umKyc) umKyc.textContent = stats.verified_users||0;
-      const revTvl = $('rev-tvl'); if (revTvl) revTvl.textContent = fmtUSD(stats.total_tvl_usd);
-      const revToday = $('rev-today'); if (revToday) revToday.textContent = fmtUSD(stats.payouts_today_usd);
-    }).catch(()=>{});
+  if (error || !data) {
+    // Fallback: load from userProfile if already set
+    if (userProfile) bindDashboardKPIs(userProfile);
+    return;
   }
 
-  // Chart renders after UI (non-blocking)
-  setTimeout(() => loadPortfolioChart(), 0);
+  // Profile — set globally so other functions can use it
+  if (data.profile && !userProfile) {
+    userProfile = data.profile;
+    bindSidebarProfile(userProfile);
+  }
+
+  // KPI cards — instant from same call
+  bindDashboardKPIs(data.profile || userProfile || {});
+
+  // Properties
+  const kpiProps = $('kpi-props'); if (kpiProps) kpiProps.textContent = data.prop_count || 0;
+  const navBadge = $('nav-prop-badge'); if (navBadge) navBadge.textContent = data.prop_count || 0;
+  allProperties = data.properties || [];
+  renderDashboardProps(allProperties);
+  renderDashboardActivity(data.activity || []);
+
+  // Chart non-blocking
+  setTimeout(() => loadPortfolioChart(), 100);
+}
+
+function bindDashboardKPIs(u) {
+  if (!u) return;
+  const kpiBal  = $('kpi-bal');      if (kpiBal)  kpiBal.textContent  = fmtUSD(u.wallet_balance_usd);
+  const kpiInv  = $('kpi-invested'); if (kpiInv)  kpiInv.textContent  = fmtUSD(u.total_invested_usd);
+  const kpiEarn = $('kpi-earned');   if (kpiEarn) kpiEarn.textContent = fmtUSD(u.total_earned_usd);
+}
+
+function bindSidebarProfile(profile) {
+  if (!profile) return;
+  const emailFallback = currentUser?.email?.split('@')[0] || 'User';
+  const displayName   = profile.full_name || emailFallback;
+  const roleLabel     = (profile.role || 'user').replace(/_/g, ' ').toUpperCase();
+  const sfAv = $('sf-av');
+  if (sfAv) { sfAv.textContent = displayName.slice(0,2).toUpperCase(); sfAv.style.animation = 'none'; }
+  setText('sf-name', displayName);
+  setText('sf-role', roleLabel);
+  setText('sf-bal',  fmtUSD(profile.wallet_balance_usd));
+  // Role CSS — critical for admin sections
+  document.body.className = document.body.className.replace(/\brole-\S+/g, '').trim();
+  document.body.classList.add('role-' + (profile.role || 'user'));
+  renderTierUI();
 }
 
 // ═══════════════════════════════════════════════
@@ -4344,35 +4661,119 @@ async function loadUsers() {
 // ═══════════════════════════════════════════════
 async function loadKYC() {
   if (!['admin','super_admin'].includes(userProfile?.role)) return;
-  const { data: users } = await sb.from('users')
-    .select('id,full_name,email,kyc_status,kyc_submitted_at')
-    .order('kyc_submitted_at',{ascending:false}).limit(100);
-  const counts={pending:0,submitted:0,approved:0,rejected:0,flagged:0};
-  (users||[]).forEach(u=>{if(counts[u.kyc_status]!==undefined)counts[u.kyc_status]++;});
-  const kp=$('kyc-pending');if(kp)kp.textContent=counts.submitted+counts.pending;
-  const ka=$('kyc-approved');if(ka)ka.textContent=counts.approved;
-  const kf=$('kyc-flagged');if(kf)kf.textContent=counts.flagged;
-  const kr=$('kyc-rejected');if(kr)kr.textContent=counts.rejected;
-  const nb=$('nav-kyc-badge');if(nb)nb.textContent=counts.submitted+counts.flagged;
-  const tb=$('kyc-table');if(!tb)return;
-  const pending=(users||[]).filter(u=>u.kyc_status!=='approved');
-  if(!pending.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px">No pending KYC records</td></tr>';return;}
-  tb.innerHTML=pending.map(u=>`<tr>
-    <td style="color:var(--t1);font-weight:600">${u.full_name||'—'}</td>
-    <td class="mono" style="font-size:11px">${u.email}</td>
-    <td>${statusChip(u.kyc_status)}</td>
-    <td class="mono" style="font-size:11px">${fmtDate(u.kyc_submitted_at)}</td>
-    <td>
-      <button class="chip chip-g" style="cursor:pointer;border:none;padding:4px 10px" onclick="updateKYC('${u.id}','approved')">Approve</button>
-      <button class="chip chip-r" style="cursor:pointer;border:none;padding:4px 10px;margin-left:4px" onclick="updateKYC('${u.id}','rejected')">Reject</button>
-    </td>
-  </tr>`).join('');
+
+  // Fetch ONLY non-admin users with their KYC data
+  const { data: users, error } = await sb
+    .from('users')
+    .select('id,full_name,email,kyc_status,kyc_submitted_at,kyc_full_name,kyc_nationality,kyc_id_type,kyc_id_number,kyc_doc_id_path,kyc_doc_selfie_path,kyc_doc_address_path,kyc_reject_reason')
+    .neq('role', 'super_admin')
+    .neq('role', 'admin')
+    .order('kyc_submitted_at', { ascending: false, nullsFirst: false });
+
+  if (error) { showToast('Failed to load KYC data', 'error'); return; }
+
+  const all = users || [];
+
+  // Count by status
+  const counts = { pending:0, submitted:0, approved:0, rejected:0, flagged:0 };
+  all.forEach(u => { if (counts[u.kyc_status] !== undefined) counts[u.kyc_status]++; });
+
+  // Update KPI cards
+  const set = (id, val) => { const el=$(id); if(el) el.textContent = val; };
+  set('kyc-pending',  counts.submitted + counts.flagged);
+  set('kyc-approved', counts.approved);
+  set('kyc-flagged',  counts.flagged);
+  set('kyc-rejected', counts.rejected);
+
+  // Update nav badge
+  const nb = $('nav-kyc-badge');
+  if (nb) nb.textContent = counts.submitted + counts.flagged || '';
+
+  // Queue: show submitted + flagged users
+  const tb = $('kyc-table');
+  if (!tb) return;
+
+  const queue = all.filter(u => ['submitted','flagged'].includes(u.kyc_status));
+
+  if (!queue.length) {
+    tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--t4)">
+      ✅ No pending KYC submissions
+    </td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = queue.map(u => `
+    <tr>
+      <td>
+        <div style="font-weight:700;font-size:13px">${u.kyc_full_name || u.full_name || '—'}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">
+          ${u.kyc_nationality || '—'} · ${(u.kyc_id_type||'—').replace('_',' ')}
+        </div>
+      </td>
+      <td style="font-size:11px;color:var(--t3)">${u.email}</td>
+      <td>${statusChip(u.kyc_status)}</td>
+      <td style="font-size:11px;color:var(--t4);font-family:var(--f-mono)">
+        ${u.kyc_submitted_at ? new Date(u.kyc_submitted_at).toLocaleString() : '—'}
+      </td>
+      <td>
+        ${u.kyc_doc_id_path
+          ? `<button onclick="viewKYCDocs('${u.id}','${u.kyc_doc_id_path}','${u.kyc_doc_selfie_path||''}','${u.kyc_doc_address_path||''}')"
+              style="background:var(--v1);border:none;color:#fff;padding:5px 12px;
+              border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;margin-bottom:6px;display:block">
+              📄 View Documents
+            </button>`
+          : `<div style="font-size:10px;color:var(--rose);margin-bottom:6px">No docs uploaded</div>`
+        }
+        <div style="display:flex;gap:6px">
+          <button onclick="updateKYC('${u.id}','approved')"
+            style="background:var(--mint);border:none;color:#fff;padding:5px 14px;
+            border-radius:7px;cursor:pointer;font-size:11px;font-weight:700">
+            ✅ Approve
+          </button>
+          <button onclick="updateKYC('${u.id}','rejected')"
+            style="background:var(--rose);border:none;color:#fff;padding:5px 12px;
+            border-radius:7px;cursor:pointer;font-size:11px;font-weight:700">
+            ✕ Reject
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
 }
 async function updateKYC(userId, status) {
-  const { error } = await sb.from('users').update({kyc_status:status,kyc_reviewed_at:new Date().toISOString(),kyc_reviewed_by:currentUser.id}).eq('id',userId);
-  if (error) { showToast('Failed to update KYC','error'); return; }
-  showToast(`KYC ${status} successfully`,'success');
+  let rejectReason = null;
+
+  if (status === 'rejected') {
+    rejectReason = prompt('Enter rejection reason (shown to user):',
+      'Documents could not be verified. Please resubmit with clearer photos.');
+    if (rejectReason === null) return; // cancelled
+  }
+
+  const updateData = {
+    kyc_status:      status,
+    kyc_reviewed_at: new Date().toISOString(),
+    kyc_reviewed_by: currentUser.id,
+  };
+  if (rejectReason) updateData.kyc_reject_reason = rejectReason;
+
+  const { error } = await sb.from('users').update(updateData).eq('id', userId);
+  if (error) { showToast('Failed to update KYC', 'error'); return; }
+
+  // Notify user
+  const msg = status === 'approved'
+    ? 'Your identity has been verified! You can now deposit funds and invest.'
+    : `Your KYC was not approved. Reason: ${rejectReason || 'Please resubmit documents.'}`;
+
+  await sb.from('notifications').insert({
+    user_id: userId,
+    title:   status === 'approved' ? '✅ KYC Approved!' : '❌ KYC Not Approved',
+    body:    msg,
+    type:    status === 'approved' ? 'success' : 'error',
+  });
+
+  showToast(`KYC ${status} — user notified`, 'success');
   await loadKYC();
+  refreshAdminBadges().catch(() => {});
 }
 
 // ═══════════════════════════════════════════════
@@ -4380,24 +4781,70 @@ async function updateKYC(userId, status) {
 // ═══════════════════════════════════════════════
 async function loadRevenue() {
   if (!['admin','super_admin'].includes(userProfile?.role)) return;
-  const { data: stats } = await sb.from('admin_dashboard_stats').select('*').single();
-  if (stats) {
-    const rt=$('rev-total');if(rt)rt.textContent=fmtUSD(parseFloat(stats.total_invested_usd||0)*0.01);
-    const rr=$('rev-roi');if(rr)rr.textContent=fmtUSD(stats.total_roi_paid_usd);
-    const rto=$('rev-today');if(rto)rto.textContent=fmtUSD(stats.today_roi_paid_usd);
-    const rtv=$('rev-tvl');if(rtv)rtv.textContent=fmtUSD(stats.total_tvl_usd);
-  }
+
+  // ── Real stats from DB ──────────────────────────────────────────
+  const [
+    { data: users },
+    { data: roiAll },
+    { data: roiToday },
+    { data: deposits },
+  ] = await Promise.all([
+    sb.from('users').select('wallet_balance_usd,total_invested_usd,kyc_status,role'),
+    sb.from('roi_payouts').select('net_amount_usd,fee_amount_usd').eq('status','completed'),
+    sb.from('roi_payouts').select('net_amount_usd').eq('status','completed')
+      .gte('payout_date', new Date().toISOString().slice(0,10)),
+    sb.from('deposit_requests').select('amount_usd').eq('status','approved'),
+  ]);
+
+  // Calculate real figures
+  const totalUsers     = users?.length || 0;
+  const kycApproved    = users?.filter(u => u.kyc_status === 'approved').length || 0;
+  const kycPending     = users?.filter(u => u.kyc_status === 'submitted').length || 0;
+  const totalTVL       = users?.reduce((s,u) => s + parseFloat(u.total_invested_usd||0), 0) || 0;
+  const totalWallet    = users?.reduce((s,u) => s + parseFloat(u.wallet_balance_usd||0), 0) || 0;
+  const totalROIPaid   = roiAll?.reduce((s,r) => s + parseFloat(r.net_amount_usd||0), 0) || 0;
+  const totalFeesEarned= roiAll?.reduce((s,r) => s + parseFloat(r.fee_amount_usd||0), 0) || 0;
+  const todayROI       = roiToday?.reduce((s,r) => s + parseFloat(r.net_amount_usd||0), 0) || 0;
+  const totalDeposited = deposits?.reduce((s,d) => s + parseFloat(d.amount_usd||0), 0) || 0;
+
+  // ── Bind to DOM ─────────────────────────────────────────────────
+  const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+
+  set('um-total',     totalUsers);
+  set('um-kyc',       kycApproved);
+  set('rev-tvl',      fmtUSD(totalTVL));
+  set('rev-today',    fmtUSD(todayROI));
+  set('rev-total',    fmtUSD(totalFeesEarned));
+  set('rev-roi',      fmtUSD(totalROIPaid));
+  set('rev-balance',  fmtUSD(totalWallet));
+  set('rev-deposited',fmtUSD(totalDeposited));
+
+  // KYC badge
+  const kycBadge = $('nav-kyc-badge');
+  if (kycBadge) kycBadge.textContent = kycPending || 0;
+
+  // ── Load pending items ──────────────────────────────────────────
+  loadPendingDeposits();
+  loadPendingWithdrawals();
+
+  // ── Recent ROI payouts table ────────────────────────────────────
   const { data: payouts } = await sb.from('roi_payouts')
-    .select('*, users(full_name,email), properties(name)')
-    .order('created_at',{ascending:false}).limit(30);
-  const tb=$('admin-payouts-table');if(!tb)return;
-  if(!payouts?.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px">No payouts</td></tr>';return;}
-  tb.innerHTML=payouts.map(p=>`<tr>
-    <td class="mono" style="font-size:11px">${p.payout_date}</td>
-    <td>${p.users?.full_name||p.users?.email||'—'}</td>
-    <td>${p.properties?.name||'—'}</td>
-    <td class="mono">${fmtUSD(p.gross_amount_usd)}</td>
-    <td class="mono" style="color:var(--mint)">${fmtUSD(p.net_amount_usd)}</td>
+    .select('payout_date, net_amount_usd, gross_amount_usd, status, users(full_name,email), properties(name)')
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  const tb = $('admin-payouts-table');
+  if (!tb) return;
+  if (!payouts?.length) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--t4)">No payouts yet</td></tr>';
+    return;
+  }
+  tb.innerHTML = payouts.map(p => `<tr>
+    <td style="font-family:var(--f-mono);font-size:11px">${p.payout_date}</td>
+    <td>${p.users?.full_name || p.users?.email || '—'}</td>
+    <td>${p.properties?.name || '—'}</td>
+    <td style="font-family:var(--f-mono)">${fmtUSD(p.gross_amount_usd)}</td>
+    <td style="font-family:var(--f-mono);color:var(--mint)">${fmtUSD(p.net_amount_usd)}</td>
     <td>${statusChip(p.status)}</td>
   </tr>`).join('');
 }
@@ -4433,6 +4880,7 @@ async function markAllRead() {
 // SETTINGS
 // ═══════════════════════════════════════════════
 function loadSettings() {
+  renderSettingsKYC(userProfile?.kyc_status || 'pending');
   if (!userProfile) return;
   const sn=$('set-name');if(sn)sn.value=userProfile.full_name||'';
   const se=$('set-email');if(se)se.value=userProfile.email||currentUser.email||'';
@@ -5038,6 +5486,959 @@ function disconnectMT5() {
   if (statusDot) { statusDot.style.background = 'var(--t4)'; statusDot.style.boxShadow = 'none'; }
   if (statusTxt) statusTxt.textContent = 'Not connected';
 }
+
+// ══════════════════════════════════════════════════════════════════
+// DEPOSIT & WITHDRAWAL SYSTEM
+// ══════════════════════════════════════════════════════════════════
+
+// Platform USDT deposit address (BEP-20) — set in platform_config
+const PLATFORM_USDT_ADDRESS = 'TQx5HHtNbkLQTvyxS4zGMLVaWGmCULHKQJ'; // placeholder — update in platform_config
+
+async function openDepositModal() {
+  const modal = $('deposit-modal');
+  if (modal) modal.style.display = 'flex';
+
+  // Load address from platform_config
+  const { data: cfg } = await sb.from('platform_config')
+    .select('value').eq('key', 'usdt_deposit_address').maybeSingle();
+  const addr = cfg?.value || PLATFORM_USDT_ADDRESS;
+
+  const addrEl = $('deposit-address');
+  if (addrEl) addrEl.textContent = addr;
+
+  // Generate QR code via free API
+  const qrEl = $('deposit-qr');
+  if (qrEl) qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(addr)}&bgcolor=ffffff&color=000000`;
+
+  // Update balance display
+  const balEl = $('withdraw-bal-display');
+  if (balEl && userProfile) balEl.textContent = parseFloat(userProfile.wallet_balance_usd || 0).toFixed(2);
+}
+
+function closeDepositModal() {
+  const modal = $('deposit-modal');
+  if (modal) modal.style.display = 'none';
+  const inp = $('deposit-amount-input');
+  if (inp) inp.value = '';
+}
+
+async function copyDepositAddress() {
+  const addr = $('deposit-address')?.textContent?.trim();
+  if (!addr) return;
+  await navigator.clipboard.writeText(addr);
+  showToast('Address copied to clipboard', 'success');
+}
+
+// Live SGM preview as user types amount
+document.addEventListener('DOMContentLoaded', () => {
+  const amtInp = $('deposit-amount-input');
+  if (amtInp) {
+    amtInp.addEventListener('input', () => {
+      const usd = parseFloat(amtInp.value) || 0;
+      const sgm = usd / SGM_RATE;
+      const tier = getUserTier((parseFloat(userProfile?.total_invested_usd || 0)) + usd);
+      const sgmEl = $('deposit-sgm-preview');
+      const tierEl = $('deposit-tier-preview');
+      if (sgmEl) sgmEl.textContent = sgm.toFixed(2) + ' SGM';
+      if (tierEl) { tierEl.textContent = tier.icon + ' ' + tier.name; tierEl.style.color = tier.color; }
+    });
+  }
+});
+
+async function submitDepositRequest() {
+  const amount = parseFloat($('deposit-amount-input')?.value);
+  if (!amount || amount < 10) {
+    showToast('Minimum deposit is $10 USDT', 'error');
+    return;
+  }
+
+  const txHash = $('deposit-txhash-input')?.value?.trim();
+  if (!txHash || !txHash.startsWith('0x') || txHash.length < 60) {
+    showToast('Please paste your transaction hash (starts with 0x)', 'error');
+    return;
+  }
+
+  const btn = $('deposit-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+  try {
+    const { error } = await sb.from('deposit_requests').insert({
+      user_id:    currentUser.id,
+      amount_usd: amount,
+      sgm_amount: amount / SGM_RATE,
+      network:    'BEP-20',
+      tx_hash:    txHash,
+      status:     'pending',
+    });
+
+    if (error) throw error;
+
+    closeDepositModal();
+    showToast(`Deposit request submitted! $${amount} USDT — Admin will credit within 30 mins.`, 'success', 6000);
+
+    // In-app notification
+    await sb.from('notifications').insert({
+      user_id: currentUser.id,
+      title:   '💰 Deposit Request Submitted',
+      body:    `Your deposit of $${amount} USDT has been submitted. Admin will verify and credit your wallet within 30 minutes.`,
+      type:    'info',
+    });
+
+  } catch(e) {
+    showToast('Failed to submit request: ' + (e.message || 'Unknown error'), 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "I've Sent the USDT — Notify Admin"; }
+  }
+}
+
+// ── WITHDRAW ──────────────────────────────────────────────────────
+function openWithdrawModal() {
+  const modal = $('withdraw-modal');
+  if (modal) modal.style.display = 'flex';
+  const balEl = $('withdraw-bal-display');
+  if (balEl && userProfile) balEl.textContent = parseFloat(userProfile.wallet_balance_usd || 0).toFixed(2);
+}
+
+function closeWithdrawModal() {
+  const modal = $('withdraw-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitWithdrawRequest() {
+  const address = $('withdraw-address-input')?.value?.trim();
+  const amount  = parseFloat($('withdraw-amount-input')?.value);
+  const balance = parseFloat(userProfile?.wallet_balance_usd || 0);
+
+  if (!address || !address.startsWith('0x') && !address.startsWith('T')) {
+    showToast('Enter a valid BEP-20 USDT address', 'error'); return;
+  }
+  if (!amount || amount < 20) {
+    showToast('Minimum withdrawal is $20 USDT', 'error'); return;
+  }
+  if (amount > balance) {
+    showToast('Insufficient balance', 'error'); return;
+  }
+
+  const btn = $('withdraw-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+  try {
+    const { data, error } = await sb.rpc('request_withdrawal', {
+      p_user_id: currentUser.id,
+      p_amount:  amount,
+      p_address: address,
+      p_network: 'BEP-20',
+    });
+    if (error) throw error;
+    closeWithdrawModal();
+    showToast(`Withdrawal submitted! You'll receive $${data.net} USDT after 1% fee. Processing within 24hrs.`, 'success', 6000);
+    // Refresh wallet balance
+    await loadUserProfile();
+  } catch(e) {
+    showToast('Failed: ' + (e.message || 'Unknown error'), 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Withdrawal Request'; }
+  }
+}
+
+// ── ADMIN: LOAD + APPROVE DEPOSITS ───────────────────────────────
+async function loadPendingDeposits() {
+  const tbody = $('pending-deposits-table');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--t4)">Loading…</td></tr>';
+
+  const { data, error } = await sb
+    .from('deposit_requests')
+    .select('*, users(email, full_name)')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  const countEl = $('pending-dep-count');
+  if (countEl) countEl.textContent = data?.length || 0;
+
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--t4)">No pending deposits ✅</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(d => {
+    const txHash = d.tx_hash || null;
+    const shortHash = txHash ? txHash.slice(0,8) + '…' + txHash.slice(-6) : '⚠️ No hash';
+    const bscUrl = txHash ? `https://bscscan.com/tx/${txHash}` : null;
+    return `
+    <tr>
+      <td>
+        <div style="font-size:12px;font-weight:600">${d.users?.full_name || '—'}</div>
+        <div style="font-size:10px;color:var(--t4)">${d.users?.email || ''}</div>
+      </td>
+      <td style="color:var(--neon);font-family:var(--f-mono);font-weight:700">$${parseFloat(d.amount_usd).toFixed(2)}</td>
+      <td style="color:var(--v2);font-family:var(--f-mono)">${parseFloat(d.sgm_amount).toFixed(2)} SGM</td>
+      <td style="font-family:var(--f-mono);font-size:10px">
+        ${bscUrl
+          ? `<a href="${bscUrl}" target="_blank"
+              style="color:var(--neon);text-decoration:none"
+              title="${txHash}">${shortHash} 🔗</a>`
+          : `<span style="color:var(--rose);font-size:10px">⚠️ No TX hash</span>`
+        }
+      </td>
+      <td style="color:var(--t4);font-size:11px">${new Date(d.created_at).toLocaleString()}</td>
+      <td>
+        ${bscUrl
+          ? `<button onclick="approveDeposit('${d.id}','${d.user_id}',${d.amount_usd},${d.sgm_amount})"
+              style="background:var(--mint);border:none;color:#fff;padding:6px 14px;
+              border-radius:7px;cursor:pointer;font-size:11px;font-weight:700">
+              ✅ Approve
+            </button>`
+          : `<button disabled title="No TX hash provided"
+              style="background:var(--b3);border:none;color:var(--t4);padding:6px 14px;
+              border-radius:7px;cursor:not-allowed;font-size:11px">
+              ⚠️ No Hash
+            </button>`
+        }
+        <button onclick="rejectDeposit('${d.id}','${d.user_id}')"
+          style="background:var(--rose);border:none;color:#fff;padding:6px 10px;
+          border-radius:7px;cursor:pointer;font-size:11px;margin-left:4px">
+          ✕
+        </button>
+      </td>
+    </tr>
+  `}).join('');
+}
+
+async function approveDeposit(depositId, userId, amountUsd, sgmAmount) {
+  if (!confirm(`Approve $${amountUsd} USDT deposit? This will credit the user's wallet.`)) return;
+  try {
+    const { data, error } = await sb.rpc('approve_deposit', {
+      p_deposit_id: depositId,
+      p_admin_id:   currentUser.id,
+    });
+    if (error) throw error;
+    showToast(`✅ Approved — $${amountUsd} + ${data.sgm_credited} SGM credited`, 'success', 5000);
+    loadPendingDeposits();
+  } catch(e) {
+    showToast('Approval failed: ' + (e.message || 'Unknown error'), 'error');
+  }
+}
+
+async function rejectDeposit(depositId, userId) {
+  if (!confirm('Reject this deposit request?')) return;
+  await sb.from('deposit_requests').update({ status: 'rejected' }).eq('id', depositId);
+  await sb.from('notifications').insert({
+    user_id: userId,
+    title:   '❌ Deposit Not Found',
+    body:    'Your deposit request could not be verified. Please contact support with your transaction hash.',
+    type:    'error',
+  });
+  showToast('Deposit rejected', 'info');
+  loadPendingDeposits();
+}
+
+// Close modals on backdrop click
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'deposit-modal')  closeDepositModal();
+  if (e.target.id === 'withdraw-modal') closeWithdrawModal();
+});
+
+// ── ADMIN: WITHDRAWAL MANAGEMENT ─────────────────────────────────
+async function loadPendingWithdrawals() {
+  const tbody = $('pending-withdrawals-table');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--t4)">Loading…</td></tr>';
+
+  const { data } = await sb
+    .from('withdrawal_requests')
+    .select('*, users(email, full_name)')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  const countEl = $('pending-wd-count');
+  if (countEl) countEl.textContent = data?.length || 0;
+
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--t4)">No pending withdrawals ✅</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(w => `
+    <tr>
+      <td>
+        <div style="font-size:12px;font-weight:600">${w.users?.full_name || '—'}</div>
+        <div style="font-size:10px;color:var(--t4)">${w.users?.email || ''}</div>
+      </td>
+      <td style="color:var(--rose);font-family:var(--f-mono);font-weight:700">$${parseFloat(w.amount_usd).toFixed(2)}</td>
+      <td style="color:var(--mint);font-family:var(--f-mono)">$${parseFloat(w.net_usd).toFixed(2)}</td>
+      <td style="font-family:var(--f-mono);font-size:10px;color:var(--t3)">
+        ${w.to_address.slice(0,8)}…${w.to_address.slice(-4)}
+        <button onclick="navigator.clipboard.writeText('${w.to_address}');showToast('Address copied','info')"
+          style="background:var(--b3);border:none;color:var(--t3);padding:2px 6px;border-radius:4px;
+          cursor:pointer;font-size:9px;margin-left:4px">Copy</button>
+      </td>
+      <td style="color:var(--t4);font-size:11px">${new Date(w.created_at).toLocaleString()}</td>
+      <td>
+        <button onclick="completeWithdrawal('${w.id}')"
+          style="background:var(--mint);border:none;color:#fff;padding:6px 12px;
+          border-radius:7px;cursor:pointer;font-size:11px;font-weight:700">
+          ✅ Mark Sent
+        </button>
+        <button onclick="rejectWithdrawal('${w.id}','${w.user_id}',${w.amount_usd})"
+          style="background:var(--rose);border:none;color:#fff;padding:6px 10px;
+          border-radius:7px;cursor:pointer;font-size:11px;margin-left:4px">
+          ✕
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function completeWithdrawal(withdrawalId) {
+  const txHash = prompt('Enter transaction hash (optional — press OK to skip):');
+  if (txHash === null) return; // cancelled
+
+  try {
+    const { data, error } = await sb.rpc('complete_withdrawal', {
+      p_withdrawal_id: withdrawalId,
+      p_admin_id:      currentUser.id,
+      p_tx_hash:       txHash || null,
+    });
+    if (error) throw error;
+    showToast(`✅ Withdrawal completed — $${data.net_usd} USDT sent`, 'success');
+    loadPendingWithdrawals();
+  } catch(e) {
+    showToast('Failed: ' + (e.message || 'Unknown error'), 'error');
+  }
+}
+
+async function rejectWithdrawal(withdrawalId, userId, amountUsd) {
+  if (!confirm('Reject this withdrawal? Funds will be returned to user wallet.')) return;
+  try {
+    // Refund user
+    const { data: user } = await sb.from('users').select('wallet_balance_usd, sgm_balance').eq('id', userId).single();
+    await sb.from('users').update({
+      wallet_balance_usd: parseFloat(user.wallet_balance_usd) + parseFloat(amountUsd),
+      sgm_balance: parseFloat(user.sgm_balance) + parseFloat(amountUsd) / 10,
+    }).eq('id', userId);
+    await sb.from('withdrawal_requests').update({ status: 'rejected' }).eq('id', withdrawalId);
+    await sb.from('notifications').insert({
+      user_id: userId,
+      title:   '❌ Withdrawal Rejected',
+      body:    `Your withdrawal of $${amountUsd} USDT has been rejected. Funds have been returned to your wallet. Please contact support.`,
+      type:    'error',
+    });
+    showToast('Withdrawal rejected — funds returned to user', 'info');
+    loadPendingWithdrawals();
+  } catch(e) {
+    showToast('Failed: ' + (e.message || 'Unknown error'), 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SUPABASE REALTIME — Live alerts for admin
+// ══════════════════════════════════════════════════════════════════
+
+let _realtimeChannel = null;
+
+function startRealtimeListeners() {
+  if (!currentUser || !userProfile) return;
+  if (_realtimeChannel) { sb.removeChannel(_realtimeChannel); _realtimeChannel = null; }
+
+  const isAdmin = ['admin','super_admin'].includes(userProfile?.role);
+
+  // ── Channel: listen to deposit_requests + notifications ────────
+  _realtimeChannel = sb.channel('sigmora-live')
+
+    // All users: listen to own notifications
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'notifications',
+      filter: `user_id=eq.${currentUser.id}`
+    }, (payload) => {
+      const n = payload.new;
+      // Show toast
+      showToast(n.title + ' — ' + n.body, n.type || 'info', 6000);
+      // Update notification badge
+      loadNotificationCount().catch(() => {});
+    })
+
+    // Admins only: listen to new deposit requests
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'deposit_requests'
+    }, async (payload) => {
+      if (!isAdmin) return;
+      const dep = payload.new;
+
+      // Fetch user details
+      const { data: user } = await sb.from('users')
+        .select('full_name, email')
+        .eq('id', dep.user_id)
+        .maybeSingle();
+
+      const name   = user?.full_name || user?.email || 'A user';
+      const amount = parseFloat(dep.amount_usd).toFixed(2);
+
+      // Alert admin with sound + toast
+      showAdminAlert(
+        '💰 New Deposit Request',
+        `${name} submitted $${amount} USDT deposit`,
+        () => {
+          // Click opens Revenue & Payouts page
+          const navEl = document.querySelector('.ni[onclick*="revenue-admin"]');
+          if (navEl) navEl.click();
+        }
+      );
+
+      // Update pending deposits count badge
+      refreshAdminBadges();
+    })
+
+    // Admins only: listen to new withdrawal requests
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'withdrawal_requests'
+    }, async (payload) => {
+      if (!isAdmin) return;
+      const wd = payload.new;
+
+      const { data: user } = await sb.from('users')
+        .select('full_name, email')
+        .eq('id', wd.user_id)
+        .maybeSingle();
+
+      const name   = user?.full_name || user?.email || 'A user';
+      const amount = parseFloat(wd.net_usd).toFixed(2);
+
+      showAdminAlert(
+        '↑ Withdrawal Request',
+        `${name} wants to withdraw $${amount} USDT`,
+        () => {
+          const navEl = document.querySelector('.ni[onclick*="revenue-admin"]');
+          if (navEl) navEl.click();
+        }
+      );
+      refreshAdminBadges();
+    })
+
+    // Admins only: new KYC submission
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'users',
+      filter: `kyc_status=eq.submitted`
+    }, async (payload) => {
+      if (!isAdmin) return;
+      const user = payload.new;
+      showAdminAlert(
+        '🪪 KYC Submitted',
+        `${user.full_name || user.email} submitted KYC documents`,
+        () => {
+          const navEl = document.querySelector('.ni[onclick*="kyc"]');
+          if (navEl) navEl.click();
+        }
+      );
+      refreshAdminBadges();
+    })
+
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        // Silent — connected
+      }
+    });
+}
+
+function stopRealtimeListeners() {
+  if (_realtimeChannel) {
+    sb.removeChannel(_realtimeChannel);
+    _realtimeChannel = null;
+  }
+}
+
+// ── Admin alert toast — larger, with action button ────────────────
+function showAdminAlert(title, message, onAction) {
+  // Play notification sound
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch(_) {}
+
+  // Create alert element
+  const alert = document.createElement('div');
+  alert.style.cssText = `
+    position:fixed;bottom:80px;right:20px;z-index:9999;
+    background:var(--raised);border:1px solid var(--v1);
+    border-radius:16px;padding:16px 20px;min-width:300px;max-width:380px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4),0 0 0 1px rgba(124,58,237,0.3);
+    animation:slideInRight .3s ease;
+  `;
+  alert.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <div style="font-size:22px;flex-shrink:0">🔔</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:13px;color:var(--v2);margin-bottom:3px">${title}</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.5">${message}</div>
+        ${onAction ? `<button onclick="this.closest('div[style]').remove();(${onAction.toString()})()"
+          style="margin-top:10px;background:var(--v1);border:none;color:#fff;
+          padding:6px 16px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700">
+          View Now →
+        </button>` : ''}
+      </div>
+      <button onclick="this.closest('div[style]').remove()"
+        style="background:var(--b2);border:none;color:var(--t4);width:24px;height:24px;
+        border-radius:6px;cursor:pointer;font-size:12px;flex-shrink:0">✕</button>
+    </div>
+  `;
+  document.body.appendChild(alert);
+  // Auto-remove after 15 seconds
+  setTimeout(() => { if (alert.parentNode) alert.remove(); }, 15000);
+}
+
+// ── Refresh admin badges (deposit count, KYC count) ───────────────
+async function refreshAdminBadges() {
+  if (!['admin','super_admin'].includes(userProfile?.role)) return;
+
+  // Pending deposits count
+  const { count: depCount } = await sb.from('deposit_requests')
+    .select('*', { count: 'exact', head: true }).eq('status', 'pending');
+  const depBadge = $('pending-dep-count');
+  if (depBadge) depBadge.textContent = depCount || 0;
+
+  // Pending withdrawals count
+  const { count: wdCount } = await sb.from('withdrawal_requests')
+    .select('*', { count: 'exact', head: true }).eq('status', 'pending');
+  const wdBadge = $('pending-wd-count');
+  if (wdBadge) wdBadge.textContent = wdCount || 0;
+
+  // KYC pending count
+  const { count: kycCount } = await sb.from('users')
+    .select('*', { count: 'exact', head: true }).eq('kyc_status', 'submitted');
+  const kycBadge = $('nav-kyc-badge');
+  if (kycBadge) kycBadge.textContent = kycCount || 0;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REAL ADMIN STATS — load actual numbers
+// ══════════════════════════════════════════════════════════════════
+async function loadAdminStats() {
+  if (!['admin','super_admin'].includes(userProfile?.role)) return;
+
+  const [
+    { count: totalUsers },
+    { count: kycApproved },
+    { count: kycPending },
+    { data: tvlData },
+    { data: roiData },
+    { count: depPending },
+    { count: wdPending },
+  ] = await Promise.all([
+    sb.from('users').select('*', { count: 'exact', head: true }),
+    sb.from('users').select('*', { count: 'exact', head: true }).eq('kyc_status', 'approved'),
+    sb.from('users').select('*', { count: 'exact', head: true }).eq('kyc_status', 'submitted'),
+    sb.from('users').select('wallet_balance_usd, total_invested_usd'),
+    sb.from('roi_payouts').select('net_amount_usd').eq('status', 'completed'),
+    sb.from('deposit_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    sb.from('withdrawal_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+  ]);
+
+  // Calculate totals
+  const totalTVL      = tvlData?.reduce((s, u) => s + parseFloat(u.total_invested_usd || 0), 0) || 0;
+  const totalBalance  = tvlData?.reduce((s, u) => s + parseFloat(u.wallet_balance_usd || 0), 0) || 0;
+  const totalROIPaid  = roiData?.reduce((s, r) => s + parseFloat(r.net_amount_usd || 0), 0) || 0;
+
+  // Bind to admin dashboard elements
+  const setText2 = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+
+  setText2('um-total',    totalUsers || 0);
+  setText2('um-kyc',      kycApproved || 0);
+  setText2('rev-tvl',     fmtUSD(totalTVL));
+  setText2('rev-today',   fmtUSD(totalROIPaid));
+  setText2('rev-balance', fmtUSD(totalBalance));
+
+  // Update badges
+  const kycBadge = $('nav-kyc-badge');
+  if (kycBadge) kycBadge.textContent = kycPending || 0;
+
+  const depBadge = $('pending-dep-count');
+  if (depBadge) depBadge.textContent = depPending || 0;
+
+  const wdBadge = $('pending-wd-count');
+  if (wdBadge) wdBadge.textContent = wdPending || 0;
+}
+
+// CSS for slide-in animation
+const _rtStyle = document.createElement('style');
+_rtStyle.textContent = `
+  @keyframes slideInRight {
+    from { transform: translateX(120%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+`;
+document.head.appendChild(_rtStyle);
+
+// ══════════════════════════════════════════════════════════════════
+// KYC SUBMISSION SYSTEM
+// ══════════════════════════════════════════════════════════════════
+let _kycFiles = { id: null, selfie: null, addr: null };
+let _kycStep  = 1;
+
+function openKYCModal() {
+  const modal = $('kyc-modal');
+  if (modal) modal.style.display = 'flex';
+  kycNextStep(1);
+  // Pre-fill name from profile
+  const nameEl = $('kyc-fullname');
+  if (nameEl && userProfile?.full_name) nameEl.value = userProfile.full_name;
+}
+
+function closeKYCModal() {
+  const modal = $('kyc-modal');
+  if (modal) modal.style.display = 'none';
+  _kycFiles = { id: null, selfie: null, addr: null };
+}
+
+function kycNextStep(step) {
+  // Validate before proceeding
+  if (step === 2 && _kycStep === 1) {
+    if (!$('kyc-fullname')?.value?.trim()) { showToast('Enter your full name', 'error'); return; }
+    if (!$('kyc-dob')?.value) { showToast('Enter date of birth', 'error'); return; }
+    if (!$('kyc-nationality')?.value?.trim()) { showToast('Enter nationality', 'error'); return; }
+    if (!$('kyc-idtype')?.value) { showToast('Select ID type', 'error'); return; }
+    if (!$('kyc-idnumber')?.value?.trim()) { showToast('Enter ID number', 'error'); return; }
+  }
+  if (step === 3 && _kycStep === 2) {
+    if (!_kycFiles.id) { showToast('Upload your government ID', 'error'); return; }
+    if (!_kycFiles.selfie) { showToast('Upload your selfie with ID', 'error'); return; }
+    // Build review content
+    const rc = $('kyc-review-content');
+    if (rc) rc.innerHTML = `
+      <div><b>Name:</b> ${$('kyc-fullname')?.value}</div>
+      <div><b>Date of Birth:</b> ${$('kyc-dob')?.value}</div>
+      <div><b>Nationality:</b> ${$('kyc-nationality')?.value}</div>
+      <div><b>ID Type:</b> ${$('kyc-idtype')?.value?.replace('_',' ')}</div>
+      <div><b>ID Number:</b> ${$('kyc-idnumber')?.value}</div>
+      <div><b>ID Document:</b> ✅ ${_kycFiles.id?.name || 'Uploaded'}</div>
+      <div><b>Selfie:</b> ✅ ${_kycFiles.selfie?.name || 'Uploaded'}</div>
+      <div><b>Proof of Address:</b> ${_kycFiles.addr ? '✅ ' + _kycFiles.addr.name : 'Not provided'}</div>
+    `;
+  }
+
+  _kycStep = step;
+
+  // Hide all panels
+  [1,2,3,'success'].forEach(p => {
+    const el = $(`kyc-panel-${p}`); if (el) el.style.display = 'none';
+  });
+  const active = $(`kyc-panel-${step}`);
+  if (active) active.style.display = 'block';
+
+  // Update step indicators
+  [1,2,3].forEach(s => {
+    const stepEl = $(`kyc-step-${s}`);
+    if (!stepEl) return;
+    stepEl.classList.remove('active','done');
+    if (s < step) stepEl.classList.add('done');
+    else if (s === step) stepEl.classList.add('active');
+    // Update line color
+    const line = $(`kyc-line-${s}`);
+    if (line) line.style.background = s < step ? 'var(--mint)' : 'var(--b3)';
+  });
+}
+
+function kycPreviewFile(input, type) {
+  const file = input.files[0];
+  if (!file) return;
+  _kycFiles[type] = file;
+  const preview = $(`kyc-${type === 'addr' ? 'addr' : type}-preview`);
+  const name    = $(`kyc-${type === 'addr' ? 'addr' : type}-name`);
+  const drop    = $(`kyc-${type === 'addr' ? 'addr' : type}-drop`);
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (preview) preview.innerHTML = `<img src="${e.target.result}"
+        style="width:80px;height:60px;object-fit:cover;border-radius:8px"/>`;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    if (preview) preview.textContent = '📄';
+  }
+  if (name) { name.textContent = '✅ ' + file.name; name.style.color = 'var(--mint)'; }
+  if (drop) drop.style.borderColor = 'var(--mint)';
+}
+
+function kycHandleDrop(event, type) {
+  event.preventDefault();
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  const input = $(`kyc-${type === 'addr' ? 'addr' : type}-file`);
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  if (input) { input.files = dt.files; kycPreviewFile(input, type); }
+}
+
+async function submitKYC() {
+  if (!$('kyc-consent')?.checked) {
+    showToast('Please confirm consent to proceed', 'error'); return;
+  }
+  const btn = $('kyc-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+
+  try {
+    const uid = currentUser.id;
+    const ts  = Date.now();
+    const uploads = {};
+
+    // Upload ID document
+    const idExt  = _kycFiles.id.name.split('.').pop();
+    const idPath = `${uid}/id_${ts}.${idExt}`;
+    const { error: idErr } = await sb.storage.from('kyc-documents')
+      .upload(idPath, _kycFiles.id, { upsert: true });
+    if (idErr) throw new Error('ID upload failed: ' + idErr.message);
+    uploads.id = idPath;
+
+    // Upload selfie
+    const sfExt   = _kycFiles.selfie.name.split('.').pop();
+    const sfPath  = `${uid}/selfie_${ts}.${sfExt}`;
+    const { error: sfErr } = await sb.storage.from('kyc-documents')
+      .upload(sfPath, _kycFiles.selfie, { upsert: true });
+    if (sfErr) throw new Error('Selfie upload failed: ' + sfErr.message);
+    uploads.selfie = sfPath;
+
+    // Upload proof of address (optional)
+    if (_kycFiles.addr) {
+      const adExt  = _kycFiles.addr.name.split('.').pop();
+      const adPath = `${uid}/address_${ts}.${adExt}`;
+      const { error: adErr } = await sb.storage.from('kyc-documents')
+        .upload(adPath, _kycFiles.addr, { upsert: true });
+      if (!adErr) uploads.addr = adPath;
+    }
+
+    // Update user record
+    const { error: userErr } = await sb.from('users').update({
+      kyc_status:           'submitted',
+      kyc_full_name:        $('kyc-fullname')?.value?.trim(),
+      kyc_date_of_birth:    $('kyc-dob')?.value || null,
+      kyc_nationality:      $('kyc-nationality')?.value?.trim(),
+      kyc_id_type:          $('kyc-idtype')?.value,
+      kyc_id_number:        $('kyc-idnumber')?.value?.trim(),
+      kyc_doc_id_path:      uploads.id,
+      kyc_doc_selfie_path:  uploads.selfie,
+      kyc_doc_address_path: uploads.addr || null,
+      kyc_submitted_at:     new Date().toISOString(),
+      updated_at:           new Date().toISOString(),
+    }).eq('id', uid);
+
+    if (userErr) throw userErr;
+
+    // Update local profile
+    if (userProfile) userProfile.kyc_status = 'submitted';
+
+    // Show success panel
+    kycNextStep('success');
+    // Refresh KYC banner
+    renderKYCBanner();
+
+  } catch(e) {
+    showToast('Submission failed: ' + (e.message || 'Please try again'), 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit for Verification'; }
+  }
+}
+
+// ── KYC rendering — banners, gates, settings card ─────────────────
+function renderKYCBanner() {
+  const status = userProfile?.kyc_status || 'pending';
+
+  // Settings card — always shown with full detail
+  renderSettingsKYC(status);
+
+  // Update deposit + buy tokens KYC gates
+  updateKYCGates(status);
+}
+
+function _kycBannerHTML(status) {
+  const cfg = {
+    pending: {
+      color:'var(--gold)', bg:'rgba(251,191,36,0.08)',
+      icon:'🪪', title:'Identity Verification Required',
+      msg:'Complete KYC to deposit funds and start investing.',
+      btn:'Start Verification →', action:'openKYCModal()',
+    },
+    submitted: {
+      color:'var(--v2)', bg:'rgba(124,58,237,0.08)',
+      icon:'⏳', title:'KYC Under Review',
+      msg:'Your documents are being verified. Usually takes 24–48 hours.',
+      btn:null, action:null,
+    },
+    approved: {
+      color:'var(--mint)', bg:'rgba(16,185,129,0.08)',
+      icon:'✅', title:'Identity Verified',
+      msg:'Your account is fully verified. You can deposit and invest freely.',
+      btn:null, action:null,
+    },
+    rejected: {
+      color:'var(--rose)', bg:'rgba(244,63,94,0.08)',
+      icon:'❌', title:'KYC Rejected',
+      msg: (userProfile?.kyc_reject_reason || 'Documents could not be verified. Please resubmit.'),
+      btn:'Resubmit Documents →', action:'openKYCModal()',
+    },
+  };
+  const b = cfg[status] || cfg.pending;
+  return `
+    <div style="padding:14px 18px;border-radius:12px;border:1px solid ${b.color}44;
+      background:${b.bg};display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="font-size:22px">${b.icon}</div>
+      <div style="flex:1;min-width:160px">
+        <div style="font-weight:800;font-size:13px;color:${b.color};margin-bottom:2px">${b.title}</div>
+        <div style="font-size:12px;color:var(--t3);line-height:1.5">${b.msg}</div>
+      </div>
+      ${b.btn ? `<button onclick="${b.action}"
+        style="background:${b.color};border:none;color:${status==='approved'?'#fff':'#000'};
+        padding:8px 18px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:800;white-space:nowrap">
+        ${b.btn}
+      </button>` : ''}
+    </div>`;
+}
+
+function renderSettingsKYC(status) {
+  const el = $('settings-kyc-card');
+  if (!el) return;
+
+  const steps = [
+    { label:'Personal Info', done: status !== 'pending' },
+    { label:'Documents',     done: ['submitted','approved','rejected'].includes(status) },
+    { label:'Verified',      done: status === 'approved' },
+  ];
+
+  const stepsHTML = steps.map((s,i) => `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+      <div style="width:28px;height:28px;border-radius:50%;
+        background:${s.done ? 'var(--mint)' : i===0 && status==='pending' ? 'var(--v1)' : 'var(--b3)'};
+        color:${s.done || (i===0&&status==='pending') ? '#fff' : 'var(--t4)'};
+        display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">
+        ${s.done ? '✓' : i+1}
+      </div>
+      <div style="font-size:9px;color:${s.done?'var(--mint)':'var(--t4)'};
+        font-family:var(--f-mono);text-align:center">${s.label}</div>
+    </div>
+    ${i < steps.length-1 ? `<div style="flex:1;height:2px;align-self:center;margin-bottom:18px;
+      background:${s.done?'var(--mint)':'var(--b3)'}"></div>` : ''}
+  `).join('');
+
+  el.innerHTML = `
+    <div class="card" style="border-color:${
+      status==='approved'?'rgba(16,185,129,0.3)':
+      status==='submitted'?'rgba(124,58,237,0.3)':
+      status==='rejected'?'rgba(244,63,94,0.3)':'rgba(251,191,36,0.3)'
+    }">
+      <div class="card-hd">
+        <div class="card-title">
+          <span class="cdot" style="background:${
+            status==='approved'?'var(--mint)':
+            status==='submitted'?'var(--v2)':
+            status==='rejected'?'var(--rose)':'var(--gold)'
+          }"></span>
+          Identity Verification (KYC)
+        </div>
+        ${status !== 'approved' ? `
+        <button onclick="openKYCModal()"
+          style="background:var(--v1);border:none;color:#fff;padding:6px 16px;
+          border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">
+          ${status==='rejected'?'Resubmit':'Start KYC'}
+        </button>` : ''}
+      </div>
+      <div style="padding:16px 18px">
+        <!-- Progress steps -->
+        <div style="display:flex;align-items:center;margin-bottom:16px">
+          ${stepsHTML}
+        </div>
+        <!-- Status banner -->
+        ${_kycBannerHTML(status)}
+        ${status === 'pending' ? `
+        <div style="margin-top:14px">
+          <div style="font-size:11px;color:var(--t4);margin-bottom:10px;font-weight:600">
+            What you'll need:
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            ${['🪪 Government ID (passport, national ID, or driving license)',
+               '🤳 Selfie holding your ID',
+               '📄 Proof of address (optional)',
+               '⏱️ Takes 2 minutes to complete'].map(item => `
+              <div style="font-size:11px;color:var(--t3);background:var(--b2);
+                border-radius:8px;padding:8px 10px">${item}</div>
+            `).join('')}
+          </div>
+        </div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function updateKYCGates(status) {
+  if (status === 'approved') {
+    // Hide all gates
+    ['deposit-kyc-gate','buy-kyc-gate'].forEach(id => {
+      const el = $(id); if (el) el.style.display = 'none';
+    });
+    return;
+  }
+
+  const gateHTML = _kycBannerHTML(status) + (status !== 'submitted' ? `
+    <div style="text-align:center;margin-top:10px">
+      <button onclick="closeDepositModal();closeWithdrawModal();openKYCModal()"
+        style="background:var(--v1);border:none;color:#fff;padding:10px 28px;
+        border-radius:10px;cursor:pointer;font-size:13px;font-weight:700">
+        Complete KYC Now →
+      </button>
+    </div>` : '');
+
+  ['deposit-kyc-gate','buy-kyc-gate'].forEach(id => {
+    const el = $(id);
+    if (el) { el.innerHTML = gateHTML; el.style.display = 'block'; }
+  });
+
+  // Hide deposit form content if not verified
+  const depForm = $('deposit-modal')?.querySelector('[id="deposit-address"]')
+    ?.closest('[style*="text-align:center"]');
+}
+
+// ── KYC Gate — block actions if not verified ──────────────────────
+function requireKYC(action) {
+  const status = userProfile?.kyc_status;
+  if (status === 'approved') return true;
+  if (status === 'submitted') {
+    showToast('KYC under review. You can invest once verified (24-48 hrs).', 'info', 5000);
+    return false;
+  }
+  // Not started — open KYC modal
+  showToast('Complete identity verification first', 'error');
+  openKYCModal();
+  return false;
+}
+
+// ── Admin: view KYC documents ──────────────────────────────────────
+async function viewKYCDocs(userId, idPath, selfiePath, addrPath) {
+  const paths = [
+    { label: 'Government ID', path: idPath },
+    { label: 'Selfie with ID', path: selfiePath },
+    { label: 'Proof of Address', path: addrPath },
+  ].filter(p => p.path);
+
+  if (!paths.length) { showToast('No documents uploaded', 'error'); return; }
+
+  // Get signed URLs for each doc
+  const urls = await Promise.all(paths.map(async p => {
+    const { data } = await sb.storage.from('kyc-documents')
+      .createSignedUrl(p.path, 3600); // 1hr signed URL
+    return { label: p.label, url: data?.signedUrl };
+  }));
+
+  // Open docs in new tabs
+  urls.forEach(u => {
+    if (u.url) window.open(u.url, '_blank');
+  });
+}
 </script>
 
   <!-- ══ AI CHAT WIDGET ══════════════════════════════════════════════ -->
@@ -5078,5 +6479,174 @@ function disconnectMT5() {
     </div>
   </div>
 
+
+  <!-- ═══ KYC SUBMISSION MODAL ═══ -->
+  <div id="kyc-modal" style="display:none;position:fixed;inset:0;z-index:9000;
+    background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);
+    align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+    <div style="background:var(--surface);border:1px solid var(--b1);border-radius:20px;
+      width:100%;max-width:560px;margin:auto;position:relative">
+
+      <!-- Header -->
+      <div style="padding:22px 28px 18px;border-bottom:1px solid var(--b1);
+        display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:18px;font-weight:800">Identity Verification</div>
+          <div style="font-size:12px;color:var(--t4);margin-top:2px">Required before investing · Takes 2 minutes</div>
+        </div>
+        <button onclick="closeKYCModal()"
+          style="background:var(--b2);border:none;color:var(--t2);width:32px;height:32px;
+          border-radius:8px;cursor:pointer;font-size:16px;line-height:1">✕</button>
+      </div>
+
+      <div style="padding:24px 28px">
+
+        <!-- Progress steps -->
+        <div style="display:flex;align-items:center;margin-bottom:24px">
+          <div class="kyc-step active" id="kyc-step-1">
+            <div class="kyc-step-num">1</div>
+            <div class="kyc-step-lbl">Personal</div>
+          </div>
+          <div style="flex:1;height:2px;background:var(--b3);margin-bottom:16px" id="kyc-line-1"></div>
+          <div class="kyc-step" id="kyc-step-2">
+            <div class="kyc-step-num">2</div>
+            <div class="kyc-step-lbl">Documents</div>
+          </div>
+          <div style="flex:1;height:2px;background:var(--b3);margin-bottom:16px" id="kyc-line-2"></div>
+          <div class="kyc-step" id="kyc-step-3">
+            <div class="kyc-step-num">3</div>
+            <div class="kyc-step-lbl">Submit</div>
+          </div>
+        </div>
+
+        <!-- STEP 1: Personal Info -->
+        <div id="kyc-panel-1">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+            <div style="grid-column:1/-1">
+              <div class="fg-lbl">Full Legal Name *</div>
+              <input id="kyc-fullname" class="auth-input" placeholder="As on your ID document"/>
+            </div>
+            <div>
+              <div class="fg-lbl">Date of Birth *</div>
+              <input id="kyc-dob" class="auth-input" type="date"/>
+            </div>
+            <div>
+              <div class="fg-lbl">Nationality *</div>
+              <input id="kyc-nationality" class="auth-input" placeholder="e.g. Indian"/>
+            </div>
+            <div>
+              <div class="fg-lbl">ID Type *</div>
+              <select id="kyc-idtype" class="auth-input" style="cursor:pointer">
+                <option value="">Select ID type</option>
+                <option value="passport">Passport</option>
+                <option value="national_id">National ID Card</option>
+                <option value="driving_license">Driving License</option>
+                <option value="aadhaar">Aadhaar Card</option>
+              </select>
+            </div>
+            <div>
+              <div class="fg-lbl">ID Number *</div>
+              <input id="kyc-idnumber" class="auth-input" placeholder="Document number"/>
+            </div>
+          </div>
+          <button onclick="kycNextStep(2)" class="fb p" style="width:100%">
+            Continue → Documents
+          </button>
+        </div>
+
+        <!-- STEP 2: Documents -->
+        <div id="kyc-panel-2" style="display:none">
+          <div style="margin-bottom:18px">
+            <div class="fg-lbl">Government ID — front *
+              <span style="color:var(--t4);font-weight:400"> · JPG/PNG/PDF · max 10MB</span>
+            </div>
+            <div onclick="$('kyc-id-file').click()"
+              style="border:2px dashed var(--b3);border-radius:12px;padding:20px;
+              text-align:center;cursor:pointer" id="kyc-id-drop"
+              ondragover="event.preventDefault();this.style.borderColor='var(--v1)'"
+              ondragleave="this.style.borderColor='var(--b3)'"
+              ondrop="kycHandleDrop(event,'id')">
+              <div id="kyc-id-preview" style="font-size:28px;margin-bottom:6px">🪪</div>
+              <div id="kyc-id-name" style="font-size:12px;color:var(--t4)">Click or drag & drop</div>
+            </div>
+            <input id="kyc-id-file" type="file" accept="image/*,.pdf" style="display:none"
+              onchange="kycPreviewFile(this,'id')"/>
+          </div>
+          <div style="margin-bottom:18px">
+            <div class="fg-lbl">Selfie holding your ID *
+              <span style="color:var(--t4);font-weight:400"> · Hold ID next to your face</span>
+            </div>
+            <div onclick="$('kyc-selfie-file').click()"
+              style="border:2px dashed var(--b3);border-radius:12px;padding:20px;
+              text-align:center;cursor:pointer" id="kyc-selfie-drop"
+              ondragover="event.preventDefault();this.style.borderColor='var(--v1)'"
+              ondragleave="this.style.borderColor='var(--b3)'"
+              ondrop="kycHandleDrop(event,'selfie')">
+              <div id="kyc-selfie-preview" style="font-size:28px;margin-bottom:6px">🤳</div>
+              <div id="kyc-selfie-name" style="font-size:12px;color:var(--t4)">Click or drag & drop</div>
+            </div>
+            <input id="kyc-selfie-file" type="file" accept="image/*" style="display:none"
+              onchange="kycPreviewFile(this,'selfie')"/>
+          </div>
+          <div style="margin-bottom:18px">
+            <div class="fg-lbl">Proof of Address
+              <span style="color:var(--t4);font-weight:400"> · Optional · Bank statement or utility bill</span>
+            </div>
+            <div onclick="$('kyc-addr-file').click()"
+              style="border:2px dashed var(--b3);border-radius:12px;padding:16px;
+              text-align:center;cursor:pointer" id="kyc-addr-drop"
+              ondragover="event.preventDefault();this.style.borderColor='var(--v1)'"
+              ondragleave="this.style.borderColor='var(--b3)'"
+              ondrop="kycHandleDrop(event,'addr')">
+              <div id="kyc-addr-preview" style="font-size:22px;margin-bottom:4px">📄</div>
+              <div id="kyc-addr-name" style="font-size:12px;color:var(--t4)">Optional — click to upload</div>
+            </div>
+            <input id="kyc-addr-file" type="file" accept="image/*,.pdf" style="display:none"
+              onchange="kycPreviewFile(this,'addr')"/>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button onclick="kycNextStep(1)" class="fb s" style="flex:1">← Back</button>
+            <button onclick="kycNextStep(3)" class="fb p" style="flex:2">Review & Submit →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Review -->
+        <div id="kyc-panel-3" style="display:none">
+          <div style="background:var(--b2);border-radius:12px;padding:16px;margin-bottom:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--v2);margin-bottom:10px">Review Your Information</div>
+            <div id="kyc-review-content" style="font-size:12px;color:var(--t2);line-height:2"></div>
+          </div>
+          <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);
+            border-radius:10px;padding:14px;margin-bottom:16px">
+            <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+              <input id="kyc-consent" type="checkbox" style="margin-top:3px;flex-shrink:0"/>
+              <div style="font-size:11px;color:var(--t3);line-height:1.6">
+                I confirm all information is accurate and documents are genuine.
+                I consent to SIGMORA processing my data for identity verification.
+              </div>
+            </label>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button onclick="kycNextStep(2)" class="fb s" style="flex:1">← Back</button>
+            <button onclick="submitKYC()" id="kyc-submit-btn" class="fb p" style="flex:2">
+              Submit for Verification
+            </button>
+          </div>
+        </div>
+
+        <!-- SUCCESS -->
+        <div id="kyc-panel-success" style="display:none;text-align:center;padding:20px 0">
+          <div style="font-size:56px;margin-bottom:14px">✅</div>
+          <div style="font-size:20px;font-weight:800;margin-bottom:8px">KYC Submitted!</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.7;margin-bottom:20px">
+            Your documents are under review.<br/>
+            We'll notify you within <b style="color:var(--t1)">24–48 hours</b>.
+          </div>
+          <button onclick="closeKYCModal()" class="fb p">Done</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </body>
 </html>
