@@ -4853,15 +4853,72 @@ async function loadRevenue() {
 // NOTIFICATIONS
 // ═══════════════════════════════════════════════
 async function loadNotifications() {
-  const { data: notifs } = await sb.from('notifications').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
-  const el=$('notifs-list');if(!el)return;
-  if(!notifs?.length){el.innerHTML='<div style="padding:30px;text-align:center;color:var(--t4)">No notifications yet</div>';return;}
-  const icons={success:'✅',error:'⚠️',info:'ℹ️',warning:'🔔'};
-  el.innerHTML=notifs.map(n=>`
-    <div class="notif-row ${n.read?'':'unread'}">
-      <div class="nic ${n.read?'':'v'}">${icons[n.type]||'🔔'}</div>
-      <div><div class="n-title">${n.title}</div><div class="n-desc">${n.body}</div><div class="n-time">${timeAgo(n.created_at)}</div></div>
-    </div>`).join('');
+  const { data: notifs } = await sb.from('notifications')
+    .select('*').eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false }).limit(50);
+
+  const el = $('notifs-list');
+  if (!el) return;
+
+  if (!notifs?.length) {
+    el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--t4)">No notifications yet</div>';
+    return;
+  }
+
+  // Mark all as read
+  sb.from('notifications')
+    .update({ read: true })
+    .eq('user_id', currentUser.id)
+    .eq('read', false)
+    .then(() => loadNotificationCount());
+
+  const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+
+  // Action routing — maps notification title keywords to nav targets
+  function getAction(title, body) {
+    const t = (title + ' ' + body).toLowerCase();
+    if (t.includes('kyc') && (t.includes('submitted') || t.includes('action required')))
+      return { label: 'Review KYC →', nav: 'kyc' };
+    if (t.includes('kyc') && t.includes('approved'))
+      return { label: 'Start Investing →', nav: 'buy-tokens' };
+    if (t.includes('kyc') && t.includes('rejected'))
+      return { label: 'Resubmit KYC →', nav: 'settings', fn: 'openKYCModal()' };
+    if (t.includes('deposit') && t.includes('approved'))
+      return { label: 'View Wallet →', nav: 'wallet' };
+    if (t.includes('deposit') && (t.includes('submitted') || t.includes('pending')))
+      return { label: 'View Deposits →', nav: 'revenue-admin' };
+    if (t.includes('withdrawal') && t.includes('completed'))
+      return { label: 'View Wallet →', nav: 'wallet' };
+    if (t.includes('withdrawal') && t.includes('request'))
+      return { label: 'View Withdrawals →', nav: 'revenue-admin' };
+    if (t.includes('roi') || t.includes('payout'))
+      return { label: 'View ROI Tracker →', nav: 'roi' };
+    if (t.includes('investment') || t.includes('token'))
+      return { label: 'View Portfolio →', nav: 'portfolio' };
+    return null;
+  }
+
+  el.innerHTML = notifs.map(n => {
+    const action = getAction(n.title, n.body || '');
+    const actionBtn = action ? `
+      <button onclick="${action.fn ? action.fn + ';' : ''}nav('${action.nav}', document.querySelector('.ni[onclick*=\'${action.nav}\']'));$('notifs-list').closest('.page')?.classList.remove('active')"
+        style="display:inline-block;margin-top:8px;padding:5px 14px;
+        background:var(--v1);border:none;color:#fff;border-radius:7px;
+        cursor:pointer;font-size:11px;font-weight:700">
+        ${action.label}
+      </button>` : '';
+
+    return `
+      <div class="notif-row ${n.read ? '' : 'unread'}" style="padding:14px 16px">
+        <div class="nic ${n.read ? '' : 'v'}">${icons[n.type] || '🔔'}</div>
+        <div style="flex:1">
+          <div class="n-title">${n.title}</div>
+          <div class="n-desc" style="line-height:1.5">${n.body || ''}</div>
+          <div class="n-time">${timeAgo(n.created_at)}</div>
+          ${actionBtn}
+        </div>
+      </div>`;
+  }).join('');
 }
 async function loadNotificationCount() {
   const { count } = await sb.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',currentUser.id).eq('read',false);
