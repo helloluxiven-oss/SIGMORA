@@ -1230,6 +1230,172 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 <!-- ═══════════════════════════════════
      AUTH SCREEN
 ═══════════════════════════════════ -->
+<!-- ═══ LANDING PAGE ═══ -->
+<div id="landing-page" style="display:flex;flex-direction:column;min-height:100vh;
+  background:var(--bg);position:relative;overflow:hidden">
+
+  <!-- Background gradient orbs -->
+  <div style="position:fixed;width:600px;height:600px;border-radius:50%;
+    background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 70%);
+    top:-200px;right:-200px;pointer-events:none;z-index:0"></div>
+  <div style="position:fixed;width:400px;height:400px;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,245,212,0.08),transparent 70%);
+    bottom:-100px;left:-100px;pointer-events:none;z-index:0"></div>
+
+  <!-- Nav -->
+  <nav style="display:flex;align-items:center;justify-content:space-between;
+    padding:20px 40px;position:relative;z-index:1;
+    border-bottom:1px solid rgba(255,255,255,0.06)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;border-radius:10px;
+        background:linear-gradient(135deg,var(--v1),var(--neon));
+        display:flex;align-items:center;justify-content:center;
+        font-size:18px;font-weight:900;color:#fff">Σ</div>
+      <div>
+        <div style="font-size:16px;font-weight:900;letter-spacing:-0.5px">SIGMORA</div>
+        <div style="font-size:9px;color:var(--t4);letter-spacing:2px;font-family:var(--f-mono)">WEB3 · RWA PLATFORM</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <button onclick="showAuthFromLanding('signin')"
+        style="background:transparent;border:1px solid var(--b3);color:var(--t2);
+        padding:8px 20px;border-radius:10px;cursor:pointer;font-size:13px">
+        Sign In
+      </button>
+      <button onclick="showAuthFromLanding('signup')"
+        style="background:var(--v1);border:none;color:#fff;
+        padding:8px 20px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700">
+        Get Started →
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:60px 20px;
+    position:relative;z-index:1">
+
+    <div style="display:inline-flex;align-items:center;gap:8px;
+      background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.3);
+      border-radius:20px;padding:6px 16px;margin-bottom:24px">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--neon);
+        box-shadow:0 0 8px var(--neon)"></span>
+      <span style="font-size:11px;color:var(--v2);font-family:var(--f-mono);
+        letter-spacing:1px">TOKENIZED REAL ESTATE</span>
+    </div>
+
+    <h1 style="font-size:clamp(36px,6vw,72px);font-weight:900;
+      letter-spacing:-2px;line-height:1.05;margin:0 0 20px;
+      max-width:800px">
+      Own Premium Real Estate<br/>
+      <span style="background:linear-gradient(135deg,var(--v2),var(--neon));
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent">
+        From $100
+      </span>
+    </h1>
+
+    <p style="font-size:18px;color:var(--t3);max-width:560px;
+      line-height:1.7;margin:0 0 40px">
+      Invest in tokenized properties across Dubai, London, Singapore &amp; Miami.
+      Earn daily ROI payouts. Start with as little as $100 USDT.
+    </p>
+
+    <!-- Stats row -->
+    <div style="display:flex;gap:40px;margin-bottom:48px;flex-wrap:wrap;justify-content:center">
+      <div style="text-align:center">
+        <div style="font-size:28px;font-weight:900;color:var(--neon)"id="lp-prop-count">4+</div>
+        <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">PROPERTIES</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:28px;font-weight:900;color:var(--v2)">0.35%</div>
+        <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">DAILY ROI</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:28px;font-weight:900;color:var(--gold)">$100</div>
+        <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">MINIMUM</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:28px;font-weight:900;color:var(--mint)">1 SGM</div>
+        <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">= $10 USDT</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <button onclick="showAuthFromLanding('signup')"
+        style="background:linear-gradient(135deg,var(--v1),var(--v2));border:none;
+        color:#fff;padding:14px 36px;border-radius:12px;cursor:pointer;
+        font-size:16px;font-weight:800;box-shadow:0 8px 32px rgba(124,58,237,0.4)">
+        Start Investing →
+      </button>
+      <button onclick="scrollToHowItWorks()"
+        style="background:rgba(255,255,255,0.06);border:1px solid var(--b3);
+        color:var(--t2);padding:14px 36px;border-radius:12px;cursor:pointer;font-size:16px">
+        How It Works ↓
+      </button>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div id="how-it-works" style="padding:80px 40px;position:relative;z-index:1;
+    border-top:1px solid rgba(255,255,255,0.06)">
+    <div style="text-align:center;margin-bottom:48px">
+      <div style="font-size:11px;color:var(--v2);font-family:var(--f-mono);
+        letter-spacing:2px;margin-bottom:10px">HOW IT WORKS</div>
+      <h2 style="font-size:36px;font-weight:900;margin:0;letter-spacing:-1px">
+        Invest in 3 Simple Steps
+      </h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:24px;max-width:900px;margin:0 auto">
+      ${['🪪 Complete KYC|Verify your identity in 2 minutes. Upload your ID and selfie. Approved within 24 hours.',
+         '💰 Deposit USDT|Send USDT (BEP-20) to your wallet. Platform credit added instantly after verification.',
+         '🏛️ Buy Property Tokens|Choose from our curated properties. Each token represents fractional ownership. Daily ROI starts next day.'].map((item,i) => {
+        const [icon_title, desc] = item.split('|');
+        const [icon, ...titleParts] = icon_title.split(' ');
+        return `<div style="background:var(--raised);border:1px solid var(--b1);border-radius:16px;padding:28px;position:relative">
+          <div style="width:40px;height:40px;border-radius:12px;background:var(--vg);
+            display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px">${icon}</div>
+          <div style="position:absolute;top:20px;right:20px;font-size:48px;font-weight:900;
+            color:rgba(255,255,255,0.04);font-family:var(--f-mono)">${i+1}</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:8px">${titleParts.join(' ')}</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.6">${desc}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <!-- Featured Properties preview -->
+  <div style="padding:60px 40px;background:rgba(0,0,0,0.2);position:relative;z-index:1">
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:11px;color:var(--v2);font-family:var(--f-mono);letter-spacing:2px;margin-bottom:10px">LIVE LISTINGS</div>
+      <h2 style="font-size:36px;font-weight:900;margin:0;letter-spacing:-1px">Featured Properties</h2>
+    </div>
+    <div id="lp-properties" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:20px;max-width:1000px;margin:0 auto 40px">
+      <!-- Populated by JS -->
+    </div>
+    <div style="text-align:center">
+      <button onclick="showAuthFromLanding('signup')"
+        style="background:var(--v1);border:none;color:#fff;padding:12px 32px;
+        border-radius:10px;cursor:pointer;font-size:14px;font-weight:700">
+        View All Properties →
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="padding:30px 40px;border-top:1px solid rgba(255,255,255,0.06);
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:12px;position:relative;z-index:1">
+    <div style="font-size:12px;color:var(--t4)">© 2026 SIGMORA · Tokenized Real Estate Platform</div>
+    <div style="display:flex;gap:20px">
+      <a href="#" style="font-size:12px;color:var(--t4);text-decoration:none">Terms</a>
+      <a href="#" style="font-size:12px;color:var(--t4);text-decoration:none">Privacy</a>
+      <a href="#" style="font-size:12px;color:var(--t4);text-decoration:none">Contact</a>
+    </div>
+  </footer>
+</div>
+
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -2799,8 +2965,8 @@ async function showDashboard(user) {
 
   // ── 3. Start tickers — no DB needed ───────────────────────────
   startTicker();
-  startPriceUpdates();
-  sb.rpc('touch_last_login').catch(() => {});
+  startPriceUpdates().catch(() => {}); // non-blocking
+  sb.rpc('touch_last_login').catch(() => {}); // non-blocking
 
   // ── 4. SINGLE RPC fetches everything in one round trip ─────────
   // get_dashboard_summary returns: profile + properties + activity
@@ -2823,7 +2989,7 @@ async function showDashboard(user) {
       ? profile.wallet_address.slice(0,6)+'…'+profile.wallet_address.slice(-4) : 'Not connected';
 
     // Role CSS — sets admin sections visible
-    document.body.className = document.body.className.replace(/role-\S+/g,'').trim();
+    document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('role-')).join(' ');
     document.body.classList.add('role-'+(profile.role||'user'));
     if (['admin','super_admin'].includes(profile.role)) {
       document.querySelectorAll('.admin-only').forEach(el => {
@@ -2856,9 +3022,24 @@ async function showDashboard(user) {
     setTimeout(() => loadPortfolioChart(), 50);
 
   } else {
-    // Fallback if RPC fails
-    await loadUserProfile();
-    await loadDashboardData();
+    // RPC failed — try direct profile fetch only
+    const { data: u } = await sb.from('users').select('*').eq('id', currentUser.id).maybeSingle();
+    if (u) {
+      userProfile = u;
+      const dn = u.full_name || emailFallback;
+      if (sfAv) { sfAv.textContent = dn.slice(0,2).toUpperCase(); sfAv.style.animation = 'none'; }
+      setText('sf-name', dn);
+      setText('sf-role', (u.role||'user').replace(/_/g,' ').toUpperCase());
+      setText('sf-bal',  fmtUSD(u.wallet_balance_usd));
+      document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('role-')).join(' ');
+      document.body.classList.add('role-'+(u.role||'user'));
+      if (['admin','super_admin'].includes(u.role)) {
+        document.querySelectorAll('.admin-only').forEach(el => {
+          el.style.display = el.classList.contains('nav-group') ? 'block' : 'flex';
+        });
+      }
+      renderTierUI();
+    }
   }
 
   // ── 5. Non-blocking extras ─────────────────────────────────────
@@ -4938,6 +5119,16 @@ async function markAllRead() {
 // ═══════════════════════════════════════════════
 function loadSettings() {
   renderSettingsKYC(userProfile?.kyc_status || 'pending');
+  // Load referral data
+  loadReferralSection().then(ref => {
+    if (!ref) return;
+    const linkEl = $('ref-link-display');
+    if (linkEl) linkEl.textContent = ref.link;
+    const countEl = $('ref-count');
+    if (countEl) countEl.textContent = ref.count;
+    const earnedEl = $('ref-earned');
+    if (earnedEl) earnedEl.textContent = (ref.count * 5) + ' SGM';
+  }).catch(() => {});
   if (!userProfile) return;
   const sn=$('set-name');if(sn)sn.value=userProfile.full_name||'';
   const se=$('set-email');if(se)se.value=userProfile.email||currentUser.email||'';
@@ -6516,6 +6707,162 @@ function notifAction(navTarget, extraFn) {
   }
   if (extraFn) setTimeout(() => { try { eval(extraFn); } catch(_) {} }, 400);
 }
+
+// ══════════════════════════════════════════════════════════════
+// LANDING PAGE
+// ══════════════════════════════════════════════════════════════
+let _currentModal_roi = 0.35; // default, updated per property
+
+function showAuthFromLanding(tab) {
+  const lp = $('landing-page');
+  const auth = $('auth-screen');
+  if (lp) lp.style.display = 'none';
+  if (auth) auth.classList.remove('hidden');
+  // Switch to correct tab
+  if (tab === 'signup') {
+    const signupTab = document.querySelector('.auth-tab[onclick*="signup"]');
+    if (signupTab) signupTab.click();
+  }
+}
+
+function scrollToHowItWorks() {
+  $('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function loadLandingProperties() {
+  const { data: props } = await sb.from('properties')
+    .select('id,name,token_symbol,token_price_usd,daily_roi_percent,city,country,total_supply,tokens_sold,cover_image_url')
+    .eq('status','active').eq('featured',true).order('sort_order').limit(3);
+
+  const container = $('lp-properties');
+  if (!container || !props?.length) return;
+
+  container.innerHTML = props.map(p => {
+    const pct = Math.round((p.tokens_sold / p.total_supply) * 100);
+    return `
+      <div style="background:var(--raised);border:1px solid var(--b1);border-radius:16px;overflow:hidden;cursor:pointer"
+        onclick="showAuthFromLanding('signup')">
+        <div style="height:160px;background:linear-gradient(135deg,var(--vg),var(--bg));
+          display:flex;align-items:center;justify-content:center;font-size:40px">🏢</div>
+        <div style="padding:18px">
+          <div style="font-size:14px;font-weight:800;margin-bottom:4px">${p.name}</div>
+          <div style="font-size:11px;color:var(--t4);margin-bottom:12px">${p.city}, ${p.country}</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+            <div>
+              <div style="font-size:10px;color:var(--t4)">Token Price</div>
+              <div style="font-size:14px;font-weight:700;color:var(--neon)">$${p.token_price_usd}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--t4)">Daily ROI</div>
+              <div style="font-size:14px;font-weight:700;color:var(--mint)">${p.daily_roi_percent}%</div>
+            </div>
+          </div>
+          <div style="height:4px;background:var(--b3);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--v1),var(--neon))"></div>
+          </div>
+          <div style="font-size:10px;color:var(--t4);margin-top:4px">${pct}% filled</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const countEl = $('lp-prop-count');
+  if (countEl) countEl.textContent = props.length + '+';
+}
+
+// ══════════════════════════════════════════════════════════════
+// ROI CALCULATOR
+// ══════════════════════════════════════════════════════════════
+function updateROICalc(amount, roiPct, tokenPrice) {
+  const usd = parseFloat(amount) || 1000;
+  const roi = roiPct || _currentModal_roi || 0.35;
+  const price = tokenPrice || 10;
+
+  const daily   = usd * (roi / 100);
+  const monthly = daily * 30;
+  const yearly  = daily * 365;
+  const tokens  = Math.floor(usd / price);
+
+  const fmt = (n) => '$' + n.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const el = (id) => $(id);
+  if (el('calc-amount-display')) el('calc-amount-display').textContent = fmt(usd);
+  if (el('calc-daily'))          el('calc-daily').textContent   = fmt(daily);
+  if (el('calc-monthly'))        el('calc-monthly').textContent = fmt(monthly);
+  if (el('calc-yearly'))         el('calc-yearly').textContent  = fmt(yearly);
+  if (el('calc-tokens-info'))    el('calc-tokens-info').textContent =
+    `${tokens} tokens at $${price} each · ${roi}% daily ROI`;
+  if (el('roi-calc-slider'))     el('roi-calc-slider').value = usd;
+}
+
+// ══════════════════════════════════════════════════════════════
+// REFERRAL SYSTEM
+// ══════════════════════════════════════════════════════════════
+async function loadReferralSection() {
+  if (!currentUser || !userProfile) return;
+
+  // Generate referral code if not exists
+  if (!userProfile.referral_code) {
+    const code = 'SIG-' + currentUser.id.slice(0,6).toUpperCase();
+    await sb.from('users').update({ referral_code: code }).eq('id', currentUser.id);
+    userProfile.referral_code = code;
+  }
+
+  const code = userProfile.referral_code;
+  const link = `${window.location.origin}?ref=${code}`;
+
+  // Count referrals
+  const { count } = await sb.from('users')
+    .select('*', { count:'exact', head:true })
+    .eq('referred_by', code);
+
+  return { code, link, count: count || 0 };
+}
+
+function getReferralLink() {
+  if (!userProfile?.referral_code) return '';
+  return window.location.origin + '?ref=' + userProfile.referral_code;
+}
+
+async function copyReferralLink() {
+  const ref = await loadReferralSection();
+  if (!ref) return;
+  await navigator.clipboard.writeText(ref.link);
+  showToast('Referral link copied! Share it to earn SGM bonuses.', 'success', 4000);
+}
+
+// Apply referral code from URL on signup
+function checkReferralParam() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (ref) {
+    localStorage.setItem('sigmora_ref', ref);
+    const refInput = $('signup-ref-code');
+    if (refInput) refInput.value = ref;
+  }
+}
+
+// Check referral on page load
+checkReferralParam();
+
+// Show landing page on first visit (no session)
+(async () => {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      // No session — show landing page
+      const lp = $('landing-page');
+      const auth = $('auth-screen');
+      if (lp) lp.style.display = 'flex';
+      if (auth) auth.classList.add('hidden');
+      // Load properties on landing page
+      loadLandingProperties().catch(() => {});
+    } else {
+      // Has session — hide landing page
+      const lp = $('landing-page');
+      if (lp) lp.style.display = 'none';
+    }
+  } catch(_) {}
+})();
 </script>
 
   <!-- ══ AI CHAT WIDGET ══════════════════════════════════════════════ -->
