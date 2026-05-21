@@ -1471,9 +1471,6 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
     <!-- Theme toggle on auth -->
     <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;align-items:center">
-      <button class="btn btn-ghost" onclick="toggleTheme()" style="height:30px;padding:0 12px;font-size:11px">
-        <span id="auth-theme-icon">☀</span> <span id="auth-theme-label">Day Light</span>
-      </button>
       <a onclick="document.getElementById('terms-page').style.display='block'" href="#"
         style="font-size:11px;color:var(--t4);text-decoration:none">Terms</a>
       <a onclick="document.getElementById('privacy-page').style.display='block'" href="#"
@@ -1596,9 +1593,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       <div class="tick-itm"><span class="tick-sym">EUR/USD</span><span class="tick-p" id="t-eur">—</span><span class="tick-c" id="t-eur-c">—</span></div>
     </div>
     <div class="tb-r">
-      <button class="btn btn-ghost" onclick="toggleTheme()">
-        <span id="theme-icon">☀</span> <span id="theme-label">Day Light</span>
-      </button>
+      
       <button class="btn btn-ghost" onclick="nav('notifs',document.querySelector('.ni[onclick*=notifs]'))">
         🔔 <span style="color:var(--rose)" id="top-notif-count">0</span>
       </button>
