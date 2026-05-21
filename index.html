@@ -2630,6 +2630,15 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 <div id="toast-container"></div>
 
 <script>
+// ── CRITICAL: Check password recovery BEFORE anything else ──────
+// Must run synchronously before Supabase auth initializes
+const _IS_PASSWORD_RECOVERY = window.location.hash.includes('type=recovery') ||
+  new URLSearchParams(window.location.search).get('type') === 'recovery';
+if (_IS_PASSWORD_RECOVERY) {
+  // Prevent any auth redirect to dashboard
+  window.__blockDashboard = true;
+}
+
 /* ══════════════════════════════════════════════════════
    SIGMORA — Clean Auth + Data Layer v3.0
    Production-ready. No frameworks. Supabase native.
@@ -3094,38 +3103,47 @@ async function showDashboard(user) {
 // ═══════════════════════════════════════════════
 function initAuthListener() {
   let _appReady = false;
-  let _inPasswordRecovery = false; // guard: prevent dashboard load during reset
+  let _inPasswordRecovery = _IS_PASSWORD_RECOVERY || false;
 
   sb.auth.onAuthStateChange(async (event, session) => {
 
     if (event === 'PASSWORD_RECOVERY') {
-      // User clicked reset link — DO NOT load dashboard
-      // Show password reset modal instead
       _inPasswordRecovery = true;
+      window.__blockDashboard = true;
       currentUser = session?.user;
 
-      // Hide landing page and auth screen, show clean reset modal
+      // Hide everything — show only reset modal
       const lp = $('landing-page');
       const auth = $('auth-screen');
+      const app = $('main-app');
       if (lp) lp.style.display = 'none';
       if (auth) auth.classList.add('hidden');
+      if (app) app.classList.add('hidden');
 
       showPasswordResetModal();
       return;
     }
 
     if (event === 'SIGNED_IN') {
-      // Block dashboard if we're in password recovery flow
-      if (_inPasswordRecovery) return;
+      // BLOCK if password recovery — user must reset password first
+      if (_inPasswordRecovery || window.__blockDashboard) {
+        // Show reset modal if not already shown
+        if (!document.getElementById('pw-reset-modal')) {
+          currentUser = session?.user;
+          showPasswordResetModal();
+        }
+        return;
+      }
       if (session?.user && !_appReady) {
         _appReady = true;
         await showDashboard(session.user);
       }
     } else if (event === 'TOKEN_REFRESHED') {
-      if (session?.user) currentUser = session.user;
+      if (session?.user && !_inPasswordRecovery) currentUser = session.user;
     } else if (event === 'SIGNED_OUT') {
       _appReady = false;
       _inPasswordRecovery = false;
+      window.__blockDashboard = false;
       showAuthScreen();
     }
   });
