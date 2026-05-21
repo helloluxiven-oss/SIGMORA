@@ -1,4 +1,14 @@
-<!DOCTYPE html>
+<div id="auth-screen" class="hidden" style="position:relative;min-height:100vh;overflow:hidden">
+  <!-- Auth background photo -->
+  <div style="position:fixed;inset:0;z-index:0;pointer-events:none">
+    <img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=1920&q=80&fit=crop"
+      onerror="this.src='https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1920&q=80&fit=crop'"
+      style="width:100%;height:100%;object-fit:cover;object-position:center"
+      alt="City skyline"/>
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(2,0,15,0.75) 0%,rgba(10,5,30,0.65) 50%,rgba(4,2,18,0.80) 100%)"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,58,237,0.12) 0%,transparent 60%,rgba(0,245,212,0.06) 100%)"></div>
+  </div>
+  <div style="position:relative;z-index:1;<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -1232,15 +1242,33 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 ═══════════════════════════════════ -->
 <!-- ═══ LANDING PAGE ═══ -->
 <div id="landing-page" style="display:flex;flex-direction:column;min-height:100vh;
-  background:var(--bg);position:relative;overflow:hidden">
+  background:#020008;position:relative;overflow:hidden">
 
-  <!-- Background gradient orbs -->
-  <div style="position:fixed;width:600px;height:600px;border-radius:50%;
-    background:radial-gradient(circle,rgba(124,58,237,0.15),transparent 70%);
-    top:-200px;right:-200px;pointer-events:none;z-index:0"></div>
-  <div style="position:fixed;width:400px;height:400px;border-radius:50%;
-    background:radial-gradient(circle,rgba(0,245,212,0.08),transparent 70%);
-    bottom:-100px;left:-100px;pointer-events:none;z-index:0"></div>
+  <!-- Dubai Night Skyline Background -->
+  <div style="position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none">
+    <img
+      src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1920&q=80&fit=crop"
+      onerror="this.src='https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1920&q=80&fit=crop'"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 60%"
+      alt="Dubai night skyline"
+    />
+    <!-- Dark overlay for text readability -->
+    <div style="position:absolute;inset:0;background:linear-gradient(
+      to bottom,
+      rgba(2,0,15,0.55) 0%,
+      rgba(5,2,20,0.45) 40%,
+      rgba(8,4,28,0.75) 80%,
+      rgba(6,3,18,0.95) 100%
+    )"></div>
+    <!-- Purple/teal tint overlay for brand feel -->
+    <div style="position:absolute;inset:0;background:linear-gradient(
+      135deg,
+      rgba(124,58,237,0.15) 0%,
+      transparent 50%,
+      rgba(0,245,212,0.08) 100%
+    )"></div>
+  </div>
+
 
   <!-- Nav -->
   <nav style="display:flex;align-items:center;justify-content:space-between;
@@ -1254,12 +1282,6 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       </div>
     </div>
     <div style="display:flex;gap:12px;align-items:center">
-      <button onclick="toggleTheme()"
-        style="background:transparent;border:1px solid var(--b3);color:var(--t2);
-        padding:8px 14px;border-radius:10px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px">
-        <span id="lp-theme-icon">☀</span>
-        <span id="lp-theme-label">Day Light</span>
-      </button>
       <button onclick="showAuthFromLanding('signin')"
         style="background:transparent;border:1px solid var(--b3);color:var(--t2);
         padding:8px 20px;border-radius:10px;cursor:pointer;font-size:13px">
@@ -2741,8 +2763,8 @@ function setTheme(t) {
   document.body.dataset.theme = t;
   const icon = t === 'light' ? '🌙' : '☀';
   const lbl  = t === 'light' ? 'Night Mode' : 'Day Light';
-  ['theme-icon','auth-theme-icon','lp-theme-icon'].forEach(id => { const el=$(''+id); if(el) el.textContent=icon; });
-  ['theme-label','auth-theme-label','lp-theme-label'].forEach(id => { const el=$(''+id); if(el) el.textContent=lbl; });
+  ['theme-icon','auth-theme-icon'].forEach(id => { const el=$(''+id); if(el) el.textContent=icon; });
+  ['theme-label','auth-theme-label'].forEach(id => { const el=$(''+id); if(el) el.textContent=lbl; });
   localStorage.setItem(THEME_KEY, t);
   if (allCharts.portfolio) refreshCharts();
 }
