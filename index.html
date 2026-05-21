@@ -1253,7 +1253,13 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div style="font-size:9px;color:var(--t4);letter-spacing:2px;font-family:var(--f-mono)">WEB3 · RWA PLATFORM</div>
       </div>
     </div>
-    <div style="display:flex;gap:12px">
+    <div style="display:flex;gap:12px;align-items:center">
+      <button onclick="toggleTheme()"
+        style="background:transparent;border:1px solid var(--b3);color:var(--t2);
+        padding:8px 14px;border-radius:10px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px">
+        <span id="lp-theme-icon">☀</span>
+        <span id="lp-theme-label">Day Light</span>
+      </button>
       <button onclick="showAuthFromLanding('signin')"
         style="background:transparent;border:1px solid var(--b3);color:var(--t2);
         padding:8px 20px;border-radius:10px;cursor:pointer;font-size:13px">
@@ -2695,8 +2701,8 @@ function setTheme(t) {
   document.body.dataset.theme = t;
   const icon = t === 'light' ? '🌙' : '☀';
   const lbl  = t === 'light' ? 'Night Mode' : 'Day Light';
-  ['theme-icon','auth-theme-icon'].forEach(id => { const el=$(''+id); if(el) el.textContent=icon; });
-  ['theme-label','auth-theme-label'].forEach(id => { const el=$(''+id); if(el) el.textContent=lbl; });
+  ['theme-icon','auth-theme-icon','lp-theme-icon'].forEach(id => { const el=$(''+id); if(el) el.textContent=icon; });
+  ['theme-label','auth-theme-label','lp-theme-label'].forEach(id => { const el=$(''+id); if(el) el.textContent=lbl; });
   localStorage.setItem(THEME_KEY, t);
   if (allCharts.portfolio) refreshCharts();
 }
@@ -6738,29 +6744,51 @@ async function loadLandingProperties() {
   if (!container || !props?.length) return;
 
   container.innerHTML = props.map(p => {
-    const pct = Math.round((p.tokens_sold / p.total_supply) * 100);
+    const pct    = Math.round((p.tokens_sold / p.total_supply) * 100);
+    // Use same embedded images as the property listing page
+    const imgObj = (typeof PROP_IMAGES_BY_NAME !== 'undefined') ? PROP_IMAGES_BY_NAME[p.name] : null;
+    const imgSrc = imgObj?.src || p.cover_image_url || null;
+    const imgPos = imgObj?.pos || 'center';
+    const imgHTML = imgSrc
+      ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;object-position:${imgPos}"/>`
+      : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px">🏢</div>`;
+
+    const yearly = (parseFloat(p.token_price_usd) * (parseFloat(p.daily_roi_percent)/100) * 365).toFixed(0);
+
     return `
-      <div style="background:var(--raised);border:1px solid var(--b1);border-radius:16px;overflow:hidden;cursor:pointer"
-        onclick="showAuthFromLanding('signup')">
-        <div style="height:160px;background:linear-gradient(135deg,var(--vg),var(--bg));
-          display:flex;align-items:center;justify-content:center;font-size:40px">🏢</div>
-        <div style="padding:18px">
-          <div style="font-size:14px;font-weight:800;margin-bottom:4px">${p.name}</div>
+      <div style="background:var(--raised);border:1px solid var(--b1);border-radius:16px;
+        overflow:hidden;cursor:pointer;transition:.2s"
+        onclick="showAuthFromLanding('signup')"
+        onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 32px rgba(124,58,237,0.2)'"
+        onmouseout="this.style.borderColor='var(--b1)';this.style.transform='';this.style.boxShadow=''">
+        <div style="height:180px;overflow:hidden;position:relative">
+          ${imgHTML}
+          <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);
+            backdrop-filter:blur(4px);border-radius:20px;padding:4px 10px;
+            font-size:10px;color:var(--mint);font-family:var(--f-mono);font-weight:700">
+            ${p.daily_roi_percent}%/day
+          </div>
+        </div>
+        <div style="padding:16px">
+          <div style="font-size:15px;font-weight:800;margin-bottom:3px">${p.name}</div>
           <div style="font-size:11px;color:var(--t4);margin-bottom:12px">${p.city}, ${p.country}</div>
           <div style="display:flex;justify-content:space-between;margin-bottom:10px">
             <div>
-              <div style="font-size:10px;color:var(--t4)">Token Price</div>
-              <div style="font-size:14px;font-weight:700;color:var(--neon)">$${p.token_price_usd}</div>
+              <div style="font-size:9px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">TOKEN PRICE</div>
+              <div style="font-size:16px;font-weight:800;color:var(--neon)">$${p.token_price_usd}</div>
             </div>
             <div style="text-align:right">
-              <div style="font-size:10px;color:var(--t4)">Daily ROI</div>
-              <div style="font-size:14px;font-weight:700;color:var(--mint)">${p.daily_roi_percent}%</div>
+              <div style="font-size:9px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">YEARLY ROI</div>
+              <div style="font-size:16px;font-weight:800;color:var(--gold)">${yearly}%</div>
             </div>
           </div>
-          <div style="height:4px;background:var(--b3);border-radius:2px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--v1),var(--neon))"></div>
+          <div style="height:4px;background:var(--b3);border-radius:2px;overflow:hidden;margin-bottom:4px">
+            <div style="height:100%;width:${pct || 1}%;background:linear-gradient(90deg,var(--v1),var(--neon))"></div>
           </div>
-          <div style="font-size:10px;color:var(--t4);margin-top:4px">${pct}% filled</div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t4)">
+            <span>${pct}% filled</span>
+            <span style="color:var(--v2);font-weight:600">Invest →</span>
+          </div>
         </div>
       </div>`;
   }).join('');
