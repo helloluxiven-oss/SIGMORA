@@ -3961,25 +3961,66 @@ function updateBuyOrder() {
 }
 
 async function doBuyTokens() {
+  // KYC gate
+  if (!requireKYC('invest')) return;
+
   const sel = $('buy-prop-select');
-  const qty = parseInt($('buy-tokens-qty')?.value)||0;
-  if (!sel?.value || !qty) { showToast('Select a property and enter token quantity','error'); return; }
-  const opt = sel.selectedOptions[0];
-  const price = parseFloat(opt.dataset.price||0);
-  const gross=price*qty, fee=gross*0.01;
-  if ((userProfile?.wallet_balance_usd||0) < gross+fee) {
-    showToast('Insufficient wallet balance. Please deposit funds first.','error'); return;
+  const qty = parseInt($('buy-tokens-qty')?.value) || 0;
+  if (!sel?.value || qty < 1) {
+    showToast('Select a property and enter token quantity', 'error'); return;
   }
-  const { error } = await sb.from('transactions').insert({
-    user_id:currentUser.id, property_id:sel.value,
-    tx_type:'buy', status:'processing',
-    token_amount:qty, token_price_usd:price,
-    gross_amount_usd:gross, fee_amount_usd:fee, net_amount_usd:gross,
-    payment_method:$('buy-payment')?.value||'wallet'
-  });
-  if (error) { showToast('Transaction failed: '+error.message,'error'); return; }
-  showToast(`Purchase initiated: ${qty.toLocaleString()} tokens for ${fmtUSD(gross+fee)}. Processing…`,'success');
-  clearBuyForm();
+
+  const opt   = sel.selectedOptions[0];
+  const price = parseFloat(opt.dataset.price || 0);
+  const amountUsd = price * qty;
+
+  // Balance check (client-side fast fail)
+  if ((userProfile?.wallet_balance_usd || 0) < amountUsd) {
+    showToast('Insufficient balance. Please deposit USDT first.', 'error');
+    const navEl = document.querySelector('.ni[onclick*="wallet"]');
+    if (navEl) setTimeout(() => navEl.click(), 1500);
+    return;
+  }
+
+  const btn = document.querySelector('.fb.p[onclick*="doBuyTokens"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
+
+  try {
+    // Call the atomic DB function — handles everything
+    const { data, error } = await sb.rpc('buy_property_tokens', {
+      p_user_id:     currentUser.id,
+      p_property_id: sel.value,
+      p_amount_usd:  amountUsd,
+    });
+
+    if (error) throw error;
+
+    // Update local profile balances
+    if (userProfile) {
+      userProfile.wallet_balance_usd  = (parseFloat(userProfile.wallet_balance_usd)  - amountUsd).toFixed(2);
+      userProfile.total_invested_usd  = (parseFloat(userProfile.total_invested_usd)  + amountUsd).toFixed(2);
+    }
+
+    // Refresh sidebar balance
+    setText('sf-bal', fmtUSD(userProfile?.wallet_balance_usd));
+    setText('kpi-bal', fmtUSD(userProfile?.wallet_balance_usd));
+    setText('kpi-invested', fmtUSD(userProfile?.total_invested_usd));
+    renderTierUI();
+
+    showToast(
+      `✅ Success! ${data.tokens} ${data.symbol} tokens purchased for ${fmtUSD(amountUsd)}. Daily ROI starts tomorrow.`,
+      'success', 6000
+    );
+
+    clearBuyForm();
+    // Reload buy tokens page to refresh property supply
+    setTimeout(() => loadBuyTokens(), 500);
+
+  } catch(e) {
+    showToast('Purchase failed: ' + (e.message || 'Unknown error'), 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '◆ Confirm Purchase'; }
+  }
 }
 function clearBuyForm() {
   const s=$('buy-prop-select');if(s)s.value='';
@@ -6533,8 +6574,10 @@ function _kycBannerHTML(status) {
     },
     rejected: {
       color:'var(--rose)', bg:'rgba(244,63,94,0.08)',
-      icon:'❌', title:'KYC Rejected',
-      msg: (userProfile?.kyc_reject_reason || 'Documents could not be verified. Please resubmit.'),
+      icon:'❌', title:'KYC Not Approved',
+      msg: userProfile?.kyc_reject_reason
+        ? '❗ Reason: ' + userProfile.kyc_reject_reason + '. Please resubmit with correct documents.'
+        : 'Your documents could not be verified. Please resubmit.',
       btn:'Resubmit Documents →', action:'openKYCModal()',
     },
   };
@@ -6609,6 +6652,15 @@ function renderSettingsKYC(status) {
         </div>
         <!-- Status banner -->
         ${_kycBannerHTML(status)}
+        ${status === 'rejected' && userProfile?.kyc_reject_reason ? `
+        <div style="margin-top:12px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);
+          border-radius:10px;padding:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--rose);margin-bottom:4px">❗ Rejection Reason:</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.5">${userProfile.kyc_reject_reason}</div>
+          <div style="font-size:11px;color:var(--t4);margin-top:6px">
+            Please resubmit with corrected documents.
+          </div>
+        </div>` : ''}
         ${status === 'pending' ? `
         <div style="margin-top:14px">
           <div style="font-size:11px;color:var(--t4);margin-bottom:10px;font-weight:600">
