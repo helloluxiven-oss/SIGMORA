@@ -7161,16 +7161,16 @@ checkReferralParam();
   </div>
 
   <!-- ═══ TERMS OF SERVICE PAGE ═══ -->
-  <div id="terms-page" style="display:none;position:fixed;inset:0;z-index:9999;
-    background:var(--bg);overflow-y:auto;isolation:isolate">
+  <div id="terms-page" style="display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto">
+    <div style="position:fixed;inset:0;background:rgba(6,5,15,0.96);backdrop-filter:blur(20px);z-index:-1"></div>
     <div style="max-width:800px;margin:0 auto;padding:60px 24px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
         <div style="display:flex;align-items:center;gap:10px">
           <div style="font-size:20px;font-weight:900">Σ SIGMORA</div>
         </div>
-        <button onclick="document.getElementById('terms-page').style.display='none'"
-          style="background:var(--b2);border:none;color:var(--t2);padding:8px 16px;
-          border-radius:8px;cursor:pointer;font-size:13px">← Back</button>
+        <button onclick="document.getElementById('terms-page').style.display='none';document.getElementById('terms-page').scrollTop=0"
+          style="background:var(--v1);border:none;color:#fff;padding:8px 20px;
+          border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">← Back</button>
       </div>
 
       <h1 style="font-size:32px;font-weight:900;letter-spacing:-1px;margin:0 0 8px">Terms of Service</h1>
@@ -7237,14 +7237,14 @@ checkReferralParam();
   </div>
 
   <!-- ═══ PRIVACY POLICY PAGE ═══ -->
-  <div id="privacy-page" style="display:none;position:fixed;inset:0;z-index:9999;
-    background:var(--bg);overflow-y:auto;isolation:isolate">
+  <div id="privacy-page" style="display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto">
+    <div style="position:fixed;inset:0;background:rgba(6,5,15,0.96);backdrop-filter:blur(20px);z-index:-1"></div>
     <div style="max-width:800px;margin:0 auto;padding:60px 24px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
         <div style="font-size:20px;font-weight:900">Σ SIGMORA</div>
-        <button onclick="document.getElementById('privacy-page').style.display='none'"
-          style="background:var(--b2);border:none;color:var(--t2);padding:8px 16px;
-          border-radius:8px;cursor:pointer;font-size:13px">← Back</button>
+        <button onclick="document.getElementById('privacy-page').style.display='none';document.getElementById('privacy-page').scrollTop=0"
+          style="background:var(--v1);border:none;color:#fff;padding:8px 20px;
+          border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">← Back</button>
       </div>
 
       <h1 style="font-size:32px;font-weight:900;letter-spacing:-1px;margin:0 0 8px">Privacy Policy</h1>
