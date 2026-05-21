@@ -2507,6 +2507,30 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
             <div class="tgl-row"><div class="tgl-l"><div class="tgl-name">Two-Factor Auth</div><div class="tgl-sub">Extra security for your account</div></div><div class="tgl" onclick="showToast('2FA setup coming soon','info')"></div></div>
           </div>
         </div>
+        <!-- Change Password -->
+        <div class="card" style="margin-top:0;margin-bottom:16px">
+          <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Change Password</div></div>
+          <div style="padding:16px 18px;display:grid;gap:12px">
+            <div>
+              <div class="fg-lbl">Current Password</div>
+              <input id="set-cur-pass" type="password" class="auth-input" placeholder="Enter current password"/>
+            </div>
+            <div>
+              <div class="fg-lbl">New Password</div>
+              <input id="set-new-pass" type="password" class="auth-input" placeholder="Min 8 characters"/>
+            </div>
+            <div>
+              <div class="fg-lbl">Confirm New Password</div>
+              <input id="set-confirm-pass" type="password" class="auth-input" placeholder="Repeat new password"/>
+            </div>
+            <button onclick="changePassword()"
+              style="background:var(--v1);border:none;color:#fff;padding:10px 24px;
+              border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;width:fit-content">
+              Update Password
+            </button>
+          </div>
+        </div>
+
         <div class="card" style="margin-top:0">
           <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--rose)"></span>Danger Zone</div></div>
           <div style="padding:14px 18px">
@@ -3069,22 +3093,40 @@ async function showDashboard(user) {
 // This fires on: page load (restored session), sign in, sign out
 // ═══════════════════════════════════════════════
 function initAuthListener() {
-  let _appReady = false; // guard: prevent duplicate showDashboard calls
+  let _appReady = false;
+  let _inPasswordRecovery = false; // guard: prevent dashboard load during reset
 
   sb.auth.onAuthStateChange(async (event, session) => {
+
+    if (event === 'PASSWORD_RECOVERY') {
+      // User clicked reset link — DO NOT load dashboard
+      // Show password reset modal instead
+      _inPasswordRecovery = true;
+      currentUser = session?.user;
+
+      // Hide landing page and auth screen, show clean reset modal
+      const lp = $('landing-page');
+      const auth = $('auth-screen');
+      if (lp) lp.style.display = 'none';
+      if (auth) auth.classList.add('hidden');
+
+      showPasswordResetModal();
+      return;
+    }
+
     if (event === 'SIGNED_IN') {
+      // Block dashboard if we're in password recovery flow
+      if (_inPasswordRecovery) return;
       if (session?.user && !_appReady) {
         _appReady = true;
         await showDashboard(session.user);
       }
     } else if (event === 'TOKEN_REFRESHED') {
-      // Session refreshed silently — no UI change needed
       if (session?.user) currentUser = session.user;
     } else if (event === 'SIGNED_OUT') {
       _appReady = false;
+      _inPasswordRecovery = false;
       showAuthScreen();
-    } else if (event === 'PASSWORD_RECOVERY') {
-      // Show password reset UI if needed
     }
   });
 }
@@ -7034,15 +7076,53 @@ async function submitPasswordReset() {
     return;
   }
 
-  // Success
+  // Success — sign out and force fresh login with new password
   document.getElementById('pw-reset-modal')?.remove();
-  // Clear hash from URL
   window.history.replaceState({}, document.title, window.location.pathname);
-  showToast('✅ Password updated successfully! Please sign in.', 'success', 5000);
+  await sb.auth.signOut();
+  showToast('✅ Password updated! Please sign in with your new password.', 'success', 5000);
+  showAuthScreen();
 }
 
 // Run on page load
 checkPasswordResetFlow();
+
+// ── Change Password (from Settings) ──────────────────────────
+async function changePassword() {
+  const curPass  = $('set-cur-pass')?.value?.trim();
+  const newPass  = $('set-new-pass')?.value?.trim();
+  const confPass = $('set-confirm-pass')?.value?.trim();
+
+  if (!curPass) { showToast('Enter your current password', 'error'); return; }
+  if (!newPass || newPass.length < 8) { showToast('New password must be at least 8 characters', 'error'); return; }
+  if (newPass !== confPass) { showToast('Passwords do not match', 'error'); return; }
+
+  // Verify current password by re-signing in
+  const { error: signInErr } = await sb.auth.signInWithPassword({
+    email:    currentUser.email,
+    password: curPass,
+  });
+
+  if (signInErr) {
+    showToast('Current password is incorrect', 'error');
+    return;
+  }
+
+  // Update password
+  const { error } = await sb.auth.updateUser({ password: newPass });
+
+  if (error) {
+    showToast('Failed to update password: ' + error.message, 'error');
+    return;
+  }
+
+  // Clear fields
+  ['set-cur-pass','set-new-pass','set-confirm-pass'].forEach(id => {
+    const el = $(id); if (el) el.value = '';
+  });
+
+  showToast('✅ Password updated successfully!', 'success', 4000);
+}
 </script>
 
   <!-- ══ AI CHAT WIDGET ══════════════════════════════════════════════ -->
