@@ -1395,9 +1395,12 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     flex-wrap:wrap;gap:12px;position:relative;z-index:1">
     <div style="font-size:12px;color:var(--t4)">© 2026 SIGMORA · Tokenized Real Estate Platform</div>
     <div style="display:flex;gap:20px">
-      <a href="#" style="font-size:12px;color:var(--t4);text-decoration:none">Terms</a>
-      <a href="#" style="font-size:12px;color:var(--t4);text-decoration:none">Privacy</a>
-      <a href="#" style="font-size:12px;color:var(--t4);text-decoration:none">Contact</a>
+      <a onclick="document.getElementById('terms-page').style.display='block'" href="#"
+        style="font-size:12px;color:var(--t4);text-decoration:none">Terms of Service</a>
+      <a onclick="document.getElementById('privacy-page').style.display='block'" href="#"
+        style="font-size:12px;color:var(--t4);text-decoration:none">Privacy Policy</a>
+      <a href="mailto:support@sigmora.com"
+        style="font-size:12px;color:var(--t4);text-decoration:none">Contact</a>
     </div>
   </footer>
 </div>
@@ -1458,10 +1461,14 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     </div>
 
     <!-- Theme toggle on auth -->
-    <div style="display:flex;justify-content:center;margin-top:16px">
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;align-items:center">
       <button class="btn btn-ghost" onclick="toggleTheme()" style="height:30px;padding:0 12px;font-size:11px">
         <span id="auth-theme-icon">☀</span> <span id="auth-theme-label">Day Light</span>
       </button>
+      <a onclick="document.getElementById('terms-page').style.display='block'" href="#"
+        style="font-size:11px;color:var(--t4);text-decoration:none">Terms</a>
+      <a onclick="document.getElementById('privacy-page').style.display='block'" href="#"
+        style="font-size:11px;color:var(--t4);text-decoration:none">Privacy</a>
     </div>
   </div>
 </div>
@@ -7148,6 +7155,132 @@ checkReferralParam();
           </div>
           <button onclick="closeKYCModal()" class="fb p">Done</button>
         </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TERMS OF SERVICE PAGE ═══ -->
+  <div id="terms-page" style="display:none;position:fixed;inset:0;z-index:5000;
+    background:var(--bg);overflow-y:auto">
+    <div style="max-width:800px;margin:0 auto;padding:60px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:20px;font-weight:900">Σ SIGMORA</div>
+        </div>
+        <button onclick="document.getElementById('terms-page').style.display='none'"
+          style="background:var(--b2);border:none;color:var(--t2);padding:8px 16px;
+          border-radius:8px;cursor:pointer;font-size:13px">← Back</button>
+      </div>
+
+      <h1 style="font-size:32px;font-weight:900;letter-spacing:-1px;margin:0 0 8px">Terms of Service</h1>
+      <p style="color:var(--t4);font-size:13px;margin:0 0 40px">Last updated: May 2026</p>
+
+      <div style="color:var(--t3);font-size:14px;line-height:1.8" id="terms-content">
+
+        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);
+          border-radius:10px;padding:16px;margin-bottom:32px;font-size:13px;color:var(--gold)">
+          ⚠️ SIGMORA is a tokenized real estate investment platform. Investments carry risk.
+          Past performance does not guarantee future returns. Please read these terms carefully.
+        </div>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">1. Acceptance of Terms</h2>
+        <p>By accessing or using SIGMORA ("Platform", "we", "us", or "our"), you agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use the Platform. These terms apply to all users, investors, and visitors of SIGMORA.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">2. Platform Description</h2>
+        <p>SIGMORA is a Web3 real estate investment platform that allows users to purchase fractional tokens representing ownership in curated real estate properties. Token holders receive daily ROI distributions based on property performance. The platform also offers a proprietary trading program for qualified traders.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">3. Eligibility</h2>
+        <p>To use SIGMORA, you must:</p>
+        <ul style="padding-left:20px;margin:12px 0">
+          <li style="margin-bottom:8px">Be at least 18 years of age</li>
+          <li style="margin-bottom:8px">Complete identity verification (KYC) successfully</li>
+          <li style="margin-bottom:8px">Not be a resident of any jurisdiction where such investments are prohibited</li>
+          <li style="margin-bottom:8px">Have the legal capacity to enter into binding agreements</li>
+        </ul>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">4. SGM Token</h2>
+        <p>The SIGMORA Token (SGM) is an internal platform utility currency with a fixed rate of 1 SGM = $10 USDT. SGM is not a cryptocurrency, security, or investment instrument. It is a platform accounting unit used to track investments and calculate tier benefits. SGM has no value outside of the SIGMORA platform.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">5. Investment Risk</h2>
+        <p>All investments on SIGMORA carry inherent risk. You may lose some or all of your invested capital. Daily ROI rates are indicative and not guaranteed. Real estate values can decline. The Platform does not guarantee any specific return on investment. You should only invest funds you can afford to lose.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">6. Deposits & Withdrawals</h2>
+        <p>Deposits are accepted in USDT (BEP-20) only. All deposits must include a valid transaction hash for verification. SIGMORA reserves the right to reject deposits that cannot be verified on-chain. Withdrawals are processed within 24 hours during business hours. A 1% network fee applies to all withdrawals.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">7. KYC & Identity Verification</h2>
+        <p>All users must complete identity verification before investing. We collect and process personal identification documents in accordance with our Privacy Policy. We reserve the right to reject or revoke KYC approval at our discretion. False or fraudulent documents will result in immediate account termination and may be reported to authorities.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">8. Prop Trading Program</h2>
+        <p>The SIGMORA Prop Trading Program allows qualified traders to manage funded accounts. Challenge requirements must be met as specified. Breach of risk limits results in automatic disqualification. Funded traders receive 80% of net profits. SIGMORA reserves the right to modify program terms at any time.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">9. Prohibited Activities</h2>
+        <p>Users may not: use the Platform for money laundering or illegal activities; create multiple accounts; manipulate Platform metrics; share account credentials; use automated bots; or engage in any activity that disrupts Platform operations. Violation will result in immediate account termination and forfeiture of funds.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">10. Platform Fees</h2>
+        <p>SIGMORA charges a 1% fee on all ROI payouts and withdrawals. No fees are charged on deposits or token purchases. Fees may be updated with 30 days notice to users. All fees are clearly displayed before any transaction is confirmed.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">11. Account Termination</h2>
+        <p>SIGMORA reserves the right to suspend or terminate any account for violation of these terms, suspicious activity, or regulatory requirements. Upon termination, pending withdrawals will be processed. Invested tokens may be liquidated at current market rates.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">12. Limitation of Liability</h2>
+        <p>SIGMORA is not liable for investment losses, market fluctuations, technical outages, or third-party failures. Our maximum liability to any user is limited to the platform fees paid in the 30 days preceding any claim. We do not provide financial, legal, or tax advice.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">13. Changes to Terms</h2>
+        <p>We may update these Terms at any time. Continued use of the Platform after changes constitutes acceptance. Material changes will be communicated via email and in-app notification.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">14. Contact</h2>
+        <p>For questions about these Terms, contact us at: <a href="mailto:support@sigmora.com" style="color:var(--v2)">support@sigmora.com</a></p>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PRIVACY POLICY PAGE ═══ -->
+  <div id="privacy-page" style="display:none;position:fixed;inset:0;z-index:5000;
+    background:var(--bg);overflow-y:auto">
+    <div style="max-width:800px;margin:0 auto;padding:60px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
+        <div style="font-size:20px;font-weight:900">Σ SIGMORA</div>
+        <button onclick="document.getElementById('privacy-page').style.display='none'"
+          style="background:var(--b2);border:none;color:var(--t2);padding:8px 16px;
+          border-radius:8px;cursor:pointer;font-size:13px">← Back</button>
+      </div>
+
+      <h1 style="font-size:32px;font-weight:900;letter-spacing:-1px;margin:0 0 8px">Privacy Policy</h1>
+      <p style="color:var(--t4);font-size:13px;margin:0 0 40px">Last updated: May 2026</p>
+
+      <div style="color:var(--t3);font-size:14px;line-height:1.8">
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:0 0 12px">1. Information We Collect</h2>
+        <p>We collect: full name, email address, date of birth, nationality, government-issued ID, selfie with ID, proof of address, wallet addresses, transaction history, and platform usage data.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">2. How We Use Your Information</h2>
+        <ul style="padding-left:20px;margin:12px 0">
+          <li style="margin-bottom:8px">Identity verification (KYC) and fraud prevention</li>
+          <li style="margin-bottom:8px">Processing investments, deposits, and withdrawals</li>
+          <li style="margin-bottom:8px">Sending transaction notifications and platform updates</li>
+          <li style="margin-bottom:8px">Compliance with applicable laws and regulations</li>
+          <li style="margin-bottom:8px">Improving platform features and user experience</li>
+        </ul>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">3. Data Storage & Security</h2>
+        <p>Your data is stored securely on Supabase (PostgreSQL) hosted in Singapore (ap-southeast-1). KYC documents are stored in private, encrypted cloud storage. We do not sell, rent, or share your personal data with third parties except as required by law or for KYC verification purposes.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">4. KYC Documents</h2>
+        <p>Government ID, selfie, and proof of address are stored securely and accessed only by authorized SIGMORA administrators for verification purposes. Documents are retained for the duration of your account and as required by applicable regulations. You may request deletion of your account and associated data subject to legal obligations.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">5. Cookies</h2>
+        <p>SIGMORA uses minimal session cookies for authentication purposes only. We do not use tracking cookies or third-party advertising cookies. Your authentication token is stored locally in your browser and cleared on sign-out.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">6. Your Rights</h2>
+        <p>You have the right to: access your personal data; correct inaccurate data; request deletion of your account; withdraw consent for email notifications; and lodge a complaint with your local data protection authority.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">7. Third-Party Services</h2>
+        <p>We use: Supabase (data storage), Vercel (hosting), Resend (email delivery), Anthropic (AI chatbot), and blockchain networks for transaction verification. Each provider operates under their own privacy policy.</p>
+
+        <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">8. Contact</h2>
+        <p>For privacy-related requests: <a href="mailto:privacy@sigmora.com" style="color:var(--v2)">privacy@sigmora.com</a></p>
 
       </div>
     </div>
