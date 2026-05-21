@@ -1443,7 +1443,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   </footer>
 </div>
 
-<div id="auth-screen" style="position:relative;overflow:hidden">
+<div id="auth-screen" class="hidden" style="position:relative;overflow:hidden">
   <div style="position:fixed;inset:0;z-index:0;pointer-events:none">
     <img src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=1920&q=80&fit=crop" onerror="this.src='https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1920&q=80&fit=crop'"
       style="width:100%;height:100%;object-fit:cover;object-position:center" alt="City"/>
@@ -2996,6 +2996,16 @@ async function doSignOut() {
 // SCREEN SWITCHING
 // ═══════════════════════════════════════════════
 function showAuthScreen() {
+  // Hide landing page
+  const lp = $('landing-page');
+  if (lp) lp.style.display = 'none';
+  // Show auth screen
+  const auth = $('auth-screen');
+  if (auth) auth.classList.remove('hidden');
+  // Hide main app
+  const app = $('main-app');
+  if (app) app.classList.add('hidden');
+
   // Clear all user state
   currentUser = null;
   userProfile  = null;
