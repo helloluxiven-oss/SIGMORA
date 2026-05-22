@@ -2956,7 +2956,7 @@ async function showDashboard(user) {
 // AUTH STATE LISTENER — the single source of truth
 // This fires on: page load (restored session), sign in, sign out
 // ═══════════════════════════════════════════════
-function initAuthListener() {
+async function initAuthListener() {
   let _appReady = false;
   let _inPasswordRecovery = _IS_PASSWORD_RECOVERY || false;
 
@@ -5342,13 +5342,13 @@ function attachEventListeners() {
     }
 
     if (session?.user) {
-      // Valid saved session — show dashboard directly (no login needed)
-      // This is the ONLY case where we bypass the login screen
+      // Valid saved session — skip landing, show dashboard
+      const lp = $('landing-page');
+      if (lp) lp.style.display = 'none';
       initAuthListener();
       await showDashboard(session.user);
     } else {
-      // No session — start auth listener and wait for sign in
-      // Auth screen is already visible from step 2
+      // No session — show landing page, wait for sign in
       initAuthListener();
     }
   } catch(e) {
@@ -6069,7 +6069,7 @@ async function rejectWithdrawal(withdrawalId, userId, amountUsd) {
 
 let _realtimeChannel = null;
 
-function startRealtimeListeners() {
+async function startRealtimeListeners() {
   if (!currentUser || !userProfile) return;
   if (_realtimeChannel) { sb.removeChannel(_realtimeChannel); _realtimeChannel = null; }
 
@@ -6861,28 +6861,33 @@ function checkReferralParam() {
 // Check referral on page load
 checkReferralParam();
 
-// ALWAYS show landing page first — preload data in background
+// Landing page + preload strategy
 (async () => {
   try {
-    const lp = $('landing-page');
+    const lp   = $('landing-page');
     const auth = $('auth-screen');
-    const app = $('main-app');
-    if (lp) lp.style.display = 'flex';
-    if (auth) auth.classList.add('hidden');
-    if (app) app.classList.add('hidden');
-    // Load properties + preload dashboard data in parallel
-    loadLandingProperties().catch(() => {});
-    // Preload: if session exists, fetch dashboard data now so it's cached before user clicks Sign In
+    const app  = $('main-app');
+    // Only show landing page if app is not already active
+    // (avoids race condition with main initApp IIFE)
+    if (!app || app.classList.contains('hidden')) {
+      if (lp)   lp.style.display = 'flex';
+      if (auth) auth.classList.add('hidden');
+      loadLandingProperties().catch(() => {});
+    }
+    // Preload dashboard data in background after 2s
     setTimeout(async () => {
       try {
         const { data: { session } } = await sb.auth.getSession();
         if (session?.user) {
           const cacheKey = 'sigmora_dash_' + session.user.id;
-          const { data } = await sb.rpc('get_dashboard_summary');
-          if (data) sessionStorage.setItem(cacheKey, JSON.stringify(data));
+          const cached = sessionStorage.getItem(cacheKey);
+          if (!cached) {
+            const { data } = await sb.rpc('get_dashboard_summary');
+            if (data) sessionStorage.setItem(cacheKey, JSON.stringify(data));
+          }
         }
       } catch(_) {}
-    }, 1000); // Start after 1s so landing page renders first
+    }, 2000);
   } catch(_) {}
 })();
 
