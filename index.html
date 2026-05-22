@@ -5357,9 +5357,10 @@ function attachEventListeners() {
       initAuthListener();
     }
   } catch(e) {
-    // Network error — keep auth screen visible, show error
-    showAuthError('Connection error. Please check your internet and refresh.');
-    initAuthListener(); // still start listener in case connection recovers
+    // Session check failed — just start auth listener, don't show error
+    // Could be first visit or Supabase warming up
+    console.warn('Session check failed:', e?.message);
+    initAuthListener();
   }
 })();
 
