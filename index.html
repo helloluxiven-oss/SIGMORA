@@ -3052,7 +3052,7 @@ async function showDashboard(user) {
   // ── 3. Start tickers — no DB needed ───────────────────────────
   startTicker();
   startPriceUpdates().catch(() => {}); // non-blocking
-  sb.rpc('touch_last_login').catch(() => {}); // non-blocking
+  try { sb.rpc('touch_last_login'); } catch(_) {} // non-blocking
 
   // ── 4. Cache + instant load ────────────────────────────────────
   const cacheKey = 'sigmora_dash_' + user.id;
