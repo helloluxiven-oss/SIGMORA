@@ -3128,7 +3128,7 @@ const PAGE_TITLES = {
   notifs:'Notifications', settings:'Settings'
 };
 
-function nav(id, el) {
+async function nav(id, el) {
   closeSidebar(); // Close sidebar on mobile when nav item tapped
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const pg = $('pg-'+id);
@@ -3144,7 +3144,7 @@ function nav(id, el) {
 
 async function loadPageData(id) {
   const loaders = {
-    dashboard: loadDashboard, wallet: loadWallet, portfolio: loadPortfolio,
+    wallet: loadWalletPage,
     properties: loadProperties, 'buy-tokens': loadBuyTokens, 'my-tokens': loadMyTokens,
     'roi-tracker': loadROITracker, startups: loadStartups,
     'fund-portfolio': loadFundPortfolio, trading: loadTrading,
@@ -3153,10 +3153,9 @@ async function loadPageData(id) {
     settings: loadSettings
   };
   const fn = loaders[id];
-  if (fn) {
+  if (typeof fn === 'function') {
     try { await fn(); } catch(e) {
-      console.error('[SIGMORA] loadPageData failed for ' + id + ':', e);
-      showToast(`${PAGE_TITLES[id]||id} failed to load — please try again`, 'error');
+      console.error('[SIGMORA] loadPageData error for', id, e);
     }
   }
 }
@@ -3184,7 +3183,7 @@ function closeSidebar() {
 // ═══════════════════════════════════════════════
 function openModal(id) { $(''+id)?.classList.add('open'); }
 function closeModal(id) { $(''+id)?.classList.remove('open'); }
-function openDepositModal() { openModal('modal-deposit'); }
+
 function openWalletModal() { openModal('modal-wallet'); }
 
 // ═══════════════════════════════════════════════
@@ -3805,11 +3804,7 @@ function pgGoTo(propId, idx) {
   const thumbs = document.querySelectorAll(`#pg-thumbs-${propId} .pg-thumb`);
   thumbs.forEach((t,i)=>t.classList.toggle('active',i===idx));
 }
-function pgNav(propId, dir) {
-  const state = window._pgState?.[propId];
-  if (!state) return;
-  pgGoTo(propId, state.idx + dir);
-}
+
 
 // Upload
 async function pgUploadFiles(files, propId) {
