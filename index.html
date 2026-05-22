@@ -1610,279 +1610,211 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
   <!-- ═══ WALLET ═══ -->
   <div class="page" id="pg-wallet">
-    <div class="sh">
-      <div class="sh-l">
-        <div class="sh-title">My Wallet</div>
-        <div class="sh-sub">Overview · Funds · Portfolio</div>
-      </div>
-      <div class="sh-r"><span class="nbadge nb-g" style="font-size:10px;padding:3px 8px">LIVE</span></div>
-    </div>
-    <div style="display:flex;gap:4px;background:var(--b2);border-radius:12px;padding:4px;margin-bottom:20px;width:fit-content">
-      <button onclick="switchWalletTab('overview')" id="wtab-overview"
-        style="padding:8px 20px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:700;background:var(--v1);color:#fff">📊 Overview</button>
-      <button onclick="switchWalletTab('funds')" id="wtab-funds"
-        style="padding:8px 20px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--t3)">💰 Funds</button>
-      <button onclick="switchWalletTab('portfolio')" id="wtab-portfolio"
-        style="padding:8px 20px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--t3)">📈 Portfolio</button>
-    </div>
-    <div id="wtab-content-overview">
-    <div class="sh">
-      <div class="sh-l">
-        <div class="sh-title">My Wallet</div>
-        <div class="sh-sub">Balance · Investments · Portfolio</div>
-      </div>
-      <div class="sh-r">
-        <span class="nbadge nb-g" style="font-size:10px;padding:4px 10px">● LIVE</span>
-      </div>
-    </div>
 
-    <!-- KPI row -->
-    <div class="g4" id="dash-kpis">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Wallet Balance</div><div class="kpi-ic">◎</div></div><div class="kpi-val" style="color:var(--v2)" id="kpi-bal">$0</div><div class="kpi-meta">Available funds</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Invested</div><div class="kpi-ic">▣</div></div><div class="kpi-val" style="color:var(--mint)" id="kpi-invested">$0</div><div class="kpi-meta">Across all verticals</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Earned</div><div class="kpi-ic">△</div></div><div class="kpi-val" style="color:var(--gold)" id="kpi-earned">$0</div><div class="kpi-meta">ROI + returns</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Active Properties</div><div class="kpi-ic">◈</div></div><div class="kpi-val" style="color:var(--neon)" id="kpi-props">0</div><div class="kpi-meta">Tokenized assets</div></div>
+  <!-- ── PAGE HEADER ── -->
+  <div class="sh">
+    <div class="sh-l">
+      <div class="sh-title">My Wallet</div>
+      <div class="sh-sub">Balances · Deposit · Withdraw · Convert</div>
     </div>
-
-    <div class="g21">
-      <!-- TVL chart -->
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Portfolio Value Over Time</div>
-          <div class="card-action" onclick="refreshCharts()">↻ REFRESH</div>
-        </div>
-        <div class="chart-wrap"><canvas id="chart-portfolio"></canvas></div>
-      </div>
-      <!-- Live Activity -->
-      <div class="card">
-        <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--mint)"></span>Live Activity</div></div>
-        <div class="actfeed" id="dash-activity">
-          <div class="act-row"><div class="a-dot v"></div><div><div class="a-txt">Loading activity...</div></div></div>
-        </div>
-      </div>
+    <div class="sh-r">
+      <span class="nbadge nb-g" style="font-size:10px;padding:3px 8px">LIVE</span>
     </div>
+  </div>
 
-    <!-- Properties overview -->
+  <!-- KYC Gate -->
+  <div id="wallet-kyc-banner" style="margin-bottom:16px"></div>
+
+  <!-- ══ 1. BALANCES ══ -->
+  <div class="g4" style="margin-bottom:24px">
+    <div class="kpi" style="border-color:rgba(0,245,212,0.25)">
+      <div class="kpi-top"><div class="kpi-lbl">USDT Balance</div><div class="kpi-ic" style="color:var(--neon)">◎</div></div>
+      <div class="kpi-val" style="color:var(--neon)" id="w-usdt-bal">$0.00</div>
+      <div class="kpi-meta">Available to invest or withdraw</div>
+    </div>
+    <div class="kpi" style="border-color:rgba(124,58,237,0.25)">
+      <div class="kpi-top"><div class="kpi-lbl">SGM Balance</div><div class="kpi-ic" style="color:var(--v2)">Σ</div></div>
+      <div class="kpi-val" style="color:var(--v2)" id="w-sgm-bal">0 SGM</div>
+      <div class="kpi-meta" id="w-sgm-usd">≈ $0.00 USDT</div>
+    </div>
+    <div class="kpi" style="border-color:rgba(16,185,129,0.25)">
+      <div class="kpi-top"><div class="kpi-lbl">Total Invested</div><div class="kpi-ic" style="color:var(--mint)">▣</div></div>
+      <div class="kpi-val" style="color:var(--mint)" id="w-invested">$0.00</div>
+      <div class="kpi-meta">Across all properties</div>
+    </div>
+    <div class="kpi" style="border-color:rgba(251,191,36,0.25)">
+      <div class="kpi-top"><div class="kpi-lbl">Total Earned</div><div class="kpi-ic" style="color:var(--gold)">△</div></div>
+      <div class="kpi-val" style="color:var(--gold)" id="w-earned">$0.00</div>
+      <div class="kpi-meta">ROI received to date</div>
+    </div>
+  </div>
+
+  <!-- ══ 2. DEPOSIT & WITHDRAW ══ -->
+  <div class="g2" style="margin-bottom:24px">
+
+    <!-- DEPOSIT -->
     <div class="card">
       <div class="card-hd">
-        <div class="card-title"><span class="cdot" style="background:var(--gold)"></span>Featured Properties</div>
-        <div class="card-action" onclick="nav('properties',document.querySelector('.ni[onclick*=properties]'))">VIEW ALL</div>
+        <div class="card-title">
+          <span class="cdot" style="background:var(--neon)"></span>Deposit USDT
+        </div>
+        <span style="font-size:10px;color:var(--t4);font-family:var(--f-mono)">BEP-20 ONLY</span>
       </div>
-      <div id="dash-props-row" style="display:flex;gap:14px;padding:14px 18px;overflow-x:auto">
-        <div style="flex:1;min-width:200px"><div class="skel" style="height:120px;border-radius:10px;margin-bottom:8px"></div><div class="skel" style="height:14px;margin-bottom:6px"></div><div class="skel" style="height:11px;width:60%"></div></div>
-        <div style="flex:1;min-width:200px"><div class="skel" style="height:120px;border-radius:10px;margin-bottom:8px"></div><div class="skel" style="height:14px;margin-bottom:6px"></div><div class="skel" style="height:11px;width:60%"></div></div>
-        <div style="flex:1;min-width:200px"><div class="skel" style="height:120px;border-radius:10px;margin-bottom:8px"></div><div class="skel" style="height:14px;margin-bottom:6px"></div><div class="skel" style="height:11px;width:60%"></div></div>
-      </div>
-    </div>
-  </div>
-    <div id="wtab-content-funds" style="display:none">
-    <div class="sh"><div class="sh-l"><div class="sh-title">My Wallet</div><div class="sh-sub">Manage your funds and view transaction history</div></div></div>
-    <div id="wallet-kyc-banner" style="display:none;margin-bottom:16px"></div>
-    <div class="wh">
-      <div class="wh-lbl">TOTAL BALANCE</div>
-      <div class="wh-bal">$<span id="w-balance">0.00</span></div>
-      <div class="wh-sub" id="w-addr-display">Deposit USDT to start investing</div>
-      <div class="wh-acts">
-        <button class="wha dep" onclick="openDepositModal()">↓ Deposit USDT</button>
-        <button class="wha wit" onclick="openWithdrawModal()">↑ Withdraw</button>
-      </div>
-    </div>
+      <div style="padding:16px 18px">
 
-    <!-- Deposit Modal -->
-    <div id="deposit-modal" style="display:none;position:fixed;inset:0;z-index:1000;
-      background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
-      align-items:center;justify-content:center">
-      <div style="background:var(--surface);border:1px solid var(--b1);border-radius:20px;
-        padding:32px;width:100%;max-width:460px;position:relative">
-
-        <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
-          <div>
-            <div style="font-size:18px;font-weight:800">Deposit USDT</div>
-            <div style="font-size:12px;color:var(--t4);margin-top:2px">BEP-20 (Binance Smart Chain) only</div>
-          </div>
-          <button onclick="closeDepositModal()"
-            style="background:var(--b2);border:none;color:var(--t2);width:32px;height:32px;
-            border-radius:8px;cursor:pointer;font-size:16px">✕</button>
-        </div>
-
-        <!-- KYC Gate inside deposit modal -->
-        <div id="deposit-kyc-gate" style="display:none"></div>
-
-        <!-- Network warning -->
-        <div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);
-          border-radius:10px;padding:12px;margin-bottom:20px;
-          display:flex;gap:10px;align-items:flex-start">
-          <span style="font-size:16px">⚠️</span>
-          <div style="font-size:12px;color:var(--gold);line-height:1.6">
-            Send only <b>USDT on BEP-20 (BSC)</b> network to this address.
-            Sending other coins or using wrong network will result in permanent loss.
+        <!-- Platform address -->
+        <div style="background:var(--b2);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+          <div style="font-size:9px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px;margin-bottom:6px">PLATFORM DEPOSIT ADDRESS</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="w-dep-addr" style="font-family:var(--f-mono);font-size:11px;color:var(--neon);flex:1;word-break:break-all;line-height:1.4">Contact admin for address</div>
+            <button onclick="copyDepAddr()" style="background:var(--b3);border:none;color:var(--t2);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;flex-shrink:0">Copy</button>
           </div>
         </div>
 
-        <!-- QR + Address -->
-        <div style="text-align:center;margin-bottom:20px">
-          <!-- QR Code (generated via API) -->
-          <div style="display:inline-block;padding:12px;background:#fff;border-radius:12px;margin-bottom:16px">
-            <img id="deposit-qr" src="" alt="QR Code"
-              style="width:160px;height:160px;display:block"/>
-          </div>
-          <div style="font-size:10px;color:var(--t4);letter-spacing:1px;
-            text-transform:uppercase;font-family:var(--f-mono);margin-bottom:8px">
-            Platform USDT Address (BEP-20)
-          </div>
-          <div style="background:var(--b2);border-radius:10px;padding:12px 16px;
-            display:flex;align-items:center;gap:10px">
-            <div id="deposit-address" style="font-family:var(--f-mono);font-size:11px;
-              color:var(--neon);word-break:break-all;flex:1;text-align:left">
-              Loading address...
-            </div>
-            <button onclick="copyDepositAddress()"
-              style="background:var(--v1);border:none;color:#fff;padding:6px 12px;
-              border-radius:7px;cursor:pointer;font-size:11px;white-space:nowrap;flex-shrink:0">
-              Copy
-            </button>
-          </div>
+        <!-- Amount -->
+        <div style="margin-bottom:10px">
+          <div class="fg-lbl">Amount (USDT) <span style="color:var(--t4);font-weight:400">· Min $10</span></div>
+          <input id="dep-amount" type="number" class="auth-input" placeholder="e.g. 100"
+            min="10" oninput="updateDepSGMPreview()"/>
         </div>
 
-        <!-- Amount input -->
-        <div style="margin-bottom:16px">
-          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
-            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">
-            Amount You're Sending (USDT)
-          </div>
-          <input id="deposit-amount-input" type="number" min="10" step="1"
-            placeholder="Minimum $10 USDT"
-            style="width:100%;background:var(--b2);border:1px solid var(--b3);
-            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:14px;
-            font-family:var(--f-mono);box-sizing:border-box"/>
-          <div style="font-size:11px;color:var(--t4);margin-top:6px">
-            You'll receive: <b id="deposit-sgm-preview" style="color:var(--neon)">0 SGM</b>
-            · Tier: <b id="deposit-tier-preview" style="color:var(--v2)">—</b>
-          </div>
-        </div>
-
-        <!-- TX Hash input — required proof -->
+        <!-- TX Hash -->
         <div style="margin-bottom:14px">
-          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
-            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">
-            Transaction Hash (required)
-            <span style="color:var(--rose)">*</span>
-          </div>
-          <input id="deposit-txhash-input" type="text"
-            placeholder="Paste your BSC TX hash: 0x..."
-            style="width:100%;background:var(--b2);border:1px solid var(--b3);
-            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:11px;
-            font-family:var(--f-mono);box-sizing:border-box"/>
-          <div style="font-size:10px;color:var(--t4);margin-top:5px;line-height:1.5">
-            After sending USDT, find your TX hash in your wallet or on
-            <a href="https://bscscan.com" target="_blank" style="color:var(--neon)">bscscan.com</a>
-          </div>
+          <div class="fg-lbl">Transaction Hash <span style="color:var(--rose);font-weight:400">· Required</span></div>
+          <input id="dep-txhash" class="auth-input" placeholder="0x... paste after sending"/>
         </div>
 
-        <!-- Submit button -->
-        <button onclick="submitDepositRequest()" id="deposit-submit-btn"
-          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--v1),var(--v2));
-          border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;
-          cursor:pointer;margin-bottom:12px">
-          Submit Deposit Request
-        </button>
+        <!-- SGM preview -->
+        <div id="dep-sgm-preview" style="background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.15);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;display:none">
+          <span style="color:var(--t4)">You will receive:</span>
+          <span id="dep-sgm-amt" style="color:var(--neon);font-weight:700;margin-left:6px"></span>
+          <span style="color:var(--t4)"> SGM</span>
+        </div>
 
-        <!-- Instructions -->
-        <div style="font-size:11px;color:var(--t4);line-height:1.7;text-align:center">
-          Send USDT first → paste TX hash → submit. Admin verifies on BSCScan and
-          credits your wallet within <b style="color:var(--t2)">30 minutes</b>.
+        <button onclick="submitDeposit()" class="fb p" style="width:100%">↓ Submit Deposit</button>
+        <div style="margin-top:8px;text-align:center;font-size:10px;color:var(--t4)">
+          Admin verifies on BSCScan before crediting · Usually within 1 hour
         </div>
       </div>
     </div>
 
-    <!-- Withdraw Modal -->
-    <div id="withdraw-modal" style="display:none;position:fixed;inset:0;z-index:1000;
-      background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
-      align-items:center;justify-content:center">
-      <div style="background:var(--surface);border:1px solid var(--b1);border-radius:20px;
-        padding:32px;width:100%;max-width:420px;position:relative">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+    <!-- WITHDRAW -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">
+          <span class="cdot" style="background:var(--rose)"></span>Withdraw USDT
+        </div>
+        <span style="font-size:10px;color:var(--t4);font-family:var(--f-mono)">1% FEE</span>
+      </div>
+      <div style="padding:16px 18px">
+
+        <!-- Balance display -->
+        <div style="background:var(--b2);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:18px;font-weight:800">Withdraw USDT</div>
-            <div style="font-size:12px;color:var(--t4);margin-top:2px">Minimum $20 · BEP-20 only</div>
+            <div style="font-size:9px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px;margin-bottom:4px">AVAILABLE BALANCE</div>
+            <div style="font-size:20px;font-weight:900;color:var(--neon)" id="w-dep-bal-display">$0.00</div>
           </div>
-          <button onclick="closeWithdrawModal()"
-            style="background:var(--b2);border:none;color:var(--t2);width:32px;height:32px;
-            border-radius:8px;cursor:pointer;font-size:16px">✕</button>
+          <button onclick="setMaxWithdraw()" style="background:var(--b3);border:none;color:var(--t2);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px">Max</button>
         </div>
-        <div style="margin-bottom:14px">
-          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
-            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Your USDT Address (BEP-20)</div>
-          <input id="withdraw-address-input" type="text"
-            placeholder="0x... (BEP-20 USDT address)"
-            style="width:100%;background:var(--b2);border:1px solid var(--b3);
-            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:12px;
-            font-family:var(--f-mono);box-sizing:border-box"/>
+
+        <!-- Wallet address -->
+        <div style="margin-bottom:10px">
+          <div class="fg-lbl">Your BEP-20 Wallet Address</div>
+          <input id="wd-address" class="auth-input" placeholder="0x... your BSC wallet"/>
         </div>
-        <div style="margin-bottom:20px">
-          <div style="font-size:10px;color:var(--t4);font-family:var(--f-mono);
-            letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">
-            Amount (USDT) · Balance: $<span id="withdraw-bal-display">0.00</span>
+
+        <!-- Amount -->
+        <div style="margin-bottom:10px">
+          <div class="fg-lbl">Amount (USDT) <span style="color:var(--t4);font-weight:400">· Min $20</span></div>
+          <input id="wd-amount" type="number" class="auth-input" placeholder="e.g. 50"
+            min="20" oninput="updateWdPreview()"/>
+        </div>
+
+        <!-- Fee preview -->
+        <div id="wd-preview" style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.15);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;display:none">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="color:var(--t4)">Fee (1%)</span>
+            <span id="wd-fee" style="color:var(--rose)"></span>
           </div>
-          <input id="withdraw-amount-input" type="number" min="20" step="1"
-            placeholder="Minimum $20"
-            style="width:100%;background:var(--b2);border:1px solid var(--b3);
-            border-radius:10px;padding:12px 16px;color:var(--t1);font-size:14px;
-            font-family:var(--f-mono);box-sizing:border-box"/>
+          <div style="display:flex;justify-content:space-between;font-weight:700">
+            <span style="color:var(--t4)">You receive</span>
+            <span id="wd-net" style="color:var(--mint)"></span>
+          </div>
         </div>
-        <button onclick="submitWithdrawRequest()" id="withdraw-submit-btn"
-          style="width:100%;padding:14px;background:linear-gradient(135deg,var(--mint),#0d9268);
-          border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;
-          margin-bottom:12px">
-          Submit Withdrawal Request
+
+        <button onclick="submitWithdrawal()" 
+          style="width:100%;padding:12px;background:var(--rose);border:none;color:#fff;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700">
+          ↑ Request Withdrawal
         </button>
-        <div style="font-size:11px;color:var(--t4);line-height:1.7;text-align:center">
-          Withdrawals processed within <b style="color:var(--t2)">24 hours</b>. 
-          1% network fee applies.
+        <div style="margin-top:8px;text-align:center;font-size:10px;color:var(--t4)">
+          Processed within 24 hours · Funds locked immediately on request
         </div>
       </div>
     </div>
-    <div class="g3" id="wallet-stats">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Invested</div></div><div class="kpi-val" style="color:var(--v2);font-size:20px" id="wk-invested">$0</div><div class="kpi-meta">All positions</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Earned</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="wk-earned">$0</div><div class="kpi-meta">Lifetime ROI</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Available</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px" id="wk-avail">$0</div><div class="kpi-meta">Ready to invest</div></div>
-    </div>
-    <div class="card">
-      <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Transaction History</div></div>
-      <table class="tbl">
-        <thead><tr><th>Type</th><th>Property</th><th>Amount</th><th>Fee</th><th>Net</th><th>Status</th><th>Date</th></tr></thead>
-        <tbody id="tx-table-body"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--t4)">Loading transactions...</td></tr></tbody>
-      </table>
-    </div>
   </div>
-    <div id="wtab-content-portfolio" style="display:none">
-    <div class="sh"><div class="sh-l"><div class="sh-title">Portfolio</div><div class="sh-sub">All investments across verticals</div></div></div>
-    <div class="g4">
-      <div class="kpi v"><div class="kpi-top"><div class="kpi-lbl">Total Invested</div></div><div class="kpi-val" style="color:var(--v2)" id="pf-invested">$0</div><div class="kpi-meta">Across all verticals</div></div>
-      <div class="kpi g"><div class="kpi-top"><div class="kpi-lbl">Current Value</div></div><div class="kpi-val" style="color:var(--mint)" id="pf-value">$0</div><div class="kpi-meta"><span class="up">▲ Active</span></div></div>
-      <div class="kpi y"><div class="kpi-top"><div class="kpi-lbl">Total Earned</div></div><div class="kpi-val" style="color:var(--gold)" id="pf-earned">$0</div><div class="kpi-meta">Lifetime returns</div></div>
-      <div class="kpi n"><div class="kpi-top"><div class="kpi-lbl">Positions</div></div><div class="kpi-val" style="color:var(--neon)" id="pf-count">0</div><div class="kpi-meta">Active investments</div></div>
+
+  <!-- ══ 3. CONVERT SGM ↔ USDT ══ -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-hd">
+      <div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Convert SGM ↔ USDT</div>
+      <span style="font-size:11px;color:var(--t4)">1 SGM = $10 USDT · Fixed rate</span>
     </div>
-    <div class="card">
-      <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Investment Breakdown</div></div>
-      <table class="tbl">
-        <thead><tr><th>Asset</th><th>Tokens</th><th>Invested</th><th>Daily ROI</th><th>Earned</th><th>Status</th></tr></thead>
-        <tbody id="portfolio-table"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--t4)">Loading portfolio...</td></tr></tbody>
-      </table>
-    </div>
-    <div class="card">
-      <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--mint)"></span>Portfolio Allocation</div></div>
-      <div class="chart-wrap donut">
-        <canvas id="chart-alloc"></canvas>
-        <div id="alloc-legend" style="flex:1;overflow:auto"></div>
+    <div style="padding:16px 18px">
+      <div class="g2">
+        <!-- SGM → USDT -->
+        <div style="background:var(--b2);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--v2);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span>Σ SGM → ◎ USDT</span>
+          </div>
+          <div style="font-size:11px;color:var(--t4);margin-bottom:6px">
+            Balance: <span id="w-sgm-for-convert" style="color:var(--v2)">0 SGM</span>
+          </div>
+          <input id="sgm-to-usdt-amt" type="number" class="auth-input" 
+            placeholder="SGM amount" min="1"
+            oninput="updateConvertPreview('s2u',this.value)"
+            style="margin-bottom:8px"/>
+          <div id="s2u-preview" style="font-size:11px;color:var(--neon);margin-bottom:10px;min-height:16px"></div>
+          <button onclick="convertSGMtoUSDT()" 
+            style="width:100%;padding:9px;background:var(--v1);border:none;color:#fff;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">
+            Convert SGM → USDT
+          </button>
+        </div>
+        <!-- USDT → SGM -->
+        <div style="background:var(--b2);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--neon);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+            <span>◎ USDT → Σ SGM</span>
+          </div>
+          <div style="font-size:11px;color:var(--t4);margin-bottom:6px">
+            Balance: <span id="w-usdt-for-convert" style="color:var(--neon)">$0.00</span>
+          </div>
+          <input id="usdt-to-sgm-amt" type="number" class="auth-input"
+            placeholder="USDT amount" min="10"
+            oninput="updateConvertPreview('u2s',this.value)"
+            style="margin-bottom:8px"/>
+          <div id="u2s-preview" style="font-size:11px;color:var(--v2);margin-bottom:10px;min-height:16px"></div>
+          <button onclick="convertUSDTtoSGM()"
+            style="width:100%;padding:9px;background:var(--neon);border:none;color:#000;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">
+            Convert USDT → SGM
+          </button>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- ══ 4. RECENT TRANSACTIONS ══ -->
+  <div class="card">
+    <div class="card-hd">
+      <div class="card-title"><span class="cdot" style="background:var(--v1)"></span>Recent Transactions</div>
+      <button onclick="loadWalletPage()" style="background:var(--b2);border:none;color:var(--t2);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px">↺ Refresh</button>
+    </div>
+    <div id="wallet-txns" style="min-height:60px">
+      <div style="padding:30px;text-align:center;color:var(--t4);font-size:13px">Loading...</div>
+    </div>
+  </div>
+
 </div>
 
-  <!-- ═══ PROPERTIES ═══ -->
-  <div class="page" id="pg-properties">
+<div class="page" id="pg-properties">
     <div class="sh">
       <div class="sh-l"><div class="sh-title">Property Listings</div><div class="sh-sub">Tokenized real estate from global premium markets — earn daily ROI from day one</div></div>
       <div class="sh-r">
@@ -7209,6 +7141,189 @@ function switchWalletTab(tab) {
     }
     if (panel) panel.style.display = isActive ? 'block' : 'none';
   });
+}
+
+// ══ WALLET PAGE ══════════════════════════════════════════════
+
+function loadWalletPage() {
+  if (!userProfile) return;
+  const bal  = parseFloat(userProfile.wallet_balance_usd || 0);
+  const sgm  = parseFloat(userProfile.sgm_balance || 0);
+  const inv  = parseFloat(userProfile.total_invested_usd || 0);
+  const earn = parseFloat(userProfile.total_earned_usd || 0);
+
+  const set = (id, v) => { const el=$(id); if(el) el.textContent=v; };
+  set('w-usdt-bal', fmtUSD(bal));
+  set('w-sgm-bal', sgm.toLocaleString('en') + ' SGM');
+  set('w-sgm-usd', '≈ ' + fmtUSD(sgm * 10));
+  set('w-invested', fmtUSD(inv));
+  set('w-earned', fmtUSD(earn));
+  set('w-dep-bal-display', fmtUSD(bal));
+  set('w-sgm-for-convert', sgm.toLocaleString('en') + ' SGM');
+  set('w-usdt-for-convert', fmtUSD(bal));
+
+  // Pre-fill wallet address
+  const wdEl = $('wd-address');
+  if (wdEl && userProfile.wallet_address) wdEl.value = userProfile.wallet_address;
+
+  // Platform deposit address
+  const addrEl = $('w-dep-addr');
+  if (addrEl && userProfile.platform_wallet_address)
+    addrEl.textContent = userProfile.platform_wallet_address;
+
+  // KYC gate
+  renderKYCBanner();
+
+  // Load transactions
+  loadWalletTransactions();
+}
+
+function updateDepSGMPreview() {
+  const amt = parseFloat($('dep-amount')?.value) || 0;
+  const prev = $('dep-sgm-preview');
+  const amtEl = $('dep-sgm-amt');
+  if (!prev) return;
+  if (amt >= 10) {
+    prev.style.display = 'block';
+    if (amtEl) amtEl.textContent = (amt / 10).toFixed(1);
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+function updateWdPreview() {
+  const amt = parseFloat($('wd-amount')?.value) || 0;
+  const prev = $('wd-preview');
+  if (!prev) return;
+  if (amt >= 20) {
+    prev.style.display = 'block';
+    const fee = amt * 0.01;
+    const net = amt - fee;
+    const s = (id, v) => { const el=$(id); if(el) el.textContent=v; };
+    s('wd-fee', fmtUSD(fee));
+    s('wd-net', fmtUSD(net));
+  } else {
+    prev.style.display = 'none';
+  }
+}
+
+function setMaxWithdraw() {
+  const bal = parseFloat(userProfile?.wallet_balance_usd || 0);
+  const el = $('wd-amount');
+  if (el) { el.value = bal.toFixed(2); updateWdPreview(); }
+}
+
+function copyDepAddr() {
+  const addr = $('w-dep-addr')?.textContent;
+  if (addr && !addr.includes('Contact')) {
+    navigator.clipboard.writeText(addr).then(() => showToast('Address copied!', 'success'));
+  } else {
+    showToast('Contact admin for deposit address', 'info');
+  }
+}
+
+function updateConvertPreview(dir, val) {
+  const n = parseFloat(val) || 0;
+  if (dir === 's2u') {
+    const el = $('s2u-preview');
+    if (el) el.textContent = n > 0 ? `${n} SGM → ${fmtUSD(n * 10)}` : '';
+  } else {
+    const el = $('u2s-preview');
+    if (el) el.textContent = n >= 10 ? `${fmtUSD(n)} → ${Math.floor(n/10)} SGM` : '';
+  }
+}
+
+async function convertSGMtoUSDT() {
+  const amt = parseFloat($('sgm-to-usdt-amt')?.value) || 0;
+  if (amt < 1) { showToast('Enter SGM amount', 'error'); return; }
+  const sgm = parseFloat(userProfile?.sgm_balance || 0);
+  if (amt > sgm) { showToast('Insufficient SGM balance', 'error'); return; }
+  const usdt = amt * 10;
+  const { error } = await sb.from('users').update({
+    sgm_balance: sgm - amt,
+    wallet_balance_usd: parseFloat(userProfile.wallet_balance_usd||0) + usdt
+  }).eq('id', currentUser.id);
+  if (error) { showToast('Conversion failed', 'error'); return; }
+  userProfile.sgm_balance = sgm - amt;
+  userProfile.wallet_balance_usd = parseFloat(userProfile.wallet_balance_usd||0) + usdt;
+  loadWalletPage();
+  setText('sf-bal', fmtUSD(userProfile.wallet_balance_usd));
+  $('sgm-to-usdt-amt').value = '';
+  showToast(`✅ ${amt} SGM → ${fmtUSD(usdt)}`, 'success');
+}
+
+async function convertUSDTtoSGM() {
+  const amt = parseFloat($('usdt-to-sgm-amt')?.value) || 0;
+  if (amt < 10) { showToast('Minimum 10 USDT', 'error'); return; }
+  const bal = parseFloat(userProfile?.wallet_balance_usd || 0);
+  if (amt > bal) { showToast('Insufficient USDT balance', 'error'); return; }
+  const sgm = Math.floor(amt / 10);
+  const { error } = await sb.from('users').update({
+    wallet_balance_usd: bal - amt,
+    sgm_balance: parseFloat(userProfile.sgm_balance||0) + sgm
+  }).eq('id', currentUser.id);
+  if (error) { showToast('Conversion failed', 'error'); return; }
+  userProfile.wallet_balance_usd = bal - amt;
+  userProfile.sgm_balance = parseFloat(userProfile.sgm_balance||0) + sgm;
+  loadWalletPage();
+  setText('sf-bal', fmtUSD(userProfile.wallet_balance_usd));
+  $('usdt-to-sgm-amt').value = '';
+  showToast(`✅ ${fmtUSD(amt)} → ${sgm} SGM`, 'success');
+}
+
+async function loadWalletTransactions() {
+  const el = $('wallet-txns');
+  if (!el || !currentUser) return;
+  const { data } = await sb.from('transactions')
+    .select('tx_type,gross_amount_usd,net_amount_usd,fee_amount_usd,status,created_at,notes')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(15);
+
+  if (!data?.length) {
+    el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--t4)">No transactions yet</div>';
+    return;
+  }
+
+  const icons  = { buy:'▣', deposit:'↓', withdrawal:'↑', roi:'△', convert:'⇄', sell:'◇' };
+  const colors = { buy:'var(--v2)', deposit:'var(--mint)', withdrawal:'var(--rose)', roi:'var(--gold)', convert:'var(--neon)', sell:'var(--t3)' };
+  const signs  = { deposit:'+', roi:'+', convert:'±', buy:'-', withdrawal:'-', sell:'+' };
+
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse">
+    <thead><tr style="font-size:10px;color:var(--t4);font-family:var(--f-mono);border-bottom:1px solid var(--b1)">
+      <td style="padding:8px 16px">TYPE</td>
+      <td style="padding:8px 16px">DATE</td>
+      <td style="padding:8px 16px;text-align:right">AMOUNT</td>
+      <td style="padding:8px 16px;text-align:right">STATUS</td>
+    </tr></thead>
+    <tbody>
+      ${data.map(t => `<tr style="border-bottom:1px solid var(--b1)">
+        <td style="padding:10px 16px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:28px;height:28px;border-radius:7px;background:var(--b2);
+              display:flex;align-items:center;justify-content:center;
+              color:${colors[t.tx_type]||'var(--t2)'};font-size:12px">
+              ${icons[t.tx_type]||'◎'}
+            </div>
+            <span style="font-size:12px;font-weight:600;text-transform:capitalize">${t.tx_type}</span>
+          </div>
+        </td>
+        <td style="padding:10px 16px;font-size:11px;color:var(--t4);font-family:var(--f-mono)">
+          ${new Date(t.created_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'})}
+        </td>
+        <td style="padding:10px 16px;text-align:right;font-size:13px;font-weight:700;color:${colors[t.tx_type]||'var(--t2)'}">
+          ${signs[t.tx_type]||''}${fmtUSD(t.net_amount_usd||t.gross_amount_usd||0)}
+        </td>
+        <td style="padding:10px 16px;text-align:right">
+          <span style="font-size:10px;font-family:var(--f-mono);padding:3px 8px;border-radius:4px;
+            background:${t.status==='completed'?'rgba(16,185,129,0.12)':t.status==='pending'?'rgba(251,191,36,0.12)':'rgba(244,63,94,0.12)'};
+            color:${t.status==='completed'?'var(--mint)':t.status==='pending'?'var(--gold)':'var(--rose)'}">
+            ${t.status||'pending'}
+          </span>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
 }
 </script>
 
