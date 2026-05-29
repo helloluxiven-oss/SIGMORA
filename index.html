@@ -3491,16 +3491,12 @@ function closeSidebar() {
 // ═══════════════════════════════════════════════
 function openModal(id) { $(''+id)?.classList.add('open'); }
 function closeModal(id) { $(''+id)?.classList.remove('open'); }
-function openDepositModal() { openModal('modal-deposit'); }
+
 function openWalletModal() { openModal('modal-wallet'); }
 
 // ═══════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════
-async function loadDashboard() {
-  await loadDashboardData();
-}
-
 async function loadDashboardData() {
   // Single RPC — returns profile + properties + activity in ONE call
   const { data, error } = await sb.rpc('get_dashboard_summary');
@@ -4089,11 +4085,7 @@ async function openPropertyModal(propId) {
 /* ── Gallery navigation ───────────────────────────────────── */
 
 
-function pgNav(propId, dir) {
-  const state = window._pgState?.[propId];
-  if (!state) return;
-  pgGoTo(propId, state.idx + dir);
-}
+
 
 /* ── Upload ───────────────────────────────────────────────── */
 
