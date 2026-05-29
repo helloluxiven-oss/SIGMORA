@@ -3230,7 +3230,20 @@ async function showDashboard(user) {
   };
   if (summary) doFetch(); else await doFetch();
 
-  // ── 5. Non-blocking extras ─────────────────────────────────────
+  // ── 5. Navigate to dashboard + non-blocking extras ───────────
+  // Show dashboard page (not wallet)
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const dashPg = $('pg-dashboard');
+  if (dashPg) dashPg.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  const dashNi = $('ni-dashboard');
+  if (dashNi) dashNi.classList.add('active');
+  const pgTitle = $('pg-title');
+  if (pgTitle) pgTitle.textContent = 'Dashboard';
+
+  // Load dashboard data
+  loadDashboard().catch(() => {});
+
   loadNotificationCount().catch(() => {});
   startRealtimeListeners();
   renderKYCBanner();
@@ -3415,7 +3428,7 @@ const PAGE_TITLES = {
   notifs:'Notifications', settings:'Settings'
 };
 
-function nav(id, el) {
+async function nav(id, el) {
   closeSidebar(); // Close sidebar on mobile when nav item tapped
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const pg = $('pg-'+id);
@@ -3430,12 +3443,20 @@ function nav(id, el) {
 
 async function loadPageData(id) {
   const loaders = {
-    dashboard: loadDashboard, wallet: loadWallet, portfolio: loadPortfolio,
-    properties: loadProperties, 'buy-tokens': loadBuyTokens, 'my-tokens': loadMyTokens,
-    'roi-tracker': loadROITracker, startups: loadStartups,
-    'fund-portfolio': loadFundPortfolio, trading: loadTrading,
-    traders: loadTraders, users: loadUsers, kyc: loadKYC,
-    'revenue-admin': loadRevenue, notifs: loadNotifications,
+    dashboard: loadDashboard,
+    wallet: loadWalletPage,
+    properties: loadProperties,
+    'buy-tokens': loadBuyTokens,
+    'my-tokens': loadMyTokens,
+    'roi-tracker': loadROITracker,
+    startups: loadStartups,
+    'fund-portfolio': loadFundPortfolio,
+    trading: loadTrading,
+    traders: loadTraders,
+    users: loadUsers,
+    kyc: loadKYC,
+    'revenue-admin': loadRevenue,
+    notifs: loadNotifications,
     settings: loadSettings
   };
   const fn = loaders[id];
@@ -7340,7 +7361,7 @@ function bindDashboardData(summary, user, emailFallback, sfAv) {
   sv('set-name', profile.full_name); sv('set-email', profile.email||user?.email);
   sv('set-phone', profile.phone); sv('set-country', profile.country);
   sv('set-city', profile.city); sv('set-wallet', profile.wallet_address);
-  setTimeout(() => loadPortfolioChart(), 50);
+  // Chart loads on ROI tracker page
 }
 
 function switchWalletTab(tab) {
