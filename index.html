@@ -171,7 +171,8 @@ html,html{margin:0;padding:0}body{height:100%;background:var(--void);color:var(-
 
 /* ══ APP LAYOUT ══════════════════════ */
 .app{display:flex;flex-direction:row;position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:500}
-.app.hidden{display:none}
+.app.hidden{display:none !important}
+#landing-page.hidden{display:none !important}
 
 /* ══ SIDEBAR ══════════════════════════ */
 .sidebar{
@@ -1361,7 +1362,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     </div>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-      <button onclick="showAuthFromLanding('signup')"
+      <button id="lp-hero-btn" onclick="showAuthFromLanding('signup')"
         style="background:linear-gradient(135deg,var(--v1),var(--v2));border:none;
         color:#fff;padding:14px 36px;border-radius:12px;cursor:pointer;
         font-size:16px;font-weight:800;box-shadow:0 8px 32px rgba(124,58,237,0.4)">
@@ -3188,7 +3189,7 @@ async function showDashboard(user) {
   const landingEl = $('landing-page');
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
-  if (landingEl) landingEl.classList.add('hidden');
+  if (landingEl) { landingEl.classList.add('hidden'); landingEl.style.display = 'none'; }
   if (authEl) authEl.classList.add('hidden');
   if (appEl)  appEl.classList.remove('hidden');
 
@@ -5599,14 +5600,15 @@ function attachEventListeners() {
   // ── 1. Theme first (no flicker) ────────────────────────────────
   initTheme();
 
-  // ── 2. IMMEDIATELY enforce auth screen visibility ───────────────
-  // This is the single source of truth for the initial state.
-  // The auth screen is ALWAYS shown first — no exceptions.
-  // It will only be hidden AFTER we confirm a valid session exists.
+  // ── 2. IMMEDIATELY enforce landing-first visibility ────────────
+  // Landing page is the single source of truth for the initial
+  // screen. Auth + app are both hidden until the user acts.
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
-  if (authEl) authEl.classList.remove('hidden');   // always show auth first
-  if (appEl)  appEl.classList.add('hidden');        // always hide app first
+  const lpEl   = $('landing-page');
+  if (lpEl)   lpEl.style.display = 'flex';
+  if (authEl) authEl.classList.add('hidden');
+  if (appEl)  appEl.classList.add('hidden');
 
   // ── 3. Attach event listeners ──────────────────────────────────
   attachEventListeners();
@@ -5649,13 +5651,19 @@ function attachEventListeners() {
     }
 
     if (session?.user) {
-      // Valid saved session — show dashboard directly (no login needed)
-      // This is the ONLY case where we bypass the login screen
+      // Valid saved session — but DO NOT auto-open dashboard.
+      // Landing page is the single first screen. Store session
+      // silently and let the "Continue to Dashboard" button (set
+      // by onAuthStateChange / below) take the user in on click.
+      currentUser = session.user;
       initAuthListener();
-      await showDashboard(session.user);
+      const lpBtn = document.querySelector('#lp-hero-btn');
+      if (lpBtn) {
+        lpBtn.textContent = 'Continue to Dashboard →';
+        lpBtn.onclick = () => { _appReady = true; showDashboard(session.user); };
+      }
     } else {
       // No session — start auth listener and wait for sign in
-      // Auth screen is already visible from step 2
       initAuthListener();
     }
   } catch(e) {
@@ -7017,7 +7025,9 @@ let _currentModal_roi = 0.35; // default, updated per property
 function showAuthFromLanding(tab) {
   const lp = $('landing-page');
   const auth = $('auth-screen');
-  if (lp) lp.style.display = 'none';
+  const app = $('main-app');
+  if (lp) { lp.classList.add('hidden'); lp.style.display = 'none'; }
+  if (app) app.classList.add('hidden');
   if (auth) auth.classList.remove('hidden');
   // Switch to correct tab
   if (tab === 'signup') {
