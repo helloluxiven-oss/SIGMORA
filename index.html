@@ -293,6 +293,23 @@ body[data-theme="light"] .topbar{background:rgba(246,244,255,0.92)}
 .tick-p{color:var(--t1);font-weight:500}
 .tick-c{font-size:9px}.tick-c.up{color:var(--mint)}.tick-c.dn{color:var(--rose)}
 .tb-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb-avatar-wrap{position:relative}
+.tb-avatar{width:38px;height:38px;border-radius:50%;border:1px solid var(--b3);
+  background:linear-gradient(135deg,var(--v1),var(--v2));color:#fff;font-weight:800;
+  font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tb-avatar-menu{position:absolute;top:46px;right:0;min-width:220px;background:var(--deep);
+  border:1px solid var(--b2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.5);
+  padding:8px;z-index:1200;display:none}
+.tb-avatar-menu.open{display:block}
+.tb-avatar-head{padding:8px 10px 10px;border-bottom:1px solid var(--b2);margin-bottom:6px}
+.tb-avatar-name{font-size:13px;font-weight:700;color:var(--t1)}
+.tb-avatar-role{font-size:10px;font-family:var(--f-mono);letter-spacing:1px;color:var(--t4)}
+.tb-menu-item{width:100%;text-align:left;background:none;border:none;color:var(--t2);
+  font-size:13px;padding:10px 10px;border-radius:8px;cursor:pointer;display:block}
+.tb-menu-item:hover{background:var(--b1);color:var(--t1)}
+.tb-menu-danger{color:var(--rose)}
+.tb-menu-danger:hover{background:rgba(244,63,94,0.1);color:var(--rose)}
+.tb-menu-sep{height:1px;background:var(--b2);margin:6px 4px}
 .btn{
   height:34px;border-radius:9px;font-family:var(--f-head);
   font-size:12px;font-weight:700;cursor:pointer;border:none;
@@ -1102,6 +1119,9 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   .tb-r{
     flex-shrink:0;gap:6px;
   }
+  /* On mobile, theme + notif live in the avatar menu / sidebar — declutter */
+  .tb-r > .btn-ghost{ display:none; }
+  .tb-avatar{ width:36px;height:36px;font-size:12px; }
   /* Hide text labels on mobile buttons, keep icons */
   #theme-label, #auth-theme-label{ display:none; }
   .btn{ padding:0 10px;min-width:36px; }
@@ -1237,7 +1257,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 @media (max-width: 768px) {
   body.in-app #mobile-bottom-nav { display:block !important; }
   body:not(.in-app) #mobile-bottom-nav { display:none !important; }
-  .main { padding-bottom:80px !important; }
+  .main { padding-bottom:calc(96px + env(safe-area-inset-bottom)) !important; }
   .app { padding-bottom:0 !important; }
   @media (max-width:768px){
     .app { height:100svh !important; top:0 !important; }
@@ -1667,6 +1687,21 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         🔔 <span style="color:var(--rose)" id="top-notif-count">0</span>
       </button>
       <button class="btn btn-primary" onclick="nav('buy-tokens',document.querySelector('.ni[onclick*=buy-tokens]'))">◆ Buy Tokens</button>
+      <div class="tb-avatar-wrap" id="tb-avatar-wrap">
+        <button class="tb-avatar" id="tb-avatar-btn" onclick="toggleAvatarMenu(event)" aria-label="Account menu">
+          <span id="tb-avatar-initials">KA</span>
+        </button>
+        <div class="tb-avatar-menu" id="tb-avatar-menu">
+          <div class="tb-avatar-head">
+            <div class="tb-avatar-name" id="tb-avatar-name">Account</div>
+            <div class="tb-avatar-role" id="tb-avatar-role">USER</div>
+          </div>
+          <button class="tb-menu-item" onclick="closeAvatarMenu();nav('settings',document.querySelector('.ni[onclick*=settings]'))">⚙ Settings</button>
+          <button class="tb-menu-item" onclick="closeAvatarMenu();nav('notifs',document.querySelector('.ni[onclick*=notifs]'))">🔔 Notifications</button>
+          <div class="tb-menu-sep"></div>
+          <button class="tb-menu-item tb-menu-danger" onclick="closeAvatarMenu();doSignOut()">⏻ Sign Out</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3104,6 +3139,30 @@ async function doForgotPassword() {
 // ═══════════════════════════════════════════════
 // AUTH — SIGN OUT
 // ═══════════════════════════════════════════════
+function toggleAvatarMenu(e) {
+  if (e) e.stopPropagation();
+  const m = document.getElementById('tb-avatar-menu');
+  if (m) m.classList.toggle('open');
+}
+function closeAvatarMenu() {
+  const m = document.getElementById('tb-avatar-menu');
+  if (m) m.classList.remove('open');
+}
+function bindAvatarMenu(profile, user) {
+  const email = user?.email || '';
+  const name  = profile?.full_name || email.split('@')[0] || 'Account';
+  const role  = (profile?.role || 'user').toUpperCase();
+  const init  = (profile?.full_name || email || 'U').trim().slice(0,2).toUpperCase();
+  const setT = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  setT('tb-avatar-initials', init);
+  setT('tb-avatar-name', name);
+  setT('tb-avatar-role', role);
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('tb-avatar-wrap');
+  if (wrap && !wrap.contains(e.target)) closeAvatarMenu();
+});
+
 async function doSignOut() {
   // Clear dashboard cache
   try {
@@ -3230,6 +3289,7 @@ async function showDashboard(user) {
         userProfile = u; const dn = u.full_name||emailFallback;
         if (sfAv) { sfAv.textContent=dn.slice(0,2).toUpperCase(); sfAv.style.animation='none'; }
         setText('sf-name',dn); setText('sf-role',(u.role||'user').replace(/_/g,' ').toUpperCase());
+        bindAvatarMenu(u, currentUser);
         setText('sf-bal',fmtUSD(u.wallet_balance_usd));
         document.body.className=document.body.className.split(' ').filter(c=>!c.startsWith('role-')).join(' ');
         document.body.classList.add('role-'+(u.role||'user'));
@@ -3296,20 +3356,10 @@ function initAuthListener() {
         _appReady = true;
         window.__userInitiatedSignIn = false;
         await showDashboard(session.user);
-      } else if (session?.user && !_appReady) {
-        // Auto-session exists but user hasn't clicked sign in
-        // Store session silently, show landing page
-        currentUser = session.user;
-        // Update landing page button to show "Continue" instead of "Get Started"
-        const lpBtn = document.querySelector('#lp-hero-btn');
-        if (lpBtn) {
-          lpBtn.textContent = 'Continue to Dashboard →';
-          lpBtn.onclick = () => {
-            _appReady = true;
-            showDashboard(session.user);
-          };
-        }
       }
+      // Auto-restored session (user did NOT sign in this visit): stay on
+      // landing. Security policy = always re-authenticate. The hero
+      // button keeps its normal "Start Investing → sign in" behavior.
     } else if (event === 'TOKEN_REFRESHED') {
       if (session?.user && !_inPasswordRecovery) currentUser = session.user;
     } else if (event === 'SIGNED_OUT') {
@@ -5654,13 +5704,12 @@ function attachEventListeners() {
     }
 
     if (session?.user) {
-      // Valid saved session — show dashboard directly (no login needed)
-      // This is the ONLY case where we bypass the login screen
+      // SECURITY POLICY: do NOT auto-open the dashboard from a restored
+      // session. Always require an explicit sign-in. Start the listener
+      // and stay on the landing page; user signs in via the auth screen.
       initAuthListener();
-      await showDashboard(session.user);
     } else {
       // No session — start auth listener and wait for sign in
-      // Auth screen is already visible from step 2
       initAuthListener();
     }
   } catch(e) {
