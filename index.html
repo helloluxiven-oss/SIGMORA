@@ -1236,6 +1236,15 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   #mobile-bottom-nav { display:block !important; }
   .main { padding-bottom:80px !important; }
   .app { padding-bottom:0 !important; }
+  .page { padding:14px 12px 20px !important; }
+  .g4 { grid-template-columns:1fr 1fr !important; gap:10px !important; }
+  .g2 { grid-template-columns:1fr !important; }
+  .kpi { padding:14px !important; }
+  .topbar { padding:0 10px !important; min-height:48px !important; }
+}
+@media (max-width: 480px) {
+  .g4 { grid-template-columns:1fr 1fr !important; }
+  .kpi-val { font-size:18px !important; }
 }
 .mbn-btn { transition: transform 0.15s ease, opacity 0.15s ease; }
 .mbn-btn:active { transform: scale(0.88); opacity:0.7; }
@@ -3241,9 +3250,6 @@ async function showDashboard(user) {
   const pgTitle = $('pg-title');
   if (pgTitle) pgTitle.textContent = 'Dashboard';
 
-  // Load dashboard data
-  loadDashboard().catch(() => {});
-
   loadNotificationCount().catch(() => {});
   startRealtimeListeners();
   renderKYCBanner();
@@ -3437,6 +3443,9 @@ async function nav(id, el) {
   if (el) el.classList.add('active');
   const pgTitle = $('pg-title'); if (pgTitle) pgTitle.textContent = PAGE_TITLES[id]||id;
   document.querySelector('.main')?.scrollTo(0,0);
+  // Reset page scroll position
+  const activePg = document.getElementById('pg-'+id);
+  if (activePg) activePg.scrollTop = 0;
   closeSidebar();
   loadPageData(id);
 }
@@ -7354,6 +7363,10 @@ function bindDashboardData(summary, user, emailFallback, sfAv) {
   sv('set-phone', profile.phone); sv('set-country', profile.country);
   sv('set-city', profile.city); sv('set-wallet', profile.wallet_address);
   // Chart loads on ROI tracker page
+  // Refresh dashboard if currently active
+  if (document.getElementById('pg-dashboard')?.classList.contains('active')) {
+    setTimeout(() => loadDashboard().catch(()=>{}), 50);
+  }
 }
 
 function switchWalletTab(tab) {
@@ -7374,10 +7387,10 @@ function switchWalletTab(tab) {
 
 function loadWalletPage() {
   if (!userProfile) return;
-  const bal  = parseFloat(userProfile.wallet_balance_usd || 0);
-  const sgm  = parseFloat(userProfile.sgm_balance || 0);
-  const inv  = parseFloat(userProfile.total_invested_usd || 0);
-  const earn = parseFloat(userProfile.total_earned_usd || 0);
+  const bal  = parseFloat(profile.wallet_balance_usd || userProfile?.wallet_balance_usd || 0);
+  const sgm  = parseFloat(profile.sgm_balance || userProfile?.sgm_balance || 0);
+  const inv  = parseFloat(profile.total_invested_usd || userProfile?.total_invested_usd || 0);
+  const earn = parseFloat(profile.total_earned_usd || userProfile?.total_earned_usd || 0);
 
   const set = (id, v) => { const el=$(id); if(el) el.textContent=v; };
   set('w-usdt-bal', fmtUSD(bal));
@@ -7952,13 +7965,16 @@ function setMobileNav(id) {
 }
 
 async function loadDashboard() {
-  if (!userProfile) return;
+  // Use currentUser for immediate render, userProfile for balances
+  const profile = userProfile || {};
+  const user = currentUser;
+  if (!user) return;
 
   // Greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
   setText('dash-greeting', greeting);
-  const name = userProfile.full_name?.split(' ')[0] || userProfile.email?.split('@')[0] || 'there';
+  const name = (profile.full_name || user?.email || 'there').split(/[ @]/)[0];
   setText('dash-name', name);
 
   // Date
