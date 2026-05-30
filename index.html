@@ -1264,6 +1264,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
 /* ── Nav scroll ────────────────────────────────────────────── */
 .nav-scroll { overflow-y:auto; flex:1; padding-bottom:8px; }
+@media (max-width:768px){ .nav-scroll { padding-bottom:calc(88px + env(safe-area-inset-bottom)); } }
 .nav-scroll::-webkit-scrollbar { width:2px; }
 .nav-scroll::-webkit-scrollbar-thumb { background:var(--b3); border-radius:1px; }
 </style>
@@ -7395,10 +7396,10 @@ function switchWalletTab(tab) {
 
 function loadWalletPage() {
   if (!userProfile) return;
-  const bal  = parseFloat(profile.wallet_balance_usd || userProfile?.wallet_balance_usd || 0);
-  const sgm  = parseFloat(profile.sgm_balance || userProfile?.sgm_balance || 0);
-  const inv  = parseFloat(profile.total_invested_usd || userProfile?.total_invested_usd || 0);
-  const earn = parseFloat(profile.total_earned_usd || userProfile?.total_earned_usd || 0);
+  const bal  = parseFloat(userProfile?.wallet_balance_usd || 0);
+  const sgm  = parseFloat(userProfile?.sgm_balance || 0);
+  const inv  = parseFloat(userProfile?.total_invested_usd || 0);
+  const earn = parseFloat(userProfile?.total_earned_usd || 0);
 
   const set = (id, v) => { const el=$(id); if(el) el.textContent=v; };
   set('w-usdt-bal', fmtUSD(bal));
