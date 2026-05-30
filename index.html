@@ -1122,6 +1122,8 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   /* On mobile, theme + notif live in the avatar menu / sidebar — declutter */
   .tb-r > .btn-ghost{ display:none; }
   .tb-avatar{ width:36px;height:36px;font-size:12px; }
+  /* Mobile uses the top-bar avatar menu for account/sign-out */
+  #sidebar-footer{ display:none !important; }
   /* Hide text labels on mobile buttons, keep icons */
   #theme-label, #auth-theme-label{ display:none; }
   .btn{ padding:0 10px;min-width:36px; }
@@ -1645,7 +1647,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   </div>
 
   <!-- Sidebar footer -->
-  <div style="padding:12px;border-top:1px solid var(--b1);margin-top:auto">
+  <div id="sidebar-footer" style="padding:12px;border-top:1px solid var(--b1);margin-top:auto">
     <div style="display:flex;align-items:center;gap:10px">
       <div style="width:32px;height:32px;border-radius:8px;background:var(--b2);
         display:flex;align-items:center;justify-content:center;
