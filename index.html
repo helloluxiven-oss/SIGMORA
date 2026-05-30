@@ -171,7 +171,8 @@ html,html{margin:0;padding:0}body{height:100%;background:var(--void);color:var(-
 
 /* ══ APP LAYOUT ══════════════════════ */
 .app{display:flex;flex-direction:row;position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:500}
-.app.hidden{display:none}
+.app.hidden{display:none !important}
+#landing-page.hidden{display:none !important}
 
 /* ══ SIDEBAR ══════════════════════════ */
 .sidebar{
@@ -1236,7 +1237,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 @media (max-width: 768px) {
   body.in-app #mobile-bottom-nav { display:block !important; }
   body:not(.in-app) #mobile-bottom-nav { display:none !important; }
-  .main { padding-bottom:calc(96px + env(safe-area-inset-bottom)) !important; }
+  .main { padding-bottom:80px !important; }
   .app { padding-bottom:0 !important; }
   @media (max-width:768px){
     .app { height:100svh !important; top:0 !important; }
@@ -1263,7 +1264,6 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
 /* ── Nav scroll ────────────────────────────────────────────── */
 .nav-scroll { overflow-y:auto; flex:1; padding-bottom:8px; }
-@media (max-width:768px){ .nav-scroll { padding-bottom:calc(88px + env(safe-area-inset-bottom)); } }
 .nav-scroll::-webkit-scrollbar { width:2px; }
 .nav-scroll::-webkit-scrollbar-thumb { background:var(--b3); border-radius:1px; }
 </style>
@@ -1363,7 +1363,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     </div>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-      <button id="lp-hero-btn" onclick="showAuthFromLanding('signup')"
+      <button onclick="showAuthFromLanding('signup')"
         style="background:linear-gradient(135deg,var(--v1),var(--v2));border:none;
         color:#fff;padding:14px 36px;border-radius:12px;cursor:pointer;
         font-size:16px;font-weight:800;box-shadow:0 8px 32px rgba(124,58,237,0.4)">
@@ -2711,8 +2711,6 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div class="card" style="margin-top:0">
           <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--rose)"></span>Danger Zone</div></div>
           <div style="padding:14px 18px">
-            <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Sign out of your SIGMORA account on this device.</div>
-            <button class="fb" style="background:var(--b2);color:var(--t1);border:1px solid var(--b3);margin-bottom:16px" onclick="doSignOut()">↪ Sign Out</button>
             <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Permanently delete your account and all associated data. This action cannot be undone.</div>
             <button class="fb" style="background:rgba(244,63,94,0.1);color:var(--rose);border:1px solid rgba(244,63,94,0.2)" onclick="showToast('Please contact support to delete your account','error')">Delete Account</button>
           </div>
@@ -3144,6 +3142,8 @@ function showAuthScreen() {
   const app = $('main-app');
   if (app) app.classList.add('hidden');
   document.body.classList.remove('in-app');
+
+  // Clear all user state
   currentUser = null;
   userProfile  = null;
 
@@ -3191,7 +3191,7 @@ async function showDashboard(user) {
   const landingEl = $('landing-page');
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
-  if (landingEl) { landingEl.classList.add('hidden'); landingEl.style.display='none'; }
+  if (landingEl) { landingEl.classList.add('hidden'); landingEl.style.display = 'none'; }
   if (authEl) authEl.classList.add('hidden');
   if (appEl)  appEl.classList.remove('hidden');
   document.body.classList.add('in-app');
@@ -3318,7 +3318,6 @@ function initAuthListener() {
       window.__blockDashboard = false;
       window.__userInitiatedSignIn = false;
       currentUser = null;
-      document.body.classList.remove('in-app');
       // Show landing page on sign out
       const lp = $('landing-page');
       const app = $('main-app');
@@ -3326,8 +3325,7 @@ function initAuthListener() {
       if (lp) { lp.classList.remove('hidden'); lp.style.display = 'flex'; }
       if (app) app.classList.add('hidden');
       if (auth) auth.classList.add('hidden');
-      const lpBtn = document.querySelector('#lp-hero-btn');
-      if (lpBtn) { lpBtn.textContent = 'Start Investing →'; lpBtn.onclick = () => showAuthFromLanding('signup'); }
+      document.body.classList.remove('in-app');
     }
   });
 }
@@ -5606,18 +5604,14 @@ function attachEventListeners() {
   // ── 1. Theme first (no flicker) ────────────────────────────────
   initTheme();
 
-  // ── 2. IMMEDIATELY enforce landing-first visibility ─────────────
-  // Landing page is the single first screen. Auth + app stay hidden
-  // until the user acts. (Skip if this is a password-recovery load.)
+  // ── 2. IMMEDIATELY enforce auth screen visibility ───────────────
+  // This is the single source of truth for the initial state.
+  // The auth screen is ALWAYS shown first — no exceptions.
+  // It will only be hidden AFTER we confirm a valid session exists.
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
-  const lpEl   = $('landing-page');
-  if (!_IS_PASSWORD_RECOVERY) {
-    if (lpEl)   { lpEl.classList.remove('hidden'); lpEl.style.display = 'flex'; }
-    if (authEl) authEl.classList.add('hidden');
-    if (appEl)  appEl.classList.add('hidden');
-    document.body.classList.remove('in-app');
-  }
+  if (authEl) authEl.classList.remove('hidden');   // always show auth first
+  if (appEl)  appEl.classList.add('hidden');        // always hide app first
 
   // ── 3. Attach event listeners ──────────────────────────────────
   attachEventListeners();
@@ -5660,18 +5654,13 @@ function attachEventListeners() {
     }
 
     if (session?.user) {
-      // Valid saved session — but DO NOT auto-open the dashboard.
-      // Landing page is always the first screen. Store session and
-      // turn the hero CTA into "Continue to Dashboard".
-      currentUser = session.user;
+      // Valid saved session — show dashboard directly (no login needed)
+      // This is the ONLY case where we bypass the login screen
       initAuthListener();
-      const lpBtn = document.querySelector('#lp-hero-btn');
-      if (lpBtn) {
-        lpBtn.textContent = 'Continue to Dashboard →';
-        lpBtn.onclick = () => { window.__userInitiatedSignIn = true; showDashboard(session.user); };
-      }
+      await showDashboard(session.user);
     } else {
       // No session — start auth listener and wait for sign in
+      // Auth screen is already visible from step 2
       initAuthListener();
     }
   } catch(e) {
@@ -7033,11 +7022,8 @@ let _currentModal_roi = 0.35; // default, updated per property
 function showAuthFromLanding(tab) {
   const lp = $('landing-page');
   const auth = $('auth-screen');
-  const app = $('main-app');
-  if (lp) { lp.classList.add('hidden'); lp.style.display = 'none'; }
-  if (app) app.classList.add('hidden');
+  if (lp) lp.style.display = 'none';
   if (auth) auth.classList.remove('hidden');
-  document.body.classList.remove('in-app');
   // Switch to correct tab
   if (tab === 'signup') {
     const signupTab = document.querySelector('.auth-tab[onclick*="signup"]');
@@ -7192,12 +7178,9 @@ checkReferralParam();
     const lp = $('landing-page');
     const auth = $('auth-screen');
     const app = $('main-app');
-    if (!_IS_PASSWORD_RECOVERY) {
-      if (lp) lp.style.display = 'flex';
-      if (auth) auth.classList.add('hidden');
-      if (app) app.classList.add('hidden');
-      document.body.classList.remove('in-app');
-    }
+    if (lp) lp.style.display = 'flex';
+    if (auth) auth.classList.add('hidden');
+    if (app) app.classList.add('hidden');
     // Load properties + preload dashboard data in parallel
     loadLandingProperties().catch(() => {});
     // Preload: if session exists, fetch dashboard data now so it's cached before user clicks Sign In
