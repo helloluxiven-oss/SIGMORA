@@ -93,7 +93,7 @@ body:not([data-theme="light"]) .modal-close {
   color: var(--t2);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,html{height:100%;overflow:hidden;margin:0;padding:0}body{height:100%;background:var(--void);color:var(--t1);font-family:var(--f-head);font-size:14px}
+html,html{margin:0;padding:0}body{height:100%;background:var(--void);color:var(--t1);font-family:var(--f-head);font-size:14px}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-thumb{background:var(--b1);border-radius:999px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -106,7 +106,7 @@ html,html{height:100%;overflow:hidden;margin:0;padding:0}body{height:100%;backgr
   background-image:radial-gradient(ellipse at 20% 20%,rgba(124,58,237,0.08) 0%,transparent 50%),
     radial-gradient(ellipse at 80% 80%,rgba(0,245,212,0.05) 0%,transparent 50%);
 }
-#auth-screen.hidden{display:none}
+#auth-screen.hidden{display:none !important}
 .auth-card{
   width:100%;max-width:420px;
   background:var(--surface);border:1px solid var(--b1);
@@ -170,7 +170,7 @@ html,html{height:100%;overflow:hidden;margin:0;padding:0}body{height:100%;backgr
 .auth-success.show{display:block}
 
 /* ══ APP LAYOUT ══════════════════════ */
-.app{display:flex;flex-direction:row;height:100vh;width:100vw;overflow:hidden;position:fixed;top:0;left:0}
+.app{display:flex;flex-direction:row;position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:500}
 .app.hidden{display:none}
 
 /* ══ SIDEBAR ══════════════════════════ */
@@ -445,7 +445,7 @@ body[data-theme="light"] .topbar{background:rgba(246,244,255,0.92)}
 .pc-country{
   font-family:var(--f-mono);font-size:10px;color:rgba(255,255,255,0.9);font-weight:500;
 }
-.pc-body{margin:0;padding:0;overflow:hidden}
+.pc-
 .pc-name{font-size:14px;font-weight:900;margin-bottom:3px;letter-spacing:-0.3px;line-height:1.3}
 .pc-token{
   font-family:var(--f-mono);font-size:9px;color:var(--v3);margin-bottom:14px;
@@ -1238,7 +1238,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   .main { padding-bottom:80px !important; }
   .app { padding-bottom:0 !important; }
   @media (max-width:768px){
-    .app { position:relative !important; height:100svh !important; }
+    .app { height:100svh !important; top:0 !important; }
     .main { height:100% !important; }
   }
 }
@@ -1272,8 +1272,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
      AUTH SCREEN
 ═══════════════════════════════════ -->
 <!-- ═══ LANDING PAGE ═══ -->
-<div id="landing-page" style="display:flex;flex-direction:column;min-height:100vh;
-  background:#020008;position:relative;overflow:hidden">
+<div id="landing-page" style="display:flex;flex-direction:column;min-height:100vh;background:#020008;position:relative;overflow-x:hidden;z-index:10">
 
   <!-- Night City Skyline SVG Background -->
   <div style="position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none">
@@ -3186,8 +3185,10 @@ async function showDashboard(user) {
   currentUser = user;
 
   // ── 1. Swap screens instantly ──────────────────────────────────
+  const landingEl = $('landing-page');
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
+  if (landingEl) landingEl.classList.add('hidden');
   if (authEl) authEl.classList.add('hidden');
   if (appEl)  appEl.classList.remove('hidden');
 
