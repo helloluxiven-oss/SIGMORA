@@ -171,8 +171,7 @@ html,html{margin:0;padding:0}body{height:100%;background:var(--void);color:var(-
 
 /* ══ APP LAYOUT ══════════════════════ */
 .app{display:flex;flex-direction:row;position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:500}
-.app.hidden{display:none !important}
-#landing-page.hidden{display:none !important}
+.app.hidden{display:none}
 
 /* ══ SIDEBAR ══════════════════════════ */
 .sidebar{
@@ -1484,11 +1483,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       </div>
       <div class="auth-field">
         <label class="auth-label">Password</label>
-        <div style="position:relative">
-          <input type="password" class="auth-input" id="si-pass" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px;width:100%;box-sizing:border-box"/>
-          <button type="button" onclick="togglePw('si-pass',this)" aria-label="Show password"
-            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
-        </div>
+        <input type="password" class="auth-input" id="si-pass" placeholder="••••••••" autocomplete="current-password"/>
       </div>
       <button class="auth-btn" id="signin-btn">Sign In to Dashboard</button>
       <div style="text-align:center">
@@ -1508,11 +1503,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       </div>
       <div class="auth-field">
         <label class="auth-label">Password</label>
-        <div style="position:relative">
-          <input type="password" class="auth-input" id="su-pass" placeholder="Min 8 characters" autocomplete="new-password" style="padding-right:44px;width:100%;box-sizing:border-box"/>
-          <button type="button" onclick="togglePw('su-pass',this)" aria-label="Show password"
-            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
-        </div>
+        <input type="password" class="auth-input" id="su-pass" placeholder="Min 8 characters" autocomplete="new-password"/>
       </div>
       <button class="auth-btn" id="signup-btn">Create Account</button>
     </div>
@@ -2699,24 +2690,15 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           <div style="padding:16px 18px;display:grid;gap:12px">
             <div>
               <div class="fg-lbl">Current Password</div>
-              <div style="position:relative">
-                <input id="set-cur-pass" type="password" class="auth-input" placeholder="Enter current password" style="padding-right:44px"/>
-                <button type="button" onclick="togglePw('set-cur-pass',this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
-              </div>
+              <input id="set-cur-pass" type="password" class="auth-input" placeholder="Enter current password"/>
             </div>
             <div>
               <div class="fg-lbl">New Password</div>
-              <div style="position:relative">
-                <input id="set-new-pass" type="password" class="auth-input" placeholder="Min 8 characters" style="padding-right:44px"/>
-                <button type="button" onclick="togglePw('set-new-pass',this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
-              </div>
+              <input id="set-new-pass" type="password" class="auth-input" placeholder="Min 8 characters"/>
             </div>
             <div>
               <div class="fg-lbl">Confirm New Password</div>
-              <div style="position:relative">
-                <input id="set-confirm-pass" type="password" class="auth-input" placeholder="Repeat new password" style="padding-right:44px"/>
-                <button type="button" onclick="togglePw('set-confirm-pass',this)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
-              </div>
+              <input id="set-confirm-pass" type="password" class="auth-input" placeholder="Repeat new password"/>
             </div>
             <button onclick="changePassword()"
               style="background:var(--v1);border:none;color:#fff;padding:10px 24px;
@@ -3014,14 +2996,6 @@ function switchAuthTab(tab) {
 // ═══════════════════════════════════════════════
 let _signingIn = false; // prevent double-submit
 
-function togglePw(id, btn) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const show = el.type === 'password';
-  el.type = show ? 'text' : 'password';
-  if (btn) { btn.textContent = show ? '🙈' : '👁'; btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); }
-}
-
 async function doSignIn() {
   window.__userInitiatedSignIn = true;
   if (_signingIn) return; // already in progress
@@ -3067,7 +3041,6 @@ async function doSignIn() {
 // AUTH — SIGN UP
 // ═══════════════════════════════════════════════
 async function doSignUp() {
-  window.__userInitiatedSignIn = true;
   const name  = $('su-name')?.value.trim();
   const email = $('su-email')?.value.trim();
   const pass  = $('su-pass')?.value;
@@ -3169,8 +3142,6 @@ function showAuthScreen() {
   const app = $('main-app');
   if (app) app.classList.add('hidden');
   document.body.classList.remove('in-app');
-
-  // Clear all user state
   currentUser = null;
   userProfile  = null;
 
@@ -3218,7 +3189,7 @@ async function showDashboard(user) {
   const landingEl = $('landing-page');
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
-  if (landingEl) { landingEl.classList.add('hidden'); landingEl.style.display = 'none'; }
+  if (landingEl) { landingEl.classList.add('hidden'); landingEl.style.display='none'; }
   if (authEl) authEl.classList.add('hidden');
   if (appEl)  appEl.classList.remove('hidden');
   document.body.classList.add('in-app');
@@ -3353,12 +3324,8 @@ function initAuthListener() {
       if (lp) { lp.classList.remove('hidden'); lp.style.display = 'flex'; }
       if (app) app.classList.add('hidden');
       if (auth) auth.classList.add('hidden');
-      // Reset hero CTA back to "Start Investing" → auth flow
       const lpBtn = document.querySelector('#lp-hero-btn');
-      if (lpBtn) {
-        lpBtn.textContent = 'Start Investing →';
-        lpBtn.onclick = () => showAuthFromLanding('signup');
-      }
+      if (lpBtn) { lpBtn.textContent = 'Start Investing →'; lpBtn.onclick = () => showAuthFromLanding('signup'); }
     }
   });
 }
@@ -5637,15 +5604,18 @@ function attachEventListeners() {
   // ── 1. Theme first (no flicker) ────────────────────────────────
   initTheme();
 
-  // ── 2. IMMEDIATELY enforce landing-first visibility ────────────
-  // Landing page is the single source of truth for the initial
-  // screen. Auth + app are both hidden until the user acts.
+  // ── 2. IMMEDIATELY enforce landing-first visibility ─────────────
+  // Landing page is the single first screen. Auth + app stay hidden
+  // until the user acts. (Skip if this is a password-recovery load.)
   const authEl = $('auth-screen');
   const appEl  = $('main-app');
   const lpEl   = $('landing-page');
-  if (lpEl)   lpEl.style.display = 'flex';
-  if (authEl) authEl.classList.add('hidden');
-  if (appEl)  appEl.classList.add('hidden');
+  if (!_IS_PASSWORD_RECOVERY) {
+    if (lpEl)   { lpEl.classList.remove('hidden'); lpEl.style.display = 'flex'; }
+    if (authEl) authEl.classList.add('hidden');
+    if (appEl)  appEl.classList.add('hidden');
+    document.body.classList.remove('in-app');
+  }
 
   // ── 3. Attach event listeners ──────────────────────────────────
   attachEventListeners();
@@ -5688,16 +5658,15 @@ function attachEventListeners() {
     }
 
     if (session?.user) {
-      // Valid saved session — but DO NOT auto-open dashboard.
-      // Landing page is the single first screen. Store session
-      // silently and let the "Continue to Dashboard" button (set
-      // by onAuthStateChange / below) take the user in on click.
+      // Valid saved session — but DO NOT auto-open the dashboard.
+      // Landing page is always the first screen. Store session and
+      // turn the hero CTA into "Continue to Dashboard".
       currentUser = session.user;
       initAuthListener();
       const lpBtn = document.querySelector('#lp-hero-btn');
       if (lpBtn) {
         lpBtn.textContent = 'Continue to Dashboard →';
-        lpBtn.onclick = () => { _appReady = true; showDashboard(session.user); };
+        lpBtn.onclick = () => { window.__userInitiatedSignIn = true; showDashboard(session.user); };
       }
     } else {
       // No session — start auth listener and wait for sign in
@@ -7221,9 +7190,12 @@ checkReferralParam();
     const lp = $('landing-page');
     const auth = $('auth-screen');
     const app = $('main-app');
-    if (lp) lp.style.display = 'flex';
-    if (auth) auth.classList.add('hidden');
-    if (app) app.classList.add('hidden');
+    if (!_IS_PASSWORD_RECOVERY) {
+      if (lp) lp.style.display = 'flex';
+      if (auth) auth.classList.add('hidden');
+      if (app) app.classList.add('hidden');
+      document.body.classList.remove('in-app');
+    }
     // Load properties + preload dashboard data in parallel
     loadLandingProperties().catch(() => {});
     // Preload: if session exists, fetch dashboard data now so it's cached before user clicks Sign In
@@ -7245,40 +7217,17 @@ checkReferralParam();
 // Supabase sends user back with #access_token in URL hash
 // ══════════════════════════════════════════════════════════════
 async function checkPasswordResetFlow() {
-  const hash   = window.location.hash || '';
-  const search = window.location.search || '';
-  const qs     = new URLSearchParams(search);
+  const hash = window.location.hash;
+  if (!hash.includes('type=recovery')) return;
 
-  // ── PKCE flow: ?code=...  (modern Supabase default) ──────────
-  const code = qs.get('code');
-  const isRecoveryQuery = qs.get('type') === 'recovery';
-  if (code) {
-    try {
-      const { error } = await sb.auth.exchangeCodeForSession(code);
-      if (error) { showToast('Reset link expired. Please request a new one.', 'error'); return; }
-      window.history.replaceState({}, document.title, window.location.pathname);
-      window.__blockDashboard = true;
-      showPasswordResetModal();
-      return;
-    } catch(_) {
-      showToast('Reset link expired. Please request a new one.', 'error');
-      return;
-    }
-  }
-
-  // ── Implicit flow: #access_token=...&type=recovery ───────────
-  if (!hash.includes('type=recovery') && !isRecoveryQuery) return;
-
+  // Parse tokens from URL hash
   const params = new URLSearchParams(hash.substring(1));
   const accessToken  = params.get('access_token');
   const refreshToken = params.get('refresh_token');
 
-  if (!accessToken) {
-    // No token in hash but flagged recovery — PASSWORD_RECOVERY event
-    // (handled by onAuthStateChange) will open the modal once session sets.
-    return;
-  }
+  if (!accessToken) return;
 
+  // Set the session so we can update password
   const { error: sessionErr } = await sb.auth.setSession({
     access_token:  accessToken,
     refresh_token: refreshToken,
@@ -7289,12 +7238,11 @@ async function checkPasswordResetFlow() {
     return;
   }
 
-  window.__blockDashboard = true;
+  // Show password reset modal
   showPasswordResetModal();
 }
 
 function showPasswordResetModal() {
-  if (document.getElementById('pw-reset-modal')) return;
   const modal = document.createElement('div');
   modal.id = 'pw-reset-modal';
   modal.style.cssText = `position:fixed;inset:0;z-index:99999;
@@ -7309,20 +7257,12 @@ function showPasswordResetModal() {
       <div style="font-size:13px;color:var(--t4);margin-bottom:28px">
         Choose a strong password for your SIGMORA account
       </div>
-      <div style="position:relative;margin-bottom:12px">
-        <input id="pw-reset-new" type="password" placeholder="New password (min 8 characters)"
-          style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
-          padding:12px 44px 12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box"/>
-        <button type="button" onclick="togglePw('pw-reset-new',this)"
-          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
-      </div>
-      <div style="position:relative;margin-bottom:20px">
-        <input id="pw-reset-confirm" type="password" placeholder="Confirm new password"
-          style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
-          padding:12px 44px 12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box"/>
-        <button type="button" onclick="togglePw('pw-reset-confirm',this)"
-          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
-      </div>
+      <input id="pw-reset-new" type="password" placeholder="New password (min 8 characters)"
+        style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
+        padding:12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box;margin-bottom:12px"/>
+      <input id="pw-reset-confirm" type="password" placeholder="Confirm new password"
+        style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
+        padding:12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box;margin-bottom:20px"/>
       <button onclick="submitPasswordReset()"
         style="width:100%;padding:14px;background:linear-gradient(135deg,var(--v1),var(--v2));
         border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
@@ -7461,10 +7401,10 @@ function switchWalletTab(tab) {
 
 function loadWalletPage() {
   if (!userProfile) return;
-  const bal  = parseFloat(userProfile?.wallet_balance_usd || 0);
-  const sgm  = parseFloat(userProfile?.sgm_balance || 0);
-  const inv  = parseFloat(userProfile?.total_invested_usd || 0);
-  const earn = parseFloat(userProfile?.total_earned_usd || 0);
+  const bal  = parseFloat(profile.wallet_balance_usd || userProfile?.wallet_balance_usd || 0);
+  const sgm  = parseFloat(profile.sgm_balance || userProfile?.sgm_balance || 0);
+  const inv  = parseFloat(profile.total_invested_usd || userProfile?.total_invested_usd || 0);
+  const earn = parseFloat(profile.total_earned_usd || userProfile?.total_earned_usd || 0);
 
   const set = (id, v) => { const el=$(id); if(el) el.textContent=v; };
   set('w-usdt-bal', fmtUSD(bal));
