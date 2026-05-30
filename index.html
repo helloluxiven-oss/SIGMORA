@@ -1235,7 +1235,8 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
 /* ── Mobile bottom nav ─────────────────────────────────────── */
 @media (max-width: 768px) {
-  #mobile-bottom-nav { display:block !important; }
+  body.in-app #mobile-bottom-nav { display:block !important; }
+  body:not(.in-app) #mobile-bottom-nav { display:none !important; }
   .main { padding-bottom:80px !important; }
   .app { padding-bottom:0 !important; }
   @media (max-width:768px){
@@ -3140,6 +3141,7 @@ function showAuthScreen() {
   // Hide main app
   const app = $('main-app');
   if (app) app.classList.add('hidden');
+  document.body.classList.remove('in-app');
 
   // Clear all user state
   currentUser = null;
@@ -3192,6 +3194,7 @@ async function showDashboard(user) {
   if (landingEl) { landingEl.classList.add('hidden'); landingEl.style.display = 'none'; }
   if (authEl) authEl.classList.add('hidden');
   if (appEl)  appEl.classList.remove('hidden');
+  document.body.classList.add('in-app');
 
   // ── 2. Instant skeleton from JWT — zero DB wait ────────────────
   const emailFallback = user.email?.split('@')[0] || 'User';
@@ -7029,6 +7032,7 @@ function showAuthFromLanding(tab) {
   if (lp) { lp.classList.add('hidden'); lp.style.display = 'none'; }
   if (app) app.classList.add('hidden');
   if (auth) auth.classList.remove('hidden');
+  document.body.classList.remove('in-app');
   // Switch to correct tab
   if (tab === 'signup') {
     const signupTab = document.querySelector('.auth-tab[onclick*="signup"]');
