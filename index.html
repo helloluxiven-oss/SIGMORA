@@ -1180,14 +1180,16 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   /* AI Chat: smaller, better position */
   #ai-chat-btn{
     width:48px;height:48px;
-    bottom:20px;right:16px;
+    bottom:calc(78px + env(safe-area-inset-bottom));right:16px;
     font-size:20px;
+    z-index:950;
   }
   #ai-chat-panel{
     right:10px;left:10px;
     width:auto;
     max-width:none;
-    bottom:80px;
+    bottom:calc(134px + env(safe-area-inset-bottom));
+    z-index:951;
   }
 
   /* Nav items: larger tap targets */
@@ -1259,7 +1261,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 @media (max-width: 768px) {
   body.in-app #mobile-bottom-nav { display:block !important; }
   body:not(.in-app) #mobile-bottom-nav { display:none !important; }
-  .main { padding-bottom:calc(96px + env(safe-area-inset-bottom)) !important; }
+  .main { padding-bottom:calc(120px + env(safe-area-inset-bottom)) !important; }
   .app { padding-bottom:0 !important; }
   @media (max-width:768px){
     .app { height:100svh !important; top:0 !important; }
