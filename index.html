@@ -1294,7 +1294,6 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
 /* ── Nav scroll ────────────────────────────────────────────── */
 .nav-scroll { overflow-y:auto; flex:1; padding-bottom:8px; }
-@media (max-width:768px){ .nav-scroll { padding-bottom:calc(110px + env(safe-area-inset-bottom)); } }
 .nav-scroll::-webkit-scrollbar { width:2px; }
 .nav-scroll::-webkit-scrollbar-thumb { background:var(--b3); border-radius:1px; }
 </style>
@@ -8185,13 +8184,15 @@ async function loadDashboard() {
   const propEl = $('dash-properties');
   if (propEl && allProperties?.length > 0) {
     propEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">` +
-      allProperties.slice(0,3).map(p => `
+      allProperties.slice(0,3).map(p => {
+        const dImg = getPropImage(p);
+        return `
         <div onclick="nav('properties',document.getElementById('ni-properties'))"
           style="background:var(--b2);border-radius:12px;overflow:hidden;cursor:pointer;
           border:1px solid var(--b1);transition:transform 0.15s"
           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          <div style="height:90px;background:var(--b3);display:flex;align-items:center;justify-content:center;
-            font-size:28px">🏛️</div>
+          <div style="height:90px;background:var(--b3);${dImg ? `background-image:url('${dImg.src}');background-size:cover;background-position:${dImg.pos||'center'};` : ''}display:flex;align-items:center;justify-content:center;
+            font-size:28px">${dImg ? '' : '🏛️'}</div>
           <div style="padding:10px">
             <div style="font-size:12px;font-weight:700;margin-bottom:2px">${p.name}</div>
             <div style="font-size:10px;color:var(--t4);margin-bottom:8px">${p.location||'Premium Location'}</div>
@@ -8200,7 +8201,8 @@ async function loadDashboard() {
               <span style="color:var(--v2)">≋ ${p.token_price_usd}/token</span>
             </div>
           </div>
-        </div>`).join('') + `</div>`;
+        </div>`;
+      }).join('') + `</div>`;
   } else if (propEl) {
     propEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t4);font-size:13px">Properties coming soon</div>';
   }
