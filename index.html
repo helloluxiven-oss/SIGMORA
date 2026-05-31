@@ -1294,7 +1294,6 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
 /* ── Nav scroll ────────────────────────────────────────────── */
 .nav-scroll { overflow-y:auto; flex:1; padding-bottom:8px; }
-@media (max-width:768px){ .nav-scroll { padding-bottom:calc(96px + env(safe-area-inset-bottom)); } }
 .nav-scroll::-webkit-scrollbar { width:2px; }
 .nav-scroll::-webkit-scrollbar-thumb { background:var(--b3); border-radius:1px; }
 </style>
@@ -1514,7 +1513,11 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       </div>
       <div class="auth-field">
         <label class="auth-label">Password</label>
-        <input type="password" class="auth-input" id="si-pass" placeholder="••••••••" autocomplete="current-password"/>
+        <div style="position:relative">
+          <input type="password" class="auth-input" id="si-pass" placeholder="••••••••" autocomplete="current-password" style="padding-right:46px;width:100%;box-sizing:border-box"/>
+          <button type="button" onclick="togglePw('si-pass',this)" aria-label="Show password"
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:17px;padding:4px;line-height:1">👁</button>
+        </div>
       </div>
       <button class="auth-btn" id="signin-btn">Sign In to Dashboard</button>
       <div style="text-align:center">
@@ -1534,7 +1537,11 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       </div>
       <div class="auth-field">
         <label class="auth-label">Password</label>
-        <input type="password" class="auth-input" id="su-pass" placeholder="Min 8 characters" autocomplete="new-password"/>
+        <div style="position:relative">
+          <input type="password" class="auth-input" id="su-pass" placeholder="Min 8 characters" autocomplete="new-password" style="padding-right:46px;width:100%;box-sizing:border-box"/>
+          <button type="button" onclick="togglePw('su-pass',this)" aria-label="Show password"
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:17px;padding:4px;line-height:1">👁</button>
+        </div>
       </div>
       <button class="auth-btn" id="signup-btn">Create Account</button>
     </div>
@@ -1959,7 +1966,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           <span style="color:var(--t4)"> SGM</span>
         </div>
 
-        <button onclick="submitDepositRequest()" class="fb p" style="width:100%">↓ Submit Deposit</button>
+        <button onclick="submitDeposit()" class="fb p" style="width:100%">↓ Submit Deposit</button>
         <div style="margin-top:8px;text-align:center;font-size:10px;color:var(--t4)">
           Admin verifies on BSCScan before crediting · Usually within 1 hour
         </div>
@@ -2010,7 +2017,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           </div>
         </div>
 
-        <button onclick="submitWithdrawRequest()" 
+        <button onclick="submitWithdrawal()" 
           style="width:100%;padding:12px;background:var(--rose);border:none;color:#fff;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700">
           ↑ Request Withdrawal
         </button>
@@ -3044,6 +3051,14 @@ function switchAuthTab(tab) {
 // ═══════════════════════════════════════════════
 let _signingIn = false; // prevent double-submit
 
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  if (btn) { btn.textContent = show ? '🙈' : '👁'; btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); }
+}
+
 async function doSignIn() {
   window.__userInitiatedSignIn = true;
   if (_signingIn) return; // already in progress
@@ -3089,6 +3104,7 @@ async function doSignIn() {
 // AUTH — SIGN UP
 // ═══════════════════════════════════════════════
 async function doSignUp() {
+  window.__userInitiatedSignIn = true;
   const name  = $('su-name')?.value.trim();
   const email = $('su-email')?.value.trim();
   const pass  = $('su-pass')?.value;
@@ -7264,17 +7280,35 @@ checkReferralParam();
 // Supabase sends user back with #access_token in URL hash
 // ══════════════════════════════════════════════════════════════
 async function checkPasswordResetFlow() {
-  const hash = window.location.hash;
+  const hash   = window.location.hash || '';
+  const search = window.location.search || '';
+  const qs     = new URLSearchParams(search);
+
+  // ── PKCE flow: ?code=...  (modern Supabase default) ──────────
+  const code = qs.get('code');
+  if (code) {
+    try {
+      const { error } = await sb.auth.exchangeCodeForSession(code);
+      if (error) { showToast('Reset link expired. Please request a new one.', 'error'); return; }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      window.__blockDashboard = true;
+      showPasswordResetModal();
+      return;
+    } catch(_) {
+      showToast('Reset link expired. Please request a new one.', 'error');
+      return;
+    }
+  }
+
+  // ── Implicit flow: #access_token=...&type=recovery ───────────
   if (!hash.includes('type=recovery')) return;
 
-  // Parse tokens from URL hash
   const params = new URLSearchParams(hash.substring(1));
   const accessToken  = params.get('access_token');
   const refreshToken = params.get('refresh_token');
 
   if (!accessToken) return;
 
-  // Set the session so we can update password
   const { error: sessionErr } = await sb.auth.setSession({
     access_token:  accessToken,
     refresh_token: refreshToken,
@@ -7285,11 +7319,11 @@ async function checkPasswordResetFlow() {
     return;
   }
 
-  // Show password reset modal
   showPasswordResetModal();
 }
 
 function showPasswordResetModal() {
+  if (document.getElementById('pw-reset-modal')) return;
   const modal = document.createElement('div');
   modal.id = 'pw-reset-modal';
   modal.style.cssText = `position:fixed;inset:0;z-index:99999;
@@ -7304,12 +7338,20 @@ function showPasswordResetModal() {
       <div style="font-size:13px;color:var(--t4);margin-bottom:28px">
         Choose a strong password for your SIGMORA account
       </div>
-      <input id="pw-reset-new" type="password" placeholder="New password (min 8 characters)"
-        style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
-        padding:12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box;margin-bottom:12px"/>
-      <input id="pw-reset-confirm" type="password" placeholder="Confirm new password"
-        style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
-        padding:12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box;margin-bottom:20px"/>
+      <div style="position:relative;margin-bottom:12px">
+        <input id="pw-reset-new" type="password" placeholder="New password (min 8 characters)"
+          style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
+          padding:12px 44px 12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box"/>
+        <button type="button" onclick="togglePw('pw-reset-new',this)"
+          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
+      </div>
+      <div style="position:relative;margin-bottom:20px">
+        <input id="pw-reset-confirm" type="password" placeholder="Confirm new password"
+          style="width:100%;background:var(--b2);border:1px solid var(--b3);border-radius:10px;
+          padding:12px 44px 12px 16px;color:var(--t1);font-size:14px;box-sizing:border-box"/>
+        <button type="button" onclick="togglePw('pw-reset-confirm',this)"
+          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px">👁</button>
+      </div>
       <button onclick="submitPasswordReset()"
         style="width:100%;padding:14px;background:linear-gradient(135deg,var(--v1),var(--v2));
         border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
