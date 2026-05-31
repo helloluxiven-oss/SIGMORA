@@ -1966,7 +1966,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           <span style="color:var(--t4)"> SGM</span>
         </div>
 
-        <button onclick="submitDeposit()" class="fb p" style="width:100%">↓ Submit Deposit</button>
+        <button onclick="submitDepositRequest()" class="fb p" style="width:100%">↓ Submit Deposit</button>
         <div style="margin-top:8px;text-align:center;font-size:10px;color:var(--t4)">
           Admin verifies on BSCScan before crediting · Usually within 1 hour
         </div>
@@ -2017,7 +2017,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           </div>
         </div>
 
-        <button onclick="submitWithdrawal()" 
+        <button onclick="submitWithdrawRequest()" 
           style="width:100%;padding:12px;background:var(--rose);border:none;color:#fff;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700">
           ↑ Request Withdrawal
         </button>
@@ -3322,7 +3322,8 @@ async function showDashboard(user) {
         setText('sf-bal',fmtUSD(u.wallet_balance_usd));
         document.body.className=document.body.className.split(' ').filter(c=>!c.startsWith('role-')).join(' ');
         document.body.classList.add('role-'+(u.role||'user'));
-        if(['admin','super_admin'].includes(u.role)) document.querySelectorAll('.admin-only').forEach(el=>{el.style.display=el.classList.contains('nav-group')?'block':'flex';});
+        if(['admin','super_admin'].includes(u.role)) { document.querySelectorAll('.admin-only').forEach(el=>{el.style.display=el.classList.contains('nav-group')?'block':'flex';}); }
+        else { document.querySelectorAll('.admin-only').forEach(el=>{el.style.display='';}); }
         renderTierUI();
       }
     }
@@ -3478,11 +3479,14 @@ async function loadUserProfile() {
   const userRole = profile.role || 'user';
   document.body.className = document.body.className.replace(/\brole-\S+/g, '').trim();
   document.body.classList.add('role-' + userRole);
-  // Force admin sections visible immediately for admin roles
+  // Toggle admin sections by role. Always reset inline display first so a
+  // previous admin session can't leak admin UI to a non-admin user.
   if (userRole === 'admin' || userRole === 'super_admin') {
     document.querySelectorAll('.admin-only').forEach(el => {
       el.style.display = el.classList.contains('nav-group') ? 'block' : 'flex';
     });
+  } else {
+    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = ''; });
   }
 
   // ── Pre-fill settings form ──────────────────────────────────────
@@ -3634,6 +3638,11 @@ function bindSidebarProfile(profile) {
   // Role CSS — critical for admin sections
   document.body.className = document.body.className.replace(/\brole-\S+/g, '').trim();
   document.body.classList.add('role-' + (profile.role || 'user'));
+  if (['admin','super_admin'].includes(profile.role)) {
+    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = el.classList.contains('nav-group') ? 'block' : 'flex'; });
+  } else {
+    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = ''; });
+  }
   renderTierUI();
 }
 
