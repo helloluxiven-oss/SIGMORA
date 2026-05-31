@@ -693,7 +693,7 @@ body[data-theme="light"] .topbar{background:rgba(246,244,255,0.92)}
 
 /* ══ MODAL ════════════════════════════ */
 .modal-backdrop{
-  position:fixed;inset:0;z-index:500;
+  position:fixed;inset:0;z-index:1000;
   background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
   display:flex;align-items:center;justify-content:center;padding:20px;
   display:none;
@@ -1124,6 +1124,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   .tb-avatar{ width:36px;height:36px;font-size:12px; }
   /* Mobile uses the top-bar avatar menu for account/sign-out */
   #sidebar-footer{ display:none !important; }
+  #sidebar-account-grp{ display:none !important; }
   /* Hide text labels on mobile buttons, keep icons */
   #theme-label, #auth-theme-label{ display:none; }
   .btn{ padding:0 10px;min-width:36px; }
@@ -1171,6 +1172,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     overflow-y:auto;
     max-width:100% !important;
     width:100%;
+    padding-bottom:calc(76px + env(safe-area-inset-bottom));
   }
   .modal-hd{
     position:sticky;top:0;z-index:10;
@@ -1641,6 +1643,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     </div>
 
     <!-- ACCOUNT -->
+    <div id="sidebar-account-grp">
     <div class="nav-grp-lbl">ACCOUNT</div>
     <div class="ni" onclick="nav('notifs',this)" id="ni-notifs">
       <span class="ni-ic">◆</span><span class="ni-lbl">Notifications</span>
@@ -1648,6 +1651,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     </div>
     <div class="ni" onclick="nav('settings',this)" id="ni-settings">
       <span class="ni-ic">⊙</span><span class="ni-lbl">Settings</span>
+    </div>
     </div>
 
   </div>
