@@ -7757,7 +7757,7 @@ async function loadWalletTransactions() {
   const el = $('wallet-txns');
   if (!el || !currentUser) return;
   const { data } = await sb.from('transactions')
-    .select('tx_type,gross_amount_usd,net_amount_usd,fee_amount_usd,status,created_at,notes')
+    .select('tx_type,gross_amount_usd,net_amount_usd,fee_amount_usd,status,created_at,notes,blockchain_tx_hash')
     .eq('user_id', currentUser.id)
     .order('created_at', { ascending: false })
     .limit(15);
@@ -7767,9 +7767,45 @@ async function loadWalletTransactions() {
     return;
   }
 
-  const icons  = { buy:'▣', deposit:'↓', withdrawal:'↑', roi:'△', convert:'⇄', sell:'◇' };
-  const colors = { buy:'var(--v2)', deposit:'var(--mint)', withdrawal:'var(--rose)', roi:'var(--gold)', convert:'var(--neon)', sell:'var(--t3)' };
-  const signs  = { deposit:'+', roi:'+', convert:'±', buy:'-', withdrawal:'-', sell:'+' };
+  const icons  = { buy:'▣', deposit:'↓', withdrawal:'↑', roi:'△', payout:'△', convert:'⇄', sell:'◇', reinvest:'↻', fee:'%' };
+  const colors = { buy:'var(--v2)', deposit:'var(--mint)', withdrawal:'var(--rose)', roi:'var(--gold)', payout:'var(--gold)', convert:'var(--neon)', sell:'var(--t3)', reinvest:'var(--v2)', fee:'var(--t3)' };
+  const signs  = { deposit:'+', roi:'+', payout:'+', convert:'±', buy:'-', withdrawal:'-', sell:'+', reinvest:'±', fee:'-' };
+
+  // Friendly stage labels per type + status
+  const stageLabel = (type, status) => {
+    const isDep = type === 'deposit', isWd = type === 'withdrawal';
+    const map = {
+      pending:    isDep ? 'Submitted'  : isWd ? 'Requested'  : 'Pending',
+      processing: isDep ? 'Verifying'  : isWd ? 'Processing' : 'Processing',
+      completed:  isDep ? 'Credited'   : isWd ? 'Sent'       : 'Completed',
+      failed:     'Failed',
+      refunded:   'Refunded',
+    };
+    return map[status] || (status || 'Pending');
+  };
+  // 3-step progress index: pending=1, processing=2, completed=3 (failed/refunded = none)
+  const stepIndex = (s) => s==='completed'?3 : s==='processing'?2 : s==='pending'?1 : 0;
+  const stageColor = (s) => s==='completed'?'var(--mint)' : s==='failed'?'var(--rose)' : s==='refunded'?'var(--rose)' : 'var(--gold)';
+
+  const dots = (s) => {
+    const idx = stepIndex(s);
+    if (idx === 0) return ''; // failed/refunded: no progress dots
+    let out = '<span style="display:inline-flex;gap:3px;margin-left:8px;vertical-align:middle">';
+    for (let i=1;i<=3;i++) {
+      const on = i <= idx;
+      out += `<span style="width:6px;height:6px;border-radius:50%;background:${on?stageColor(s):'var(--b3)'}"></span>`;
+    }
+    out += '</span>';
+    return out;
+  };
+
+  const bscLink = (hash) => {
+    if (!hash) return '';
+    const short = hash.slice(0,8) + '…' + hash.slice(-6);
+    return `<a href="https://bscscan.com/tx/${hash}" target="_blank" rel="noopener"
+      style="font-size:10px;color:var(--neon);font-family:var(--f-mono);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px">
+      ${short} ↗</a>`;
+  };
 
   el.innerHTML = `<table style="width:100%;border-collapse:collapse">
     <thead><tr style="font-size:10px;color:var(--t4);font-family:var(--f-mono);border-bottom:1px solid var(--b1)">
@@ -7787,7 +7823,10 @@ async function loadWalletTransactions() {
               color:${colors[t.tx_type]||'var(--t2)'};font-size:12px">
               ${icons[t.tx_type]||'◎'}
             </div>
-            <span style="font-size:12px;font-weight:600;text-transform:capitalize">${t.tx_type}</span>
+            <div>
+              <span style="font-size:12px;font-weight:600;text-transform:capitalize">${t.tx_type}</span>
+              ${bscLink(t.blockchain_tx_hash)}
+            </div>
           </div>
         </td>
         <td style="padding:10px 16px;font-size:11px;color:var(--t4);font-family:var(--f-mono)">
@@ -7796,12 +7835,13 @@ async function loadWalletTransactions() {
         <td style="padding:10px 16px;text-align:right;font-size:13px;font-weight:700;color:${colors[t.tx_type]||'var(--t2)'}">
           ${signs[t.tx_type]||''}${fmtUSD(t.net_amount_usd||t.gross_amount_usd||0)}
         </td>
-        <td style="padding:10px 16px;text-align:right">
+        <td style="padding:10px 16px;text-align:right;white-space:nowrap">
           <span style="font-size:10px;font-family:var(--f-mono);padding:3px 8px;border-radius:4px;
-            background:${t.status==='completed'?'rgba(16,185,129,0.12)':t.status==='pending'?'rgba(251,191,36,0.12)':'rgba(244,63,94,0.12)'};
-            color:${t.status==='completed'?'var(--mint)':t.status==='pending'?'var(--gold)':'var(--rose)'}">
-            ${t.status||'pending'}
+            background:${stepIndex(t.status)===3?'rgba(16,185,129,0.12)':(t.status==='failed'||t.status==='refunded')?'rgba(244,63,94,0.12)':'rgba(251,191,36,0.12)'};
+            color:${stageColor(t.status)}">
+            ${stageLabel(t.tx_type, t.status)}
           </span>
+          ${dots(t.status)}
         </td>
       </tr>`).join('')}
     </tbody>
