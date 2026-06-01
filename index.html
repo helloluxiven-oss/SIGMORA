@@ -2843,6 +2843,48 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   </div>
 </div>
 
+<!-- Withdrawal Confirmation Modal -->
+<div class="modal-backdrop" id="modal-withdraw-confirm">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-hd" style="padding:18px 22px">
+      <div class="modal-title">Confirm Withdrawal</div>
+      <button class="modal-close" onclick="closeWithdrawConfirm()">✕</button>
+    </div>
+    <div style="padding:4px 22px 8px">
+      <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(251,191,36,0.08);
+        border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:11px 13px;margin-bottom:16px">
+        <span style="font-size:16px;line-height:1;flex-shrink:0">⚠️</span>
+        <div style="font-size:11px;color:var(--t2);line-height:1.45">
+          Double-check the address. Crypto withdrawals are <b style="color:var(--gold)">irreversible</b> —
+          funds sent to a wrong address cannot be recovered.
+        </div>
+      </div>
+      <div style="background:var(--b2);border-radius:12px;padding:14px 16px;font-size:13px">
+        <div style="display:flex;justify-content:space-between;padding:7px 0">
+          <span style="color:var(--t4)">Amount</span><span id="wdc-amount" style="font-weight:700">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--b1)">
+          <span style="color:var(--t4)">Fee (1%)</span><span id="wdc-fee" style="color:var(--rose)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--b1)">
+          <span style="color:var(--t4)">You receive</span><span id="wdc-net" style="color:var(--mint);font-weight:800;font-size:15px">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--b1)">
+          <span style="color:var(--t4)">Network</span><span id="wdc-network" style="font-family:var(--f-mono);font-size:12px">—</span>
+        </div>
+        <div style="padding:7px 0;border-top:1px solid var(--b1)">
+          <div style="color:var(--t4);margin-bottom:3px">To address</div>
+          <div id="wdc-addr" style="font-family:var(--f-mono);font-size:12px;color:var(--neon);word-break:break-all">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="fbtns" style="margin-top:6px;padding:0 22px 18px;display:flex;gap:10px">
+      <button id="wdc-confirm-btn" class="fb p" style="flex:1" onclick="confirmWithdraw()">Confirm Withdrawal</button>
+      <button class="fb s" style="flex:1" onclick="closeWithdrawConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Buy Tokens Modal (property detail) -->
 <div class="modal-backdrop" id="modal-property">
   <div class="modal" style="max-width:720px;max-height:92vh;overflow-y:auto;padding:0">
@@ -6286,12 +6328,12 @@ function closeWithdrawModal() {
   if (modal) modal.style.display = 'none';
 }
 
-async function submitWithdrawRequest() {
-  const address = $('withdraw-address-input')?.value?.trim();
-  const amount  = parseFloat($('withdraw-amount-input')?.value);
+function submitWithdrawRequest() {
+  const address = $('wd-address')?.value?.trim();
+  const amount  = parseFloat($('wd-amount')?.value);
   const balance = parseFloat(userProfile?.wallet_balance_usd || 0);
 
-  if (!address || !address.startsWith('0x') && !address.startsWith('T')) {
+  if (!address || (!address.startsWith('0x') && !address.startsWith('T'))) {
     showToast('Enter a valid BEP-20 USDT address', 'error'); return;
   }
   if (!amount || amount < 20) {
@@ -6301,7 +6343,28 @@ async function submitWithdrawRequest() {
     showToast('Insufficient balance', 'error'); return;
   }
 
-  const btn = $('withdraw-submit-btn');
+  // ── Show confirmation step before executing ──
+  const fee = amount * 0.01;
+  const net = amount - fee;
+  const shortAddr = address.length > 18 ? address.slice(0,10) + '…' + address.slice(-8) : address;
+  const set = (id, v) => { const el=$(id); if(el) el.textContent=v; };
+  set('wdc-amount', fmtUSD(amount));
+  set('wdc-fee', '− ' + fmtUSD(fee));
+  set('wdc-net', fmtUSD(net));
+  set('wdc-addr', shortAddr);
+  set('wdc-network', 'BEP-20 (BSC)');
+  // stash validated values for the confirm step
+  window.__pendingWithdraw = { address, amount };
+  const m = $('modal-withdraw-confirm');
+  if (m) m.classList.add('open');
+}
+
+async function confirmWithdraw() {
+  const pend = window.__pendingWithdraw;
+  if (!pend) { closeWithdrawConfirm(); return; }
+  const { address, amount } = pend;
+
+  const btn = $('wdc-confirm-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
 
   try {
@@ -6312,15 +6375,25 @@ async function submitWithdrawRequest() {
       p_network: 'BEP-20',
     });
     if (error) throw error;
-    closeWithdrawModal();
-    showToast(`Withdrawal submitted! You'll receive $${data.net} USDT after 1% fee. Processing within 24hrs.`, 'success', 6000);
-    // Refresh wallet balance
+    closeWithdrawConfirm();
+    const net = (data && data.net != null) ? data.net : (amount * 0.99).toFixed(2);
+    showToast(`Withdrawal submitted! You'll receive $${net} USDT after 1% fee. Processing within 24hrs.`, 'success', 6000);
+    // Clear the form
+    const a=$('wd-address'), n=$('wd-amount'); if(a)a.value=''; if(n)n.value='';
+    updateWdPreview();
     await loadUserProfile();
+    loadWalletPage();
   } catch(e) {
     showToast('Failed: ' + (e.message || 'Unknown error'), 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Submit Withdrawal Request'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm Withdrawal'; }
+    window.__pendingWithdraw = null;
   }
+}
+
+function closeWithdrawConfirm() {
+  const m = $('modal-withdraw-confirm');
+  if (m) m.classList.remove('open');
 }
 
 // ── ADMIN: LOAD + APPROVE DEPOSITS ───────────────────────────────
