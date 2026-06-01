@@ -1281,7 +1281,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 }
 .mbn-btn { transition: transform 0.15s ease, opacity 0.15s ease; }
 .mbn-btn:active { transform: scale(0.88); opacity:0.7; }
-.mbn-btn.mbn-active span:last-child { color:var(--v2) !important; }
+.mbn-btn.mbn-active:not(#mbn-properties) span:last-child { color:var(--v2) !important; }
 
 /* ── Page transitions ──────────────────────────────────────── */
 .page { animation: pgFadeIn 0.22s ease; }
@@ -8407,12 +8407,14 @@ async function loadWalletTransactions() {
 function setMobileNav(id) {
   document.querySelectorAll('.mbn-btn').forEach(b => {
     b.classList.remove('mbn-active');
+    if (b.id === 'mbn-properties') return; // FAB icon stays white
     const lbl = b.querySelector('span:last-child');
     if (lbl && lbl.style) lbl.style.color = 'var(--t4)';
   });
   const active = document.getElementById('mbn-' + id);
   if (active) {
     active.classList.add('mbn-active');
+    if (id === 'properties') return; // FAB: keep white icon
     const lbl = active.querySelector('span:last-child');
     if (lbl) lbl.style.color = 'var(--v2)';
   }
@@ -8558,46 +8560,48 @@ async function loadDashboard() {
   background:var(--surface);
   border-top:1px solid var(--b1);
   z-index:900;
-  padding:6px 0 max(6px, env(safe-area-inset-bottom));
+  padding:10px 0 max(10px, env(safe-area-inset-bottom));
+  overflow:visible;
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px)">
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0">
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;align-items:end">
     <button onclick="nav('dashboard',this);setMobileNav('dashboard')" id="mbn-dashboard"
       class="mbn-btn mbn-active"
-      style="background:none;border:none;cursor:pointer;padding:6px 4px;text-align:center;
+      style="background:none;border:none;cursor:pointer;padding:4px;text-align:center;
       display:flex;flex-direction:column;align-items:center;gap:3px">
-      <span style="font-size:18px">⊞</span>
+      <span style="font-size:18px;line-height:1">⊞</span>
       <span style="font-size:9px;font-family:var(--f-mono);letter-spacing:0.5px;color:var(--v2)">HOME</span>
     </button>
     <button onclick="nav('wallet',this);setMobileNav('wallet')" id="mbn-wallet"
       class="mbn-btn"
-      style="background:none;border:none;cursor:pointer;padding:6px 4px;text-align:center;
+      style="background:none;border:none;cursor:pointer;padding:4px;text-align:center;
       display:flex;flex-direction:column;align-items:center;gap:3px">
-      <span style="font-size:18px">◎</span>
+      <span style="font-size:18px;line-height:1">◎</span>
       <span style="font-size:9px;font-family:var(--f-mono);letter-spacing:0.5px;color:var(--t4)">WALLET</span>
     </button>
-    <button onclick="nav('properties',this);setMobileNav('properties')" id="mbn-properties"
-      class="mbn-btn"
-      style="background:none;border:none;cursor:pointer;padding:6px 4px;text-align:center;
-      display:flex;flex-direction:column;align-items:center;gap:3px;
-      position:relative;top:-14px;
-      background:linear-gradient(135deg,var(--v1),var(--v2)) !important;
-      border-radius:50%;width:44px;height:44px;justify-content:center;
-      box-shadow:0 4px 16px rgba(124,58,237,0.5);margin:0 auto">
-      <span style="font-size:20px;color:white">▣</span>
-    </button>
+    <div style="display:flex;justify-content:center;align-items:flex-end;position:relative">
+      <button onclick="nav('properties',this);setMobileNav('properties')" id="mbn-properties"
+        class="mbn-btn"
+        style="background:linear-gradient(135deg,var(--v1),var(--v2)) !important;border:3px solid var(--surface);cursor:pointer;
+        display:flex;align-items:center;justify-content:center;
+        position:relative;top:-18px;
+        border-radius:50%;width:48px;height:48px;padding:0;
+        box-shadow:0 4px 16px rgba(124,58,237,0.5)">
+        <span style="font-size:20px;color:#fff;line-height:1">▣</span>
+      </button>
+    </div>
     <button onclick="nav('my-tokens',this);setMobileNav('my-tokens')" id="mbn-my-tokens"
       class="mbn-btn"
-      style="background:none;border:none;cursor:pointer;padding:6px 4px;text-align:center;
+      style="background:none;border:none;cursor:pointer;padding:4px;text-align:center;
       display:flex;flex-direction:column;align-items:center;gap:3px">
-      <span style="font-size:18px">◇</span>
+      <span style="font-size:18px;line-height:1">◇</span>
       <span style="font-size:9px;font-family:var(--f-mono);letter-spacing:0.5px;color:var(--t4)">PORTFOLIO</span>
     </button>
     <button onclick="nav('settings',this);setMobileNav('settings')" id="mbn-settings"
       class="mbn-btn"
-      style="background:none;border:none;cursor:pointer;padding:6px 4px;text-align:center;
+      style="background:none;border:none;cursor:pointer;padding:4px;text-align:center;
       display:flex;flex-direction:column;align-items:center;gap:3px">
-      <span style="font-size:18px">⊙</span>
+      <span style="font-size:18px;line-height:1">⊙</span>
       <span style="font-size:9px;font-family:var(--f-mono);letter-spacing:0.5px;color:var(--t4)">ACCOUNT</span>
     </button>
   </div>
