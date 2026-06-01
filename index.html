@@ -1933,16 +1933,35 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div class="card-title">
           <span class="cdot" style="background:var(--neon)"></span>Deposit USDT
         </div>
-        <span style="font-size:10px;color:var(--t4);font-family:var(--f-mono)">BEP-20 ONLY</span>
+        <span style="font-size:10px;color:var(--gold);font-family:var(--f-mono);font-weight:700;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);padding:3px 8px;border-radius:6px">⚠ BEP-20 ONLY</span>
       </div>
       <div style="padding:16px 18px">
 
-        <!-- Platform address -->
-        <div style="background:var(--b2);border-radius:10px;padding:12px 14px;margin-bottom:14px">
-          <div style="font-size:9px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px;margin-bottom:6px">PLATFORM DEPOSIT ADDRESS</div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div id="w-dep-addr" style="font-family:var(--f-mono);font-size:11px;color:var(--neon);flex:1;word-break:break-all;line-height:1.4">Contact admin for address</div>
-            <button onclick="copyDepAddr()" style="background:var(--b3);border:none;color:var(--t2);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;flex-shrink:0">Copy</button>
+        <!-- ⚠️ LOUD NETWORK WARNING -->
+        <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(251,191,36,0.10);
+          border:1px solid rgba(251,191,36,0.35);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+          <span style="font-size:18px;line-height:1;flex-shrink:0">⚠️</span>
+          <div style="font-size:12px;line-height:1.45;color:var(--t2)">
+            Send <b style="color:var(--gold)">USDT on BEP-20 (BSC)</b> only.
+            Sending any other token or network (ERC-20, TRC-20, etc.) will
+            result in <b style="color:var(--rose)">permanent loss of funds</b>.
+          </div>
+        </div>
+
+        <!-- QR + Platform address -->
+        <div style="background:var(--b2);border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:9px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px;margin-bottom:10px">PLATFORM DEPOSIT ADDRESS</div>
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <div id="w-dep-qr-wrap" style="background:#fff;border-radius:10px;padding:8px;flex-shrink:0;display:none">
+              <img id="w-dep-qr" alt="Deposit address QR" width="120" height="120" style="display:block;border-radius:4px"/>
+            </div>
+            <div style="flex:1;min-width:160px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div id="w-dep-addr" style="font-family:var(--f-mono);font-size:11px;color:var(--neon);flex:1;word-break:break-all;line-height:1.4">Contact admin for address</div>
+                <button onclick="copyDepAddr()" style="background:var(--b3);border:none;color:var(--t2);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;flex-shrink:0">Copy</button>
+              </div>
+              <div style="margin-top:8px;font-size:10px;color:var(--t4)">Scan the QR with your wallet app, or copy the address.</div>
+            </div>
           </div>
         </div>
 
@@ -7624,10 +7643,15 @@ function loadWalletPage() {
   const wdEl = $('wd-address');
   if (wdEl && userProfile.wallet_address) wdEl.value = userProfile.wallet_address;
 
-  // Platform deposit address
+  // Platform deposit address + QR
   const addrEl = $('w-dep-addr');
-  if (addrEl && userProfile.platform_wallet_address)
-    addrEl.textContent = userProfile.platform_wallet_address;
+  const depAddr = userProfile.platform_wallet_address;
+  if (addrEl && depAddr) addrEl.textContent = depAddr;
+  if (depAddr) {
+    const qrEl = $('w-dep-qr'), qrWrap = $('w-dep-qr-wrap');
+    if (qrEl) qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(depAddr)}&bgcolor=ffffff&color=000000`;
+    if (qrWrap) qrWrap.style.display = 'block';
+  }
 
   // KYC gate
   renderKYCBanner();
