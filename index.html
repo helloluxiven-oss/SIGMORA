@@ -1900,6 +1900,9 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <!-- KYC Gate -->
   <div id="wallet-kyc-banner" style="margin-bottom:16px"></div>
 
+  <!-- Onboarding CTA (new users only) -->
+  <div id="wallet-onboard-cta" style="margin-bottom:20px;display:none"></div>
+
   <!-- ══ 1. BALANCES ══ -->
   <div class="g4" style="margin-bottom:24px">
     <div class="kpi" style="border-color:rgba(0,245,212,0.25)">
@@ -7658,6 +7661,50 @@ function loadWalletPage() {
 
   // Load transactions
   loadWalletTransactions();
+
+  // ── Onboarding CTA: show only for brand-new users (nothing yet) ──
+  const ctaEl = $('wallet-onboard-cta');
+  if (ctaEl) {
+    const isNew = bal <= 0 && sgm <= 0 && inv <= 0 && earn <= 0;
+    if (isNew) {
+      ctaEl.style.display = 'block';
+      ctaEl.innerHTML = `
+        <div style="position:relative;overflow:hidden;border-radius:16px;
+          background:linear-gradient(135deg,rgba(124,58,237,0.18),rgba(0,245,212,0.10));
+          border:1px solid rgba(124,58,237,0.35);padding:22px 22px 20px">
+          <div style="font-size:11px;font-family:var(--f-mono);letter-spacing:1px;color:var(--v2);margin-bottom:8px">GET STARTED</div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px">Make your first deposit to start earning</div>
+          <div style="font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:16px;max-width:560px">
+            Deposit USDT (BEP-20), convert to SGM, and invest in tokenized real estate
+            earning up to <b style="color:var(--mint)">0.35%/day</b>. Your balance and ROI will appear here automatically.
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onclick="document.getElementById('w-dep-qr-wrap')?.scrollIntoView({behavior:'smooth',block:'center'})"
+              class="fb p" style="padding:11px 18px">↓ Deposit USDT</button>
+            <button onclick="nav('properties',document.querySelector('.ni[onclick*=properties]'))"
+              class="fb" style="padding:11px 18px;background:var(--b2);color:var(--t1)">▣ Browse Properties</button>
+          </div>
+          <!-- 3-step mini guide -->
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid rgba(124,58,237,0.2)">
+            <div style="flex:1;min-width:120px">
+              <div style="font-size:11px;color:var(--v2);font-weight:700;margin-bottom:2px">1 · Deposit</div>
+              <div style="font-size:11px;color:var(--t4);line-height:1.4">Send USDT on BEP-20 to your address</div>
+            </div>
+            <div style="flex:1;min-width:120px">
+              <div style="font-size:11px;color:var(--neon);font-weight:700;margin-bottom:2px">2 · Convert</div>
+              <div style="font-size:11px;color:var(--t4);line-height:1.4">Swap USDT to SGM (1 SGM = $10)</div>
+            </div>
+            <div style="flex:1;min-width:120px">
+              <div style="font-size:11px;color:var(--mint);font-weight:700;margin-bottom:2px">3 · Earn</div>
+              <div style="font-size:11px;color:var(--t4);line-height:1.4">Invest in property, earn daily ROI</div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      ctaEl.style.display = 'none';
+      ctaEl.innerHTML = '';
+    }
+  }
 }
 
 function updateDepSGMPreview() {
