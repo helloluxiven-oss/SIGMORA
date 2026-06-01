@@ -1797,7 +1797,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div style="font-size:22px;margin-bottom:6px">▣</div>
         <div style="font-size:11px;font-weight:700;color:var(--v2)">Invest</div>
       </button>
-      <button onclick="nav('wallet',document.getElementById('ni-wallet'));setTimeout(()=>document.getElementById('sgm-to-usdt-amt')?.focus(),300)"
+      <button onclick="nav('wallet',document.getElementById('ni-wallet'));setTimeout(()=>document.getElementById('cv-from-amt')?.focus(),300)"
         style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:12px;
         padding:14px 8px;cursor:pointer;text-align:center;transition:all 0.2s">
         <div style="font-size:22px;margin-bottom:6px">⇄</div>
@@ -2054,47 +2054,56 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <!-- ══ 3. CONVERT SGM ↔ USDT ══ -->
   <div class="card" style="margin-bottom:24px">
     <div class="card-hd">
-      <div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Convert SGM ↔ USDT</div>
+      <div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Convert</div>
       <span style="font-size:11px;color:var(--t4)">1 SGM = $10 USDT · Fixed rate</span>
     </div>
     <div style="padding:16px 18px">
-      <div class="g2">
-        <!-- SGM → USDT -->
-        <div style="background:var(--b2);border-radius:12px;padding:16px">
-          <div style="font-size:11px;font-weight:700;color:var(--v2);margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span>Σ SGM → ◎ USDT</span>
+      <div style="max-width:440px;margin:0 auto">
+
+        <!-- FROM (You pay) -->
+        <div style="background:var(--b2);border-radius:14px;padding:14px 16px;position:relative">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:11px;color:var(--t4)">You pay</span>
+            <span style="font-size:11px;color:var(--t4)">Balance:
+              <span id="cv-from-bal" style="color:var(--t2)">0</span>
+              <button onclick="cvSetMax()" style="background:var(--b3);border:none;color:var(--v2);padding:2px 7px;border-radius:5px;cursor:pointer;font-size:9px;margin-left:4px;font-weight:700">MAX</button>
+            </span>
           </div>
-          <div style="font-size:11px;color:var(--t4);margin-bottom:6px">
-            Balance: <span id="w-sgm-for-convert" style="color:var(--v2)">0 SGM</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input id="cv-from-amt" type="number" inputmode="decimal" placeholder="0.00" min="0"
+              oninput="cvUpdate()"
+              style="flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:22px;font-weight:800;width:100%;padding:0"/>
+            <span id="cv-from-cur" style="font-size:14px;font-weight:800;color:var(--v2);white-space:nowrap;padding:6px 12px;background:var(--b3);border-radius:9px">Σ SGM</span>
           </div>
-          <input id="sgm-to-usdt-amt" type="number" class="auth-input" 
-            placeholder="SGM amount" min="1"
-            oninput="updateConvertPreview('s2u',this.value)"
-            style="margin-bottom:8px"/>
-          <div id="s2u-preview" style="font-size:11px;color:var(--neon);margin-bottom:10px;min-height:16px"></div>
-          <button onclick="convertSGMtoUSDT()" 
-            style="width:100%;padding:9px;background:var(--v1);border:none;color:#fff;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">
-            Convert SGM → USDT
-          </button>
         </div>
-        <!-- USDT → SGM -->
-        <div style="background:var(--b2);border-radius:12px;padding:16px">
-          <div style="font-size:11px;font-weight:700;color:var(--neon);margin-bottom:12px;display:flex;align-items:center;gap:6px">
-            <span>◎ USDT → Σ SGM</span>
-          </div>
-          <div style="font-size:11px;color:var(--t4);margin-bottom:6px">
-            Balance: <span id="w-usdt-for-convert" style="color:var(--neon)">$0.00</span>
-          </div>
-          <input id="usdt-to-sgm-amt" type="number" class="auth-input"
-            placeholder="USDT amount" min="10"
-            oninput="updateConvertPreview('u2s',this.value)"
-            style="margin-bottom:8px"/>
-          <div id="u2s-preview" style="font-size:11px;color:var(--v2);margin-bottom:10px;min-height:16px"></div>
-          <button onclick="convertUSDTtoSGM()"
-            style="width:100%;padding:9px;background:var(--neon);border:none;color:#000;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">
-            Convert USDT → SGM
-          </button>
+
+        <!-- SWAP BUTTON -->
+        <div style="display:flex;justify-content:center;margin:-9px 0;position:relative;z-index:2">
+          <button onclick="cvSwap()" title="Swap direction"
+            style="width:36px;height:36px;border-radius:50%;background:var(--v1);border:3px solid var(--surface);
+            color:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:transform 0.15s"
+            onmouseover="this.style.transform='rotate(180deg)'" onmouseout="this.style.transform=''">⇅</button>
         </div>
+
+        <!-- TO (You receive) -->
+        <div style="background:var(--b2);border-radius:14px;padding:14px 16px">
+          <div style="font-size:11px;color:var(--t4);margin-bottom:8px">You receive</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div id="cv-to-amt" style="flex:1;color:var(--t1);font-size:22px;font-weight:800">0.00</div>
+            <span id="cv-to-cur" style="font-size:14px;font-weight:800;color:var(--neon);white-space:nowrap;padding:6px 12px;background:var(--b3);border-radius:9px">◎ USDT</span>
+          </div>
+        </div>
+
+        <!-- Rate hint -->
+        <div id="cv-hint" style="font-size:11px;color:var(--t4);text-align:center;margin-top:10px;min-height:15px"></div>
+
+        <!-- Convert button -->
+        <button id="cv-btn" onclick="cvConvert()"
+          style="width:100%;margin-top:12px;padding:13px;background:linear-gradient(135deg,var(--v1),var(--v2));
+          border:none;color:#fff;border-radius:12px;cursor:pointer;font-size:14px;font-weight:800">
+          Convert
+        </button>
       </div>
     </div>
   </div>
@@ -7713,8 +7722,7 @@ function loadWalletPage() {
   set('w-invested', fmtUSD(inv));
   set('w-earned', fmtUSD(earn));
   set('w-dep-bal-display', fmtUSD(bal));
-  set('w-sgm-for-convert', sgm.toLocaleString('en') + ' SGM');
-  set('w-usdt-for-convert', fmtUSD(bal));
+  if (typeof cvRefresh === 'function') cvRefresh();
 
   // Pre-fill wallet address
   const wdEl = $('wd-address');
@@ -7825,53 +7833,91 @@ function copyDepAddr() {
   }
 }
 
-function updateConvertPreview(dir, val) {
-  const n = parseFloat(val) || 0;
-  if (dir === 's2u') {
-    const el = $('s2u-preview');
-    if (el) el.textContent = n > 0 ? `${n} SGM → ${fmtUSD(n * 10)}` : '';
+// ── SWAP-STYLE CONVERTER ─────────────────────────────────────────
+// cvDir 's2u' = paying SGM, receiving USDT.  'u2s' = paying USDT, receiving SGM.
+let cvDir = 's2u';
+
+function cvRefresh() {
+  // Update currency labels, balances, and recalc — called on load + after swap.
+  const sgm = parseFloat(userProfile?.sgm_balance || 0);
+  const bal = parseFloat(userProfile?.wallet_balance_usd || 0);
+  const fromCur = $('cv-from-cur'), toCur = $('cv-to-cur'), fromBal = $('cv-from-bal');
+  if (cvDir === 's2u') {
+    if (fromCur) { fromCur.textContent = 'Σ SGM'; fromCur.style.color = 'var(--v2)'; }
+    if (toCur)   { toCur.textContent   = '◎ USDT'; toCur.style.color = 'var(--neon)'; }
+    if (fromBal) fromBal.textContent = sgm.toLocaleString('en') + ' SGM';
   } else {
-    const el = $('u2s-preview');
-    if (el) el.textContent = n >= 10 ? `${fmtUSD(n)} → ${Math.floor(n/10)} SGM` : '';
+    if (fromCur) { fromCur.textContent = '◎ USDT'; fromCur.style.color = 'var(--neon)'; }
+    if (toCur)   { toCur.textContent   = 'Σ SGM'; toCur.style.color = 'var(--v2)'; }
+    if (fromBal) fromBal.textContent = fmtUSD(bal);
+  }
+  cvUpdate();
+}
+
+function cvUpdate() {
+  const amt = parseFloat($('cv-from-amt')?.value) || 0;
+  const toEl = $('cv-to-amt'), hint = $('cv-hint');
+  if (cvDir === 's2u') {
+    const usdt = amt * 10;
+    if (toEl) toEl.textContent = fmtUSD(usdt);
+    if (hint) hint.textContent = amt > 0 ? `${amt} SGM × $10 = ${fmtUSD(usdt)}` : '1 SGM = $10 USDT';
+  } else {
+    const sgm = Math.floor(amt / 10);
+    if (toEl) toEl.textContent = sgm.toLocaleString('en') + ' SGM';
+    if (hint) hint.textContent = amt > 0 ? `${fmtUSD(amt)} ÷ $10 = ${sgm} SGM` : '$10 USDT = 1 SGM';
   }
 }
 
-async function convertSGMtoUSDT() {
-  const amt = parseFloat($('sgm-to-usdt-amt')?.value) || 0;
-  if (amt < 1) { showToast('Enter SGM amount', 'error'); return; }
-  const sgm = parseFloat(userProfile?.sgm_balance || 0);
-  if (amt > sgm) { showToast('Insufficient SGM balance', 'error'); return; }
-  const usdt = amt * 10;
-  const { error } = await sb.from('users').update({
-    sgm_balance: sgm - amt,
-    wallet_balance_usd: parseFloat(userProfile.wallet_balance_usd||0) + usdt
-  }).eq('id', currentUser.id);
-  if (error) { showToast('Conversion failed', 'error'); return; }
-  userProfile.sgm_balance = sgm - amt;
-  userProfile.wallet_balance_usd = parseFloat(userProfile.wallet_balance_usd||0) + usdt;
-  loadWalletPage();
-  setText('sf-bal', fmtUSD(userProfile.wallet_balance_usd));
-  $('sgm-to-usdt-amt').value = '';
-  showToast(`✅ ${amt} SGM → ${fmtUSD(usdt)}`, 'success');
+function cvSwap() {
+  cvDir = (cvDir === 's2u') ? 'u2s' : 's2u';
+  const inp = $('cv-from-amt'); if (inp) inp.value = '';
+  cvRefresh();
 }
 
-async function convertUSDTtoSGM() {
-  const amt = parseFloat($('usdt-to-sgm-amt')?.value) || 0;
-  if (amt < 10) { showToast('Minimum 10 USDT', 'error'); return; }
+function cvSetMax() {
+  const sgm = parseFloat(userProfile?.sgm_balance || 0);
   const bal = parseFloat(userProfile?.wallet_balance_usd || 0);
-  if (amt > bal) { showToast('Insufficient USDT balance', 'error'); return; }
-  const sgm = Math.floor(amt / 10);
-  const { error } = await sb.from('users').update({
-    wallet_balance_usd: bal - amt,
-    sgm_balance: parseFloat(userProfile.sgm_balance||0) + sgm
-  }).eq('id', currentUser.id);
-  if (error) { showToast('Conversion failed', 'error'); return; }
-  userProfile.wallet_balance_usd = bal - amt;
-  userProfile.sgm_balance = parseFloat(userProfile.sgm_balance||0) + sgm;
-  loadWalletPage();
-  setText('sf-bal', fmtUSD(userProfile.wallet_balance_usd));
-  $('usdt-to-sgm-amt').value = '';
-  showToast(`✅ ${fmtUSD(amt)} → ${sgm} SGM`, 'success');
+  const inp = $('cv-from-amt');
+  if (inp) { inp.value = (cvDir === 's2u') ? sgm : bal.toFixed(2); cvUpdate(); }
+}
+
+async function cvConvert() {
+  const amt = parseFloat($('cv-from-amt')?.value) || 0;
+  const btn = $('cv-btn');
+  const sgm = parseFloat(userProfile?.sgm_balance || 0);
+  const bal = parseFloat(userProfile?.wallet_balance_usd || 0);
+
+  if (cvDir === 's2u') {
+    if (amt < 1) { showToast('Enter SGM amount', 'error'); return; }
+    if (amt > sgm) { showToast('Insufficient SGM balance', 'error'); return; }
+  } else {
+    if (amt < 10) { showToast('Minimum 10 USDT', 'error'); return; }
+    if (amt > bal) { showToast('Insufficient USDT balance', 'error'); return; }
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Converting…'; }
+  try {
+    let update, msg;
+    if (cvDir === 's2u') {
+      const usdt = amt * 10;
+      update = { sgm_balance: sgm - amt, wallet_balance_usd: bal + usdt };
+      msg = `✅ ${amt} SGM → ${fmtUSD(usdt)}`;
+    } else {
+      const got = Math.floor(amt / 10);
+      update = { wallet_balance_usd: bal - amt, sgm_balance: sgm + got };
+      msg = `✅ ${fmtUSD(amt)} → ${got} SGM`;
+    }
+    const { error } = await sb.from('users').update(update).eq('id', currentUser.id);
+    if (error) { showToast('Conversion failed', 'error'); return; }
+    userProfile.sgm_balance        = update.sgm_balance;
+    userProfile.wallet_balance_usd = update.wallet_balance_usd;
+    const inp = $('cv-from-amt'); if (inp) inp.value = '';
+    loadWalletPage();
+    setText('sf-bal', fmtUSD(userProfile.wallet_balance_usd));
+    showToast(msg, 'success');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Convert'; }
+  }
 }
 
 async function loadWalletTransactions() {
