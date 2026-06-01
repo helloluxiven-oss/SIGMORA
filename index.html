@@ -3283,6 +3283,11 @@ async function showDashboard(user) {
   if (authEl) authEl.classList.add('hidden');
   if (appEl)  appEl.classList.remove('hidden');
   document.body.classList.add('in-app');
+  // Seed history + mark session active for back-button & 30-min grace.
+  try {
+    localStorage.setItem('sig_last_active', String(Date.now()));
+    if (history.state?.sigPage !== 'dashboard') history.pushState({ sigPage: 'dashboard' }, '', '#dashboard');
+  } catch(_){}
 
   // ── 2. Instant skeleton from JWT — zero DB wait ────────────────
   const emailFallback = user.email?.split('@')[0] || 'User';
@@ -3398,6 +3403,7 @@ function initAuthListener() {
       window.__blockDashboard = false;
       window.__userInitiatedSignIn = false;
       currentUser = null;
+      try { localStorage.removeItem('sig_last_active'); localStorage.removeItem('sig_last_page'); localStorage.removeItem('sig_last_scroll'); } catch(_){}
       // Show landing page on sign out
       const lp = $('landing-page');
       const app = $('main-app');
@@ -3529,6 +3535,13 @@ async function nav(id, el) {
   const pgTitle = $('pg-title'); if (pgTitle) pgTitle.textContent = PAGE_TITLES[id]||id;
   document.querySelector('.main')?.scrollTo(0,0);
   closeSidebar();
+  // Remember current screen for seamless return
+  try { localStorage.setItem('sig_last_page', id); localStorage.setItem('sig_last_active', String(Date.now())); } catch(_){}
+  // Push an in-app history entry so the hardware back button moves between
+  // screens instead of leaving the site (skip duplicates / initial dashboard).
+  if (!window.__navSilent && history.state?.sigPage !== id) {
+    history.pushState({ sigPage: id }, '', '#' + id);
+  }
   loadPageData(id);
 }
 
@@ -5742,10 +5755,26 @@ function attachEventListeners() {
     }
 
     if (session?.user) {
-      // SECURITY POLICY: do NOT auto-open the dashboard from a restored
-      // session. Always require an explicit sign-in. Start the listener
-      // and stay on the landing page; user signs in via the auth screen.
+      // 30-MINUTE GRACE WINDOW: if the user was active within the last
+      // 30 minutes, restore them straight into the app (seamless return).
+      // Otherwise require an explicit sign-in.
       initAuthListener();
+      try {
+        const GRACE_MS = 30 * 60 * 1000;
+        const last = parseInt(localStorage.getItem('sig_last_active') || '0', 10);
+        if (last && (Date.now() - last) < GRACE_MS) {
+          window.__userInitiatedSignIn = true;
+          await showDashboard(session.user);
+          // Restore last screen + scroll
+          const lastPage = localStorage.getItem('sig_last_page');
+          if (lastPage && lastPage !== 'dashboard') {
+            const navEl = document.querySelector(`.ni[onclick*="${lastPage}"]`);
+            if (navEl) { try { await nav(lastPage, navEl); } catch(_){} }
+          }
+          const sy = parseInt(localStorage.getItem('sig_last_scroll') || '0', 10);
+          if (sy) { const m = document.querySelector('.main'); if (m) m.scrollTop = sy; }
+        }
+      } catch(_) { /* stay on landing if anything fails */ }
     } else {
       // No session — start auth listener and wait for sign in
       initAuthListener();
@@ -7259,6 +7288,83 @@ function checkReferralParam() {
 // Check referral on page load
 checkReferralParam();
 
+// ══════════════════════════════════════════════════════════════════════
+// BACK BUTTON + SESSION CONTINUITY (world-class mobile behavior)
+// ══════════════════════════════════════════════════════════════════════
+(function setupBackAndContinuity() {
+  // Keep "last active" fresh on any interaction so the 30-min grace works.
+  const touch = () => { try { localStorage.setItem('sig_last_active', String(Date.now())); } catch(_){} };
+  ['click','keydown','touchstart','scroll'].forEach(ev =>
+    document.addEventListener(ev, touch, { passive: true, capture: true }));
+
+  // Save scroll position of the main scroll area (throttled).
+  let _st;
+  document.addEventListener('scroll', (e) => {
+    const m = e.target.closest ? e.target.closest('.main') : null;
+    const main = document.querySelector('.main');
+    if (!main) return;
+    clearTimeout(_st);
+    _st = setTimeout(() => { try { localStorage.setItem('sig_last_scroll', String(main.scrollTop)); } catch(_){} }, 200);
+  }, { passive: true, capture: true });
+
+  // Also persist on tab hide / app background.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      touch();
+      const main = document.querySelector('.main');
+      if (main) { try { localStorage.setItem('sig_last_scroll', String(main.scrollTop)); } catch(_){} }
+    }
+  });
+
+  // Seed a root history entry so the first back press has somewhere to land.
+  let _exitArmed = false;
+  if (!history.state) history.replaceState({ sigRoot: true }, '', location.href);
+
+  window.addEventListener('popstate', (e) => {
+    // Only intercept when inside the app.
+    if (!document.body.classList.contains('in-app')) return;
+
+    // 1) If a modal is open, close it and stay.
+    const openModalEl = document.querySelector('.modal-backdrop.open, #pw-reset-modal');
+    if (openModalEl) {
+      history.pushState({ sigPage: localStorage.getItem('sig_last_page') || 'dashboard' }, '', '#' + (localStorage.getItem('sig_last_page')||'dashboard'));
+      if (openModalEl.id === 'pw-reset-modal') { /* leave reset modal alone */ }
+      else { document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open')); }
+      return;
+    }
+
+    // 2) If the sidebar is open, close it and stay.
+    const sb = document.getElementById('sidebar');
+    if (sb && sb.classList.contains('open')) {
+      if (typeof closeSidebar === 'function') closeSidebar();
+      history.pushState({ sigPage: localStorage.getItem('sig_last_page') || 'dashboard' }, '', '#' + (localStorage.getItem('sig_last_page')||'dashboard'));
+      return;
+    }
+
+    // 3) If we navigated to a non-dashboard screen, go to the state we land on.
+    const target = e.state && e.state.sigPage;
+    if (target) {
+      const navEl = document.querySelector(`.ni[onclick*="${target}"]`);
+      window.__navSilent = true;            // don't push a new history entry
+      try { nav(target, navEl); } catch(_){}
+      window.__navSilent = false;
+      _exitArmed = false;
+      return;
+    }
+
+    // 4) At the app root (dashboard) — "press back again to exit".
+    if (!_exitArmed) {
+      _exitArmed = true;
+      if (typeof showToast === 'function') showToast('Press back again to exit', 'info');
+      // Re-arm a history entry so this press doesn't leave immediately.
+      history.pushState({ sigPage: 'dashboard' }, '', '#dashboard');
+      setTimeout(() => { _exitArmed = false; }, 2000);
+      return;
+    }
+    // Second press within 2s → allow it to leave (do nothing; browser exits).
+  });
+})();
+
 // ALWAYS show landing page first — preload data in background
 (async () => {
   try {
@@ -8184,15 +8290,13 @@ async function loadDashboard() {
   const propEl = $('dash-properties');
   if (propEl && allProperties?.length > 0) {
     propEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">` +
-      allProperties.slice(0,3).map(p => {
-        const dImg = getPropImage(p);
-        return `
+      allProperties.slice(0,3).map(p => `
         <div onclick="nav('properties',document.getElementById('ni-properties'))"
           style="background:var(--b2);border-radius:12px;overflow:hidden;cursor:pointer;
           border:1px solid var(--b1);transition:transform 0.15s"
           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          <div style="height:90px;background:var(--b3);${dImg ? `background-image:url('${dImg.src}');background-size:cover;background-position:${dImg.pos||'center'};` : ''}display:flex;align-items:center;justify-content:center;
-            font-size:28px">${dImg ? '' : '🏛️'}</div>
+          <div style="height:90px;background:var(--b3);display:flex;align-items:center;justify-content:center;
+            font-size:28px">🏛️</div>
           <div style="padding:10px">
             <div style="font-size:12px;font-weight:700;margin-bottom:2px">${p.name}</div>
             <div style="font-size:10px;color:var(--t4);margin-bottom:8px">${p.location||'Premium Location'}</div>
@@ -8201,8 +8305,7 @@ async function loadDashboard() {
               <span style="color:var(--v2)">≋ ${p.token_price_usd}/token</span>
             </div>
           </div>
-        </div>`;
-      }).join('') + `</div>`;
+        </div>`).join('') + `</div>`;
   } else if (propEl) {
     propEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t4);font-size:13px">Properties coming soon</div>';
   }
