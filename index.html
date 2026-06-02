@@ -1659,7 +1659,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       <span class="nbadge" id="nav-prop-badge" style="font-size:11px;padding:1px 5px;display:none">0</span>
     </div>
     <div class="ni" onclick="nav('roi-tracker',this)" id="ni-roi-tracker">
-      <span class="ni-ic">△</span><span class="ni-lbl">ROI Tracker</span>
+      <span class="ni-ic">△</span><span class="ni-lbl">Transparency</span>
     </div>
 
     <!-- TRADE -->
@@ -2313,7 +2313,27 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
   <!-- ═══ ROI TRACKER ═══ -->
   <div class="page" id="pg-roi-tracker">
-    <div class="sh"><div class="sh-l"><div class="sh-title">ROI Tracker</div><div class="sh-sub">Rental income history and earnings breakdown</div></div></div>
+    <div class="sh"><div class="sh-l"><div class="sh-title">Transparency &amp; Earnings</div><div class="sh-sub">Live platform solvency, real income collected, and your earnings</div></div></div>
+
+    <!-- ═══ PLATFORM TRANSPARENCY (live, public to investors) ═══ -->
+    <div class="card" style="margin-bottom:16px;border-color:rgba(16,185,129,0.3)">
+      <div class="card-hd">
+        <div class="card-title"><span class="cdot" id="tp-dot" style="background:var(--mint)"></span>Platform Solvency — Live</div>
+        <button onclick="loadTransparency()" class="btn btn-ghost" style="font-size:11px">🔄 Refresh</button>
+      </div>
+      <div class="g4" style="margin-bottom:10px">
+        <div class="kpi"><div class="kpi-lbl">Reserve Ratio</div><div class="kpi-val" id="tp-ratio" style="font-size:22px;color:var(--mint)">—</div><div class="kpi-meta">Reserves ÷ obligations</div></div>
+        <div class="kpi"><div class="kpi-lbl">Backing Status</div><div class="kpi-val" id="tp-gate" style="font-size:16px">—</div><div class="kpi-meta">Auto-halt if underfunded</div></div>
+        <div class="kpi"><div class="kpi-lbl">Rent Collected</div><div class="kpi-val" id="tp-income" style="font-size:20px;color:var(--gold)">—</div><div class="kpi-meta">Real property income</div></div>
+        <div class="kpi"><div class="kpi-lbl">Listed Properties</div><div class="kpi-val" id="tp-props" style="font-size:20px;color:var(--v2)">—</div><div class="kpi-meta">Active assets</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--t4);line-height:1.6;border-top:1px solid var(--b3);padding-top:10px">
+        Every payout on SIGMORA comes only from <b style="color:var(--t2)">real rental income</b> collected from properties — never from new deposits.
+        If reserves ever fall below what we owe investors, the system <b style="color:var(--t2)">automatically pauses payouts</b>. This page reads live from the platform ledger.
+      </div>
+    </div>
+
+    <div class="sh" style="margin:18px 0 8px"><div class="sh-l"><div class="sh-sub" style="font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Your Earnings</div></div></div>
     <div class="g3">
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Payouts</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="roi-total">$0</div><div class="kpi-meta">Lifetime earnings</div></div>
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Last Payout</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="roi-last">$0</div><div class="kpi-meta">Most recent</div></div>
@@ -2326,7 +2346,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     <div class="card">
       <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Payout History</div></div>
       <table class="tbl">
-        <thead><tr><th>Date</th><th>Property</th><th>Tokens</th><th>ROI %</th><th>Gross</th><th>Net Paid</th><th>Status</th></tr></thead>
+        <thead><tr><th>Date</th><th>Property</th><th>Tokens</th><th>Rate</th><th>Gross</th><th>Net Paid</th><th>Status</th></tr></thead>
         <tbody id="roi-table"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--t4)">Loading payouts...</td></tr></tbody>
       </table>
     </div>
@@ -2347,7 +2367,9 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div class="fg"><label>Total Value (USD)</label><input type="number" id="ap-value" placeholder="4200000"/></div>
         <div class="fg"><label>Token Price (USD)</label><input type="number" id="ap-token-price" placeholder="10"/></div>
         <div class="fg"><label>Total Supply</label><input type="number" id="ap-supply" placeholder="420000"/></div>
-        <div class="fg"><label>Daily ROI (%)</label><input type="number" id="ap-roi" placeholder="0.35" step="0.01"/></div>
+        <div class="fg"><label>Net Rental Yield (% / yr)</label><input type="number" id="ap-yield" placeholder="6" step="0.1"/></div>
+        <div class="fg"><label>Current Valuation (USD)</label><input type="number" id="ap-valuation" placeholder="4200000"/></div>
+        <div class="fg"><label>Lock-in (months)</label><input type="number" id="ap-lock" placeholder="18"/></div>
         <div class="fg"><label>Min Investment (Tokens)</label><input type="number" id="ap-min" placeholder="10"/></div>
         <div class="fg"><label>Launch Date</label><input type="date" id="ap-launch"/></div>
       </div>
@@ -4569,7 +4591,27 @@ async function loadMyTokens() {
 // ═══════════════════════════════════════════════
 // ROI TRACKER
 // ═══════════════════════════════════════════════
+async function loadTransparency() {
+  try {
+    const { data: s } = await sb.rpc('compute_solvency');
+    const hasLiab = s?.has_liabilities;
+    const solvent = s?.is_solvent;
+    const rEl=$('tp-ratio'), gEl=$('tp-gate'), dEl=$('tp-dot');
+    if (rEl) { rEl.textContent = hasLiab ? ((s.reserve_ratio*100).toFixed(1)+'%') : 'N/A'; rEl.style.color = !hasLiab?'var(--t3)':(solvent?'var(--mint)':'var(--rose)'); }
+    if (gEl) { gEl.textContent = !hasLiab?'— Idle':(solvent?'✅ Fully Backed':'⛔ Paused'); gEl.style.color = !hasLiab?'var(--t3)':(solvent?'var(--mint)':'var(--rose)'); }
+    if (dEl) dEl.style.background = !hasLiab?'var(--t4)':(solvent?'var(--mint)':'var(--rose)');
+    // total real income collected
+    const { data: inc } = await sb.from('property_income').select('amount_usd');
+    const totalInc = (inc||[]).reduce((a,r)=>a+parseFloat(r.amount_usd||0),0);
+    setText('tp-income', fmtUSD(totalInc));
+    // active property count
+    const { count } = await sb.from('properties').select('id',{count:'exact',head:true}).eq('status','active');
+    setText('tp-props', String(count||0));
+  } catch(e) { console.error('transparency', e); }
+}
+
 async function loadROITracker() {
+  loadTransparency();
   const { data: payouts } = await sb.from('roi_payouts')
     .select('*, properties(name)').eq('user_id',currentUser.id)
     .order('payout_date',{ascending:false}).limit(50);
@@ -4619,7 +4661,9 @@ async function doAddProperty() {
     total_value_usd:parseFloat($('ap-value')?.value)||0,
     token_price_usd:parseFloat($('ap-token-price')?.value)||10,
     total_supply:parseInt($('ap-supply')?.value)||0,
-    daily_roi_percent:parseFloat($('ap-roi')?.value)||0.35,
+    net_rental_yield_pct:parseFloat($('ap-yield')?.value)||6,
+    current_valuation_usd:parseFloat($('ap-valuation')?.value)||parseFloat($('ap-value')?.value)||0,
+    lock_months:parseInt($('ap-lock')?.value)||18,
     min_investment_tokens:parseInt($('ap-min')?.value)||1,
     launch_date:$('ap-launch')?.value||null,
     description:$('ap-desc')?.value,
@@ -4630,7 +4674,7 @@ async function doAddProperty() {
   clearPropertyForm();
 }
 function clearPropertyForm() {
-  ['ap-name','ap-symbol','ap-country','ap-city','ap-address','ap-value','ap-token-price','ap-supply','ap-roi','ap-min','ap-launch','ap-desc'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['ap-name','ap-symbol','ap-country','ap-city','ap-address','ap-value','ap-token-price','ap-supply','ap-yield','ap-valuation','ap-lock','ap-min','ap-launch','ap-desc'].forEach(id=>{const el=$(id);if(el)el.value='';});
 }
 
 // ═══════════════════════════════════════════════
