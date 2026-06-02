@@ -6132,15 +6132,25 @@ async function loadSolvency() {
     const { data, error } = await sb.rpc('compute_solvency');
     if (error) throw error;
     const s = data || {};
-    const ratio = (s.reserve_ratio ?? 1) * 100;
+    const hasLiab = s.has_liabilities;
     const solvent = s.is_solvent;
-    setText('solv-ratio', ratio.toFixed(1) + '%');
+    const ratioEl = $('solv-ratio');
+    if (!hasLiab) {
+      setText('solv-ratio', 'N/A');
+      if (ratioEl) ratioEl.style.color = 'var(--t3)';
+    } else {
+      const ratio = (s.reserve_ratio ?? 0) * 100;
+      setText('solv-ratio', ratio.toFixed(1) + '%');
+      if (ratioEl) ratioEl.style.color = solvent ? 'var(--mint)' : 'var(--rose)';
+    }
     setText('solv-reserves', fmtUSD(s.reserves || 0));
     setText('solv-liab', fmtUSD(s.liabilities || 0));
-    const gateEl = $('solv-gate'), dotEl = $('solv-dot'), ratioEl = $('solv-ratio');
-    if (gateEl) { gateEl.textContent = solvent ? '✅ SOLVENT' : '⛔ HALT'; gateEl.style.color = solvent ? 'var(--mint)' : 'var(--rose)'; }
-    if (dotEl) dotEl.style.background = solvent ? 'var(--mint)' : 'var(--rose)';
-    if (ratioEl) ratioEl.style.color = solvent ? 'var(--mint)' : 'var(--rose)';
+    const gateEl = $('solv-gate'), dotEl = $('solv-dot');
+    if (gateEl) {
+      gateEl.textContent = !hasLiab ? '— IDLE' : (solvent ? '✅ SOLVENT' : '⛔ HALT');
+      gateEl.style.color = !hasLiab ? 'var(--t3)' : (solvent ? 'var(--mint)' : 'var(--rose)');
+    }
+    if (dotEl) dotEl.style.background = !hasLiab ? 'var(--t4)' : (solvent ? 'var(--mint)' : 'var(--rose)');
     // pools
     const { data: pools } = await sb.from('pool_balances').select('pool_name,balance_usd');
     (pools || []).forEach(p => {
