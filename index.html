@@ -1413,7 +1413,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     <p style="font-size:18px;color:var(--t3);max-width:560px;
       line-height:1.7;margin:0 0 40px">
       Invest in tokenized properties across Dubai, London, Singapore &amp; Miami.
-      Earn daily ROI payouts. Start with as little as $100 USDT.
+      Earn rental income from real property earnings. Start with as little as $100 USDT.
     </p>
 
     <!-- Stats row -->
@@ -1423,8 +1423,8 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">PROPERTIES</div>
       </div>
       <div style="text-align:center">
-        <div style="font-size:28px;font-weight:900;color:var(--v2)">0.35%</div>
-        <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">DAILY ROI</div>
+        <div style="font-size:28px;font-weight:900;color:var(--v2)">Rental</div>
+        <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">INCOME</div>
       </div>
       <div style="text-align:center">
         <div style="font-size:28px;font-weight:900;color:var(--gold)">$100</div>
@@ -1478,7 +1478,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         <div style="width:40px;height:40px;border-radius:12px;background:var(--vg);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px">🏛️</div>
         <div style="position:absolute;top:20px;right:20px;font-size:48px;font-weight:900;color:rgba(255,255,255,0.04);font-family:var(--f-mono)">3</div>
         <div style="font-size:16px;font-weight:800;margin-bottom:8px">Buy Property Tokens</div>
-        <div style="font-size:13px;color:var(--t3);line-height:1.6">Choose from our curated properties. Each token = fractional ownership. Daily ROI starts next day.</div>
+        <div style="font-size:13px;color:var(--t3);line-height:1.6">Choose from our curated properties. Each token = fractional ownership. Rental income begins once the property earns.</div>
       </div>
     </div>
   </div>
@@ -2166,7 +2166,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
 <div class="page" id="pg-properties">
     <div class="sh">
-      <div class="sh-l"><div class="sh-title">Property Listings</div><div class="sh-sub">Tokenized real estate from global premium markets — earn daily ROI from day one</div></div>
+      <div class="sh-l"><div class="sh-title">Property Listings</div><div class="sh-sub">Tokenized real estate from global premium markets — earn rental income from real property earnings</div></div>
       <div class="sh-r">
         <select onchange="filterProperties(this.value)" style="background:var(--raised);border:1px solid var(--b3);color:var(--t1);padding:8px 14px;border-radius:9px;font-family:var(--f-head);font-size:12px;outline:none;cursor:pointer">
           <option value="">🌍 All Types</option>
@@ -2191,7 +2191,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       </div>
       <div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--b3);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
         <div style="width:36px;height:36px;border-radius:10px;background:rgba(251,191,36,0.12);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
-        <div><div style="font-family:var(--f-mono);font-size:11px;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Avg Daily ROI</div><div style="font-size:20px;font-weight:900;color:var(--gold)" id="prop-stat-roi">0.27%</div></div>
+        <div><div style="font-family:var(--f-mono);font-size:11px;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Est. Net Yield</div><div style="font-size:20px;font-weight:900;color:var(--gold)" id="prop-stat-roi">~6–10%</div></div>
       </div>
       <div style="flex:1;min-width:140px;background:var(--surface);border:1px solid var(--b3);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
         <div style="width:36px;height:36px;border-radius:10px;background:rgba(0,245,212,0.12);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🌍</div>
@@ -2272,7 +2272,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           <div class="ob-row">Quantity <span id="ob-qty">—</span></div>
           <div class="ob-row">Platform Fee (1%) <span id="ob-fee">—</span></div>
           <div class="ob-total">Total <span id="ob-total">—</span></div>
-          <div class="ob-note">Daily ROI: <b id="ob-roi">0.00%</b> · Break-even: <b id="ob-bep">— days</b></div>
+          <div class="ob-note">Est. net rental yield: <b id="ob-roi">~6–10%/yr*</b> · 18-month lock-in</div>
         </div>
         <div class="fbtns">
           <button class="fb p" onclick="doBuyTokens()">◆ Confirm Purchase</button>
@@ -2291,8 +2291,9 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           <div style="padding:0 18px 14px">
             <div class="tm"><div class="tm-top"><span class="tm-sym">SGM PRICE</span><span class="tm-val" style="color:var(--v2)">$10.00</span></div><div class="tm-row"><span>Market Cap</span><span class="mono" style="color:var(--t2)">$120M</span></div></div>
             <div class="tm"><div class="tm-top"><span class="tm-sym">CIRCULATING</span><span class="tm-val" style="color:var(--mint)">12M SGM</span></div><div class="tm-row"><span>Total Supply</span><span class="mono" style="color:var(--t2)">100M SGM</span></div></div>
-            <div class="tm"><div class="tm-top"><span class="tm-sym">DAILY ROI</span><span class="tm-val" style="color:var(--gold)">0.25–0.50%</span></div><div class="tm-row"><span>Annual Yield</span><span class="mono" style="color:var(--mint)">~127% APY</span></div></div>
+            <div class="tm"><div class="tm-top"><span class="tm-sym">RENTAL YIELD</span><span class="tm-val" style="color:var(--gold)">Variable</span></div><div class="tm-row"><span>Est. net annual</span><span class="mono" style="color:var(--mint)">~6–10%*</span></div></div>
           </div>
+          <div style="padding:0 18px 14px;font-size:10px;color:var(--t4);line-height:1.5">*Indicative net rental yield from real property income. Not guaranteed. Actual income depends on occupancy and property performance.</div>
         </div>
       </div>
     </div>
@@ -2304,7 +2305,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     <div class="card">
       <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Token Holdings</div></div>
       <table class="tbl">
-        <thead><tr><th>Property</th><th>Symbol</th><th>Tokens</th><th>Token Price</th><th>Value</th><th>Daily ROI</th><th>Total Earned</th></tr></thead>
+        <thead><tr><th>Property</th><th>Symbol</th><th>Tokens</th><th>Token Price</th><th>Value</th><th>Income Earned</th><th>Total Earned</th></tr></thead>
         <tbody id="my-tokens-table"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--t4)">Loading...</td></tr></tbody>
       </table>
     </div>
@@ -2312,7 +2313,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
   <!-- ═══ ROI TRACKER ═══ -->
   <div class="page" id="pg-roi-tracker">
-    <div class="sh"><div class="sh-l"><div class="sh-title">ROI Tracker</div><div class="sh-sub">Daily payout history and earnings breakdown</div></div></div>
+    <div class="sh"><div class="sh-l"><div class="sh-title">ROI Tracker</div><div class="sh-sub">Rental income history and earnings breakdown</div></div></div>
     <div class="g3">
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Payouts</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="roi-total">$0</div><div class="kpi-meta">Lifetime earnings</div></div>
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Last Payout</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="roi-last">$0</div><div class="kpi-meta">Most recent</div></div>
@@ -2695,7 +2696,53 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Today's Payouts</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="rev-today">—</div></div>
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total TVL</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px" id="rev-tvl">—</div></div>
     </div>
-    
+
+    <!-- ═══ SOLVENCY DASHBOARD (v2) ═══ -->
+    <div class="card" style="margin-bottom:16px;border-color:rgba(211,69,91,0.35)">
+      <div class="card-hd">
+        <div class="card-title"><span class="cdot" id="solv-dot" style="background:var(--mint)"></span>Solvency Engine</div>
+        <button onclick="loadSolvency()" class="btn btn-ghost" style="font-size:11px">🔄 Refresh</button>
+      </div>
+      <div class="g4" style="margin-bottom:12px">
+        <div class="kpi"><div class="kpi-lbl">Reserve Ratio</div><div class="kpi-val" id="solv-ratio" style="font-size:22px">—</div></div>
+        <div class="kpi"><div class="kpi-lbl">Reserves</div><div class="kpi-val" id="solv-reserves" style="font-size:18px;color:var(--mint)">—</div></div>
+        <div class="kpi"><div class="kpi-lbl">Liabilities</div><div class="kpi-val" id="solv-liab" style="font-size:18px;color:var(--gold)">—</div></div>
+        <div class="kpi"><div class="kpi-lbl">Gate Status</div><div class="kpi-val" id="solv-gate" style="font-size:16px">—</div></div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--t3)">
+        <span>Custody pool: <b id="pool-custody" style="color:var(--t1)">—</b></span>
+        <span>Yield pool: <b id="pool-yield" style="color:var(--t1)">—</b></span>
+        <span>Treasury: <b id="pool-treasury" style="color:var(--t1)">—</b></span>
+        <span>SGM backing: <b id="pool-backing" style="color:var(--t1)">—</b></span>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--t4)">Gate auto-halts payouts if reserves fall below liabilities. Payouts come only from the yield pool (real income).</div>
+    </div>
+
+    <!-- ═══ RECORD PROPERTY INCOME (v2) ═══ -->
+    <div class="card" style="margin-bottom:16px;border-color:rgba(247,195,37,0.35)">
+      <div class="card-hd">
+        <div class="card-title"><span class="cdot" style="background:var(--gold)"></span>Record Property Income</div>
+      </div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:12px">Log real rent received or sale gains. Net (after platform fee) flows into the yield pool — the only source of user payouts.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:160px">
+          <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">Property</label>
+          <select id="inc-property" style="width:100%;padding:10px;border-radius:8px;background:var(--b3);border:1px solid var(--b1);color:var(--t1);font-size:13px;min-height:42px"><option value="">Loading…</option></select>
+        </div>
+        <div style="width:120px">
+          <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">Type</label>
+          <select id="inc-type" style="width:100%;padding:10px;border-radius:8px;background:var(--b3);border:1px solid var(--b1);color:var(--t1);font-size:13px;min-height:42px">
+            <option value="rent">Rent</option><option value="sale_gain">Sale gain</option><option value="other">Other</option>
+          </select>
+        </div>
+        <div style="width:140px">
+          <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">Amount (USD)</label>
+          <input id="inc-amount" type="number" min="0" step="0.01" placeholder="0.00" style="width:100%;padding:10px;border-radius:8px;background:var(--b3);border:1px solid var(--b1);color:var(--t1);font-size:13px;min-height:42px"/>
+        </div>
+        <button onclick="recordIncome()" class="btn" style="background:var(--gold);color:#1a1a1a;font-weight:700;min-height:42px;padding:0 18px">+ Record</button>
+      </div>
+    </div>
+
     <!-- Pending Deposits — Admin Panel -->
     <div class="card" style="margin-bottom:16px;border-color:rgba(0,245,212,0.2)">
       <div class="card-hd">
@@ -2810,7 +2857,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--mint)"></span>Platform Controls</div></div>
           <div style="padding:8px 18px 14px">
             <div class="tgl-row"><div class="tgl-l"><div class="tgl-name">Email Notifications</div><div class="tgl-sub">Receive payout & activity emails</div></div><div class="tgl on" id="tgl-email" onclick="this.classList.toggle('on')"></div></div>
-            <div class="tgl-row"><div class="tgl-l"><div class="tgl-name">Auto-Reinvest ROI</div><div class="tgl-sub">Reinvest daily payouts automatically</div></div><div class="tgl" id="tgl-reinvest" onclick="this.classList.toggle('on')"></div></div>
+            <div class="tgl-row"><div class="tgl-l"><div class="tgl-name">Auto-Reinvest Income</div><div class="tgl-sub">Reinvest rental income automatically</div></div><div class="tgl" id="tgl-reinvest" onclick="this.classList.toggle('on')"></div></div>
             <div class="tgl-row"><div class="tgl-l"><div class="tgl-name">Two-Factor Auth</div><div class="tgl-sub">Extra security for your account</div></div><div class="tgl" onclick="showToast('2FA setup coming soon','info')"></div></div>
           </div>
         </div>
@@ -4169,7 +4216,7 @@ async function openPropertyModal(propId) {
             <div style="font-family:var(--f-mono);font-weight:700;font-size:15px">${fmtUSD(prop.token_price_usd)}</div>
           </div>
           <div style="text-align:center;border-left:1px solid var(--b3)">
-            <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Daily ROI</div>
+            <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Income Earned</div>
             <div style="font-family:var(--f-mono);color:var(--mint);font-weight:700;font-size:15px">${fmtPct(prop.daily_roi_percent)}</div>
           </div>
           <div style="text-align:center;border-left:1px solid var(--b3)">
@@ -4422,8 +4469,7 @@ function updateBuyOrder() {
   const obQty=$('ob-qty');if(obQty)obQty.textContent=qty.toLocaleString();
   const obFee=$('ob-fee');if(obFee)obFee.textContent=fmtUSD(fee);
   const obTotal=$('ob-total');if(obTotal)obTotal.textContent=fmtUSD(total);
-  const obRoi=$('ob-roi');if(obRoi)obRoi.textContent=fmtPct(roi);
-  const obBep=$('ob-bep');if(obBep)obBep.textContent=bep?bep+' days':'—';
+  // ob-roi/ob-bep intentionally left static (honest rental-income copy in markup); no daily-ROI overwrite
 }
 
 async function doBuyTokens() {
@@ -4474,7 +4520,7 @@ async function doBuyTokens() {
     renderTierUI();
 
     showToast(
-      `✅ Success! ${data.tokens} ${data.symbol} tokens purchased for ${fmtUSD(amountUsd)}. Daily ROI starts tomorrow.`,
+      `✅ Success! ${data.tokens} ${data.symbol} tokens purchased for ${fmtUSD(amountUsd)}. Rental income begins once the property earns.`,
       'success', 6000
     );
 
@@ -5475,6 +5521,8 @@ async function updateKYC(userId, status) {
 // ═══════════════════════════════════════════════
 async function loadRevenue() {
   if (!['admin','super_admin'].includes(userProfile?.role)) return;
+  loadSolvency();
+  loadIncomeProperties();
 
   // ── Real stats from DB ──────────────────────────────────────────
   const [
@@ -6056,26 +6104,83 @@ document.addEventListener('click', e => {
 async function adminRunPayouts() {
   const btn = document.querySelector('[onclick*="adminRunPayouts"]');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Running…'; }
-
   try {
-    const { data, error } = await sb.rpc('admin_trigger_roi_payout');
+    const { data, error } = await sb.rpc('process_daily_income_payout');
     if (error) throw error;
-
-    const r = data;
-    showToast(
-      `✅ Payout complete: ${r.paid_out} investors paid · $${r.total_usd} total`,
-      'success',
-      6000
-    );
-
-    // Refresh dashboard stats
-    if (document.querySelector('.page.active')?.id === 'pg-revenue-admin') {
-      loadRevenue();
+    const r = data || {};
+    if (r.halted) {
+      showToast(`⛔ HALTED — insolvent (ratio ${(r.reserve_ratio*100).toFixed(1)}%). No payouts made.`, 'error', 7000);
+    } else if (r.skipped) {
+      showToast('Already ran for today.', 'info');
+    } else if (r.paid_total !== undefined) {
+      showToast(`✅ Paid $${(+r.paid_total).toFixed(2)} to ${r.investments_paid} investment(s) from real income`, 'success', 6000);
+    } else {
+      showToast(r.reason || 'Nothing to pay (no income yet).', 'info');
     }
+    loadSolvency();
+    if (document.querySelector('.page.active')?.id === 'pg-revenue-admin') loadRevenue();
   } catch(e) {
     showToast('Payout failed: ' + (e.message || 'Unknown error'), 'error');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '▶ RUN PAYOUTS'; }
+  }
+}
+
+// ── v2: Solvency dashboard ───────────────────────────────────────
+async function loadSolvency() {
+  try {
+    const { data, error } = await sb.rpc('compute_solvency');
+    if (error) throw error;
+    const s = data || {};
+    const ratio = (s.reserve_ratio ?? 1) * 100;
+    const solvent = s.is_solvent;
+    setText('solv-ratio', ratio.toFixed(1) + '%');
+    setText('solv-reserves', fmtUSD(s.reserves || 0));
+    setText('solv-liab', fmtUSD(s.liabilities || 0));
+    const gateEl = $('solv-gate'), dotEl = $('solv-dot'), ratioEl = $('solv-ratio');
+    if (gateEl) { gateEl.textContent = solvent ? '✅ SOLVENT' : '⛔ HALT'; gateEl.style.color = solvent ? 'var(--mint)' : 'var(--rose)'; }
+    if (dotEl) dotEl.style.background = solvent ? 'var(--mint)' : 'var(--rose)';
+    if (ratioEl) ratioEl.style.color = solvent ? 'var(--mint)' : 'var(--rose)';
+    // pools
+    const { data: pools } = await sb.from('pool_balances').select('pool_name,balance_usd');
+    (pools || []).forEach(p => {
+      const id = { custody:'pool-custody', yield:'pool-yield', treasury:'pool-treasury', sgm_backing:'pool-backing' }[p.pool_name];
+      if (id) setText(id, fmtUSD(p.balance_usd || 0));
+    });
+  } catch(e) { console.error('solvency load', e); }
+}
+
+// ── v2: Record property income ───────────────────────────────────
+async function loadIncomeProperties() {
+  try {
+    const { data } = await sb.from('properties').select('id,name').eq('status','active').order('name');
+    const sel = $('inc-property'); if (!sel) return;
+    sel.innerHTML = (data && data.length)
+      ? data.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
+      : '<option value="">No active properties</option>';
+  } catch(e) { console.error('inc props', e); }
+}
+
+async function recordIncome() {
+  const pid = $('inc-property')?.value;
+  const type = $('inc-type')?.value || 'rent';
+  const amt = parseFloat($('inc-amount')?.value);
+  if (!pid) { showToast('Pick a property', 'error'); return; }
+  if (!amt || amt <= 0) { showToast('Enter a valid amount', 'error'); return; }
+  const btn = document.querySelector('[onclick*="recordIncome"]');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  try {
+    const { data, error } = await sb.rpc('record_property_income', {
+      p_property_id: pid, p_income_type: type, p_amount: amt, p_admin_id: currentUser.id
+    });
+    if (error) throw error;
+    showToast(`✅ Recorded $${amt} — $${(+data.to_yield_pool).toFixed(2)} to yield pool (fee $${(+data.fee).toFixed(2)})`, 'success', 6000);
+    const inp = $('inc-amount'); if (inp) inp.value = '';
+    loadSolvency();
+  } catch(e) {
+    showToast('Failed: ' + (e.message || 'error'), 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '+ Record'; }
   }
 }
 
@@ -7382,7 +7487,7 @@ function updateROICalc(amount, roiPct, tokenPrice) {
   if (el('calc-monthly'))        el('calc-monthly').textContent = fmt(monthly);
   if (el('calc-yearly'))         el('calc-yearly').textContent  = fmt(yearly);
   if (el('calc-tokens-info'))    el('calc-tokens-info').textContent =
-    `${tokens} tokens at $${price} each · ${roi}% daily ROI`;
+    `${tokens} tokens at $${price} each · 18-month lock-in`;
   if (el('roi-calc-slider'))     el('roi-calc-slider').value = usd;
 }
 
@@ -7801,7 +7906,7 @@ function loadWalletPage() {
           <div style="font-size:20px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px">Make your first deposit to start earning</div>
           <div style="font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:16px;max-width:560px">
             Deposit USDT (BEP-20), convert to SGM, and invest in tokenized real estate
-            earning up to <b style="color:var(--mint)">0.35%/day</b>. Your balance and ROI will appear here automatically.
+            earning <b style="color:var(--mint)">rental income from real property earnings</b>. Your balance and income will appear here automatically.
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button onclick="document.getElementById('w-dep-qr-wrap')?.scrollIntoView({behavior:'smooth',block:'center'})"
@@ -7821,7 +7926,7 @@ function loadWalletPage() {
             </div>
             <div style="flex:1;min-width:120px">
               <div style="font-size:11px;color:var(--mint);font-weight:700;margin-bottom:2px">3 · Earn</div>
-              <div style="font-size:11px;color:var(--t4);line-height:1.4">Invest in property, earn daily ROI</div>
+              <div style="font-size:11px;color:var(--t4);line-height:1.4">Invest in property, earn rental income</div>
             </div>
           </div>
         </div>`;
@@ -8288,7 +8393,7 @@ async function loadWalletTransactions() {
         <p>By accessing or using SIGMORA ("Platform", "we", "us", or "our"), you agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use the Platform. These terms apply to all users, investors, and visitors of SIGMORA.</p>
 
         <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">2. Platform Description</h2>
-        <p>SIGMORA is a Web3 real estate investment platform that allows users to purchase fractional tokens representing ownership in curated real estate properties. Token holders receive daily ROI distributions based on property performance. The platform also offers a proprietary trading program for qualified traders.</p>
+        <p>SIGMORA is a Web3 real estate investment platform that allows users to purchase fractional tokens representing ownership in curated real estate properties. Token holders receive rental income distributions based on actual property performance (rent collected and, at maturity, any appreciation). Income is variable and paid only from real property earnings. The platform also offers a proprietary trading program for qualified traders.</p>
 
         <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">3. Eligibility</h2>
         <p>To use SIGMORA, you must:</p>
@@ -8303,7 +8408,7 @@ async function loadWalletTransactions() {
         <p>The SIGMORA Token (SGM) is an internal platform utility currency with a fixed rate of 1 SGM = $10 USDT. SGM is not a cryptocurrency, security, or investment instrument. It is a platform accounting unit used to track investments and calculate tier benefits. SGM has no value outside of the SIGMORA platform.</p>
 
         <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">5. Investment Risk</h2>
-        <p>All investments on SIGMORA carry inherent risk. You may lose some or all of your invested capital. Daily ROI rates are indicative and not guaranteed. Real estate values can decline. The Platform does not guarantee any specific return on investment. You should only invest funds you can afford to lose.</p>
+        <p>All investments on SIGMORA carry inherent risk. You may lose some or all of your invested capital. Rental income is variable, depends on occupancy and property performance, and is not guaranteed. Real estate values can decline. The Platform does not guarantee any specific return on investment. You should only invest funds you can afford to lose.</p>
 
         <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">6. Deposits & Withdrawals</h2>
         <p>Deposits are accepted in USDT (BEP-20) only. All deposits must include a valid transaction hash for verification. SIGMORA reserves the right to reject deposits that cannot be verified on-chain. Withdrawals are processed within 24 hours during business hours. A 1% network fee applies to all withdrawals.</p>
@@ -8318,7 +8423,7 @@ async function loadWalletTransactions() {
         <p>Users may not: use the Platform for money laundering or illegal activities; create multiple accounts; manipulate Platform metrics; share account credentials; use automated bots; or engage in any activity that disrupts Platform operations. Violation will result in immediate account termination and forfeiture of funds.</p>
 
         <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">10. Platform Fees</h2>
-        <p>SIGMORA charges a 1% fee on all ROI payouts and withdrawals. No fees are charged on deposits or token purchases. Fees may be updated with 30 days notice to users. All fees are clearly displayed before any transaction is confirmed.</p>
+        <p>SIGMORA charges a 1% fee on rental income distributions and withdrawals. No fees are charged on deposits or token purchases. Fees may be updated with 30 days notice to users. All fees are clearly displayed before any transaction is confirmed.</p>
 
         <h2 style="color:var(--t1);font-size:18px;font-weight:800;margin:32px 0 12px">11. Account Termination</h2>
         <p>SIGMORA reserves the right to suspend or terminate any account for violation of these terms, suspicious activity, or regulatory requirements. Upon termination, pending withdrawals will be processed. Invested tokens may be liquidated at current market rates.</p>
