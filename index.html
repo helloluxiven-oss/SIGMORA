@@ -3514,7 +3514,7 @@ async function showDashboard(user) {
         document.body.className=document.body.className.split(' ').filter(c=>!c.startsWith('role-')).join(' ');
         document.body.classList.add('role-'+(u.role||'user'));
         if(['admin','super_admin'].includes(u.role)) { document.querySelectorAll('.admin-only').forEach(el=>{el.style.display=el.classList.contains('nav-group')?'block':'flex';}); }
-        else { document.querySelectorAll('.admin-only').forEach(el=>{el.style.display='';}); }
+        else { document.querySelectorAll('.admin-only').forEach(el=>{el.style.display='none';}); }
         renderTierUI();
       }
     }
@@ -3589,6 +3589,10 @@ function initAuthListener() {
       window.__blockDashboard = false;
       window.__userInitiatedSignIn = false;
       currentUser = null;
+      userProfile = null;
+      // strip any role-* class so admin nav from a prior session cannot bleed through
+      document.body.className = document.body.className.split(' ').filter(c=>!c.startsWith('role-')).join(' ');
+      document.querySelectorAll('.admin-only').forEach(el=>{ el.style.display='none'; });
       try { localStorage.removeItem('sig_last_active'); localStorage.removeItem('sig_last_page'); localStorage.removeItem('sig_last_scroll'); } catch(_){}
       // Show landing page on sign out
       const lp = $('landing-page');
@@ -3678,7 +3682,7 @@ async function loadUserProfile() {
       el.style.display = el.classList.contains('nav-group') ? 'block' : 'flex';
     });
   } else {
-    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = ''; });
+    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = 'none'; });
   }
 
   // ── Pre-fill settings form ──────────────────────────────────────
@@ -3840,7 +3844,7 @@ function bindSidebarProfile(profile) {
   if (['admin','super_admin'].includes(profile.role)) {
     document.querySelectorAll('.admin-only').forEach(el => { el.style.display = el.classList.contains('nav-group') ? 'block' : 'flex'; });
   } else {
-    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = ''; });
+    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = 'none'; });
   }
   renderTierUI();
 }
