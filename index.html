@@ -24,15 +24,15 @@
    Deep Cosmos · Electric Violet
 ══════════════════════════════════════ */
 :root {
-  --void:#03020a; --deep:#06050f; --base:#0a0917; --raised:#0f0d1e;
-  --surface:#141228; --overlay:#1a1833; --lift:#201e3a;
+  --void:#0b0e11; --deep:#0e1116; --base:#12161c; --raised:#161a20;
+  --surface:#181c23; --overlay:#1e232b; --lift:#242a33;
   --v1:#7c3aed; --v2:#9d5cff; --v3:#b980ff; --v4:#5b21b6;
   --vg:rgba(124,58,237,0.15); --vd:rgba(124,58,237,0.07);
   --neon:#00f5d4; --neon2:#00c4aa; --ember:#ff6b35;
   --gold:#fbbf24; --mint:#10b981; --rose:#f43f5e; --sky:#38bdf8;
-  --t1:#f3f1ff; --t2:#beb8de; --t3:#918ab8; --t4:#696389;
-  --b1:rgba(124,58,237,0.2); --b2:rgba(124,58,237,0.1);
-  --b3:rgba(255,255,255,0.06); --b4:rgba(255,255,255,0.03);
+  --t1:#eaecef; --t2:#b7bdc6; --t3:#848e9c; --t4:#5e6673;
+  --b1:rgba(255,255,255,0.10); --b2:rgba(255,255,255,0.06);
+  --b3:rgba(255,255,255,0.05); --b4:rgba(255,255,255,0.035);
   --f-head:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; --f-display:'Cabinet Grotesk',sans-serif; --f-mono:'JetBrains Mono',monospace;
   --sw:256px; --r:16px; --r-sm:10px;
   --shadow:0 8px 32px rgba(0,0,0,0.4);
@@ -356,12 +356,13 @@ body[data-theme="light"] .topbar{background:rgba(246,244,255,0.92)}
 .card{
   background:var(--surface);border:1px solid var(--b3);
   border-radius:var(--r);overflow:hidden;margin-bottom:16px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.3);
 }
 .card-hd{
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 18px 12px;border-bottom:1px solid var(--b4);
 }
-.card-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+.card-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:-0.1px}
 .cdot{width:6px;height:6px;border-radius:50%}
 .card-action{
   font-family:var(--f-mono);font-size:11px;letter-spacing:1px;
@@ -372,15 +373,15 @@ body[data-theme="light"] .topbar{background:rgba(246,244,255,0.92)}
 
 /* ══ KPI CARDS ═══════════════════════ */
 .kpi{
-  background:var(--surface);border:1px solid var(--b3);
-  border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;
-  transition:border-color .2s;
+  background:var(--raised);border:1px solid var(--b3);
+  border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;
+  transition:border-color .2s, transform .2s;
 }
-.kpi:hover{border-color:var(--b1)}
-.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
-.kpi-lbl{font-family:var(--f-mono);font-size:11px;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase}
-.kpi-ic{font-size:18px}
-.kpi-val{font-family:var(--f-display);font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:5px}
+.kpi:hover{border-color:var(--b1);transform:translateY(-1px)}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.kpi-lbl{font-family:var(--f-mono);font-size:10px;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
+.kpi-ic{font-size:15px;opacity:0.5}
+.kpi-val{font-family:var(--f-display);font-size:28px;font-weight:700;letter-spacing:-0.8px;line-height:1;margin-bottom:6px}
 .kpi-meta{font-size:11px;color:var(--t4)}
 .up{color:var(--mint)}.dn{color:var(--rose)}
 .mono{font-family:var(--f-mono)}
@@ -1796,23 +1797,23 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="g4" style="margin-bottom:20px">
     <div class="kpi" style="border-color:rgba(0,245,212,0.25);cursor:pointer" onclick="nav('wallet',document.getElementById('ni-wallet'))">
       <div class="kpi-top"><div class="kpi-lbl">USDT Balance</div><div class="kpi-ic" style="color:var(--neon)">≋</div></div>
-      <div class="kpi-val" style="color:var(--neon)" id="dash-usdt">≋ 0.00</div>
+      <div class="kpi-val" style="color:var(--t1)" id="dash-usdt">≋ 0.00</div>
       <div class="kpi-meta">Tap to deposit ↗</div>
     </div>
     <div class="kpi" style="border-color:rgba(124,58,237,0.25);cursor:pointer" onclick="nav('wallet',document.getElementById('ni-wallet'))">
       <div class="kpi-top"><div class="kpi-lbl">SGM Balance</div><div class="kpi-ic" style="color:var(--v2)">≋</div></div>
-      <div class="kpi-val" style="color:var(--v2)" id="dash-sgm">0 SGM</div>
+      <div class="kpi-val" style="color:var(--t1)" id="dash-sgm">0 SGM</div>
       <div class="kpi-meta" id="dash-sgm-usd">≋ 0.00</div>
     </div>
     <div class="kpi" style="border-color:rgba(16,185,129,0.25);cursor:pointer" onclick="nav('my-tokens',document.getElementById('ni-my-tokens'))">
       <div class="kpi-top"><div class="kpi-lbl">Total Invested</div><div class="kpi-ic" style="color:var(--mint)">▣</div></div>
-      <div class="kpi-val" style="color:var(--mint)" id="dash-invested">≋ 0.00</div>
+      <div class="kpi-val" style="color:var(--t1)" id="dash-invested">≋ 0.00</div>
       <div class="kpi-meta">Tap to view tokens ↗</div>
     </div>
     <div class="kpi" style="border-color:rgba(251,191,36,0.25);cursor:pointer" onclick="nav('roi-tracker',document.getElementById('ni-roi-tracker'))">
       <div class="kpi-top"><div class="kpi-lbl">Total Earned</div><div class="kpi-ic" style="color:var(--gold)">△</div></div>
-      <div class="kpi-val" style="color:var(--gold)" id="dash-earned">≋ 0.00</div>
-      <div class="kpi-meta">ROI received ↗</div>
+      <div class="kpi-val" style="color:var(--t1)" id="dash-earned">≋ 0.00</div>
+      <div class="kpi-meta">Income received ↗</div>
     </div>
   </div>
 
@@ -1951,23 +1952,23 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="g4" style="margin-bottom:24px">
     <div class="kpi" style="border-color:rgba(0,245,212,0.25)">
       <div class="kpi-top"><div class="kpi-lbl">USDT Balance</div><div class="kpi-ic" style="color:var(--neon)">◎</div></div>
-      <div class="kpi-val" style="color:var(--neon)" id="w-usdt-bal">≋ 0.00</div>
+      <div class="kpi-val" style="color:var(--t1)" id="w-usdt-bal">≋ 0.00</div>
       <div class="kpi-meta">Available to invest or withdraw</div>
     </div>
     <div class="kpi" style="border-color:rgba(124,58,237,0.25)">
       <div class="kpi-top"><div class="kpi-lbl">SGM Balance</div><div class="kpi-ic" style="color:var(--v2)">Σ</div></div>
-      <div class="kpi-val" style="color:var(--v2)" id="w-sgm-bal">0 SGM</div>
+      <div class="kpi-val" style="color:var(--t1)" id="w-sgm-bal">0 SGM</div>
       <div class="kpi-meta" id="w-sgm-usd">≈ $0.00 USDT</div>
     </div>
     <div class="kpi" style="border-color:rgba(16,185,129,0.25)">
       <div class="kpi-top"><div class="kpi-lbl">Total Invested</div><div class="kpi-ic" style="color:var(--mint)">▣</div></div>
-      <div class="kpi-val" style="color:var(--mint)" id="w-invested">≋ 0.00</div>
+      <div class="kpi-val" style="color:var(--t1)" id="w-invested">≋ 0.00</div>
       <div class="kpi-meta">Across all properties</div>
     </div>
     <div class="kpi" style="border-color:rgba(251,191,36,0.25)">
       <div class="kpi-top"><div class="kpi-lbl">Total Earned</div><div class="kpi-ic" style="color:var(--gold)">△</div></div>
-      <div class="kpi-val" style="color:var(--gold)" id="w-earned">≋ 0.00</div>
-      <div class="kpi-meta">ROI received to date</div>
+      <div class="kpi-val" style="color:var(--t1)" id="w-earned">≋ 0.00</div>
+      <div class="kpi-meta">Rental income received</div>
     </div>
   </div>
 
@@ -2335,9 +2336,9 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
     <div class="sh" style="margin:18px 0 8px"><div class="sh-l"><div class="sh-sub" style="font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Your Earnings</div></div></div>
     <div class="g3">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Payouts</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="roi-total">$0</div><div class="kpi-meta">Lifetime earnings</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Last Payout</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="roi-last">$0</div><div class="kpi-meta">Most recent</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Payout Count</div></div><div class="kpi-val" style="color:var(--v2);font-size:20px" id="roi-count">0</div><div class="kpi-meta">Total payouts</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Payouts</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="roi-total">$0</div><div class="kpi-meta">Lifetime earnings</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Last Payout</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="roi-last">$0</div><div class="kpi-meta">Most recent</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Payout Count</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="roi-count">0</div><div class="kpi-meta">Total payouts</div></div>
     </div>
     <div class="card">
       <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--mint)"></span>Earnings Over Time</div></div>
@@ -2541,10 +2542,10 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
 
     <!-- KPI row -->
     <div class="g4" style="margin-bottom:16px">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Active Traders</div></div><div class="kpi-val" style="color:var(--v2);font-size:20px" id="tr-count">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Allocated</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="tr-alloc">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">MTD P&L</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="tr-mtd">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">YTD P&L</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px" id="tr-ytd">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Active Traders</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="tr-count">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Allocated</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="tr-alloc">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">MTD P&L</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="tr-mtd">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">YTD P&L</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="tr-ytd">—</div></div>
     </div>
 
     <!-- TradingView chart card -->
@@ -2606,10 +2607,10 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="page" id="pg-liquidity">
     <div class="sh"><div class="sh-l"><div class="sh-title">Liquidity Pool</div><div class="sh-sub">SGM token liquidity & market depth</div></div></div>
     <div class="g4">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Liquidity</div></div><div class="kpi-val" style="color:var(--v2);font-size:20px">$2.4M</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">24h Volume</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px">$184K</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Pool APY</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px">18.4%</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Providers</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px">247</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Liquidity</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">$2.4M</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">24h Volume</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">$184K</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Pool APY</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">18.4%</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Providers</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">247</div></div>
     </div>
     <div class="card">
       <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Provide Liquidity</div></div>
@@ -2650,10 +2651,10 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="page" id="pg-users">
     <div class="sh"><div class="sh-l"><div class="sh-title">User Management</div><div class="sh-sub">Platform users and account status</div></div></div>
     <div class="g4">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Users</div></div><div class="kpi-val" style="color:var(--v2);font-size:20px" id="um-total">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">KYC Approved</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="um-kyc">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Pending KYC</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="um-pending">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total TVL</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px" id="um-tvl">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Users</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="um-total">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">KYC Approved</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="um-kyc">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Pending KYC</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="um-pending">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total TVL</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="um-tvl">—</div></div>
     </div>
     <div class="card">
       <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>All Users</div></div>
@@ -2668,8 +2669,8 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="page" id="pg-kyc">
     <div class="sh"><div class="sh-l"><div class="sh-title">KYC / Compliance</div><div class="sh-sub">Identity verification and AML review</div></div></div>
     <div class="g4">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Pending Review</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="kyc-pending">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Approved</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="kyc-approved">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Pending Review</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="kyc-pending">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Approved</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="kyc-approved">—</div></div>
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Flagged</div></div><div class="kpi-val" style="color:var(--rose);font-size:20px" id="kyc-flagged">—</div></div>
       <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Rejected</div></div><div class="kpi-val" style="color:var(--t3);font-size:20px" id="kyc-rejected">—</div></div>
     </div>
@@ -2686,10 +2687,10 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="page" id="pg-tokenomics">
     <div class="sh"><div class="sh-l"><div class="sh-title">Tokenomics</div><div class="sh-sub">Platform token metrics and distribution</div></div></div>
     <div class="g4">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">SGM Price</div></div><div class="kpi-val" style="color:var(--v2);font-size:20px">$10.00</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Market Cap</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px">$120M</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Circulating</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px">12M</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Supply</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px">100M</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">SGM Price</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">$10.00</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Market Cap</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">$120M</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Circulating</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">12M</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Supply</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px">100M</div></div>
     </div>
     <div class="g2">
       <div class="card">
@@ -2713,10 +2714,10 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="page" id="pg-revenue-admin">
     <div class="sh"><div class="sh-l"><div class="sh-title">Revenue & Payouts</div><div class="sh-sub">Platform revenue tracking and ROI distribution</div></div></div>
     <div class="g4">
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Revenue</div></div><div class="kpi-val" style="color:var(--v2);font-size:20px" id="rev-total">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total ROI Paid</div></div><div class="kpi-val" style="color:var(--mint);font-size:20px" id="rev-roi">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Today's Payouts</div></div><div class="kpi-val" style="color:var(--gold);font-size:20px" id="rev-today">—</div></div>
-      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total TVL</div></div><div class="kpi-val" style="color:var(--neon);font-size:20px" id="rev-tvl">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Revenue</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="rev-total">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total Income Paid</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="rev-roi">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Today's Payouts</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="rev-today">—</div></div>
+      <div class="kpi"><div class="kpi-top"><div class="kpi-lbl">Total TVL</div></div><div class="kpi-val" style="color:var(--t1);font-size:20px" id="rev-tvl">—</div></div>
     </div>
 
     <!-- ═══ SOLVENCY DASHBOARD (v2) ═══ -->
