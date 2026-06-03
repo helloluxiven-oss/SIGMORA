@@ -24,15 +24,15 @@
    Deep Cosmos · Electric Violet
 ══════════════════════════════════════ */
 :root {
-  --void:#0b0e11; --deep:#0e1116; --base:#12161c; --raised:#161a20;
-  --surface:#181c23; --overlay:#1e232b; --lift:#242a33;
+  --void:#0a0813; --deep:#0d0a18; --base:#12101f; --raised:#171426;
+  --surface:#1a1730; --overlay:#221d3a; --lift:#2a2545;
   --v1:#7c3aed; --v2:#9d5cff; --v3:#b980ff; --v4:#5b21b6;
   --vg:rgba(124,58,237,0.15); --vd:rgba(124,58,237,0.07);
   --neon:#00f5d4; --neon2:#00c4aa; --ember:#ff6b35;
   --gold:#fbbf24; --mint:#10b981; --rose:#f43f5e; --sky:#38bdf8;
-  --t1:#eaecef; --t2:#b7bdc6; --t3:#848e9c; --t4:#5e6673;
-  --b1:rgba(255,255,255,0.10); --b2:rgba(255,255,255,0.06);
-  --b3:rgba(255,255,255,0.05); --b4:rgba(255,255,255,0.035);
+  --t1:#f0eefb; --t2:#bdb6da; --t3:#8b84a8; --t4:#635c80;
+  --b1:rgba(124,58,237,0.28); --b2:rgba(124,58,237,0.14);
+  --b3:rgba(157,92,255,0.10); --b4:rgba(157,92,255,0.06);
   --f-head:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; --f-display:'Cabinet Grotesk',sans-serif; --f-mono:'JetBrains Mono',monospace;
   --sw:256px; --r:16px; --r-sm:10px;
   --shadow:0 8px 32px rgba(0,0,0,0.4);
@@ -354,7 +354,8 @@ body[data-theme="light"] .topbar{background:rgba(246,244,255,0.92)}
 
 /* ══ CARDS ═══════════════════════════ */
 .card{
-  background:var(--surface);border:1px solid var(--b3);
+  background:linear-gradient(180deg,rgba(124,58,237,0.05),transparent 120px),var(--surface);
+  border:1px solid var(--b3);
   border-radius:var(--r);overflow:hidden;margin-bottom:16px;
   box-shadow:0 1px 2px rgba(0,0,0,0.3);
 }
@@ -373,11 +374,12 @@ body[data-theme="light"] .topbar{background:rgba(246,244,255,0.92)}
 
 /* ══ KPI CARDS ═══════════════════════ */
 .kpi{
-  background:var(--raised);border:1px solid var(--b3);
+  background:linear-gradient(180deg,rgba(124,58,237,0.06),transparent),var(--raised);
+  border:1px solid var(--b3);
   border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;
-  transition:border-color .2s, transform .2s;
+  transition:border-color .2s, transform .2s, box-shadow .2s;
 }
-.kpi:hover{border-color:var(--b1);transform:translateY(-1px)}
+.kpi:hover{border-color:var(--b1);transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,58,237,0.12)}
 .kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .kpi-lbl{font-family:var(--f-mono);font-size:10px;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;font-weight:500}
 .kpi-ic{font-size:15px;opacity:0.5}
@@ -1797,12 +1799,12 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="g4" style="margin-bottom:20px">
     <div class="kpi" style="border-color:rgba(0,245,212,0.25);cursor:pointer" onclick="nav('wallet',document.getElementById('ni-wallet'))">
       <div class="kpi-top"><div class="kpi-lbl">USDT Balance</div><div class="kpi-ic" style="color:var(--neon)">≋</div></div>
-      <div class="kpi-val" style="color:var(--t1)" id="dash-usdt">≋ 0.00</div>
+      <div class="kpi-val" style="color:var(--neon)" id="dash-usdt">≋ 0.00</div>
       <div class="kpi-meta">Tap to deposit ↗</div>
     </div>
     <div class="kpi" style="border-color:rgba(124,58,237,0.25);cursor:pointer" onclick="nav('wallet',document.getElementById('ni-wallet'))">
       <div class="kpi-top"><div class="kpi-lbl">SGM Balance</div><div class="kpi-ic" style="color:var(--v2)">≋</div></div>
-      <div class="kpi-val" style="color:var(--t1)" id="dash-sgm">0 SGM</div>
+      <div class="kpi-val" style="color:var(--v2)" id="dash-sgm">0 SGM</div>
       <div class="kpi-meta" id="dash-sgm-usd">≋ 0.00</div>
     </div>
     <div class="kpi" style="border-color:rgba(16,185,129,0.25);cursor:pointer" onclick="nav('my-tokens',document.getElementById('ni-my-tokens'))">
@@ -1952,12 +1954,12 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   <div class="g4" style="margin-bottom:24px">
     <div class="kpi" style="border-color:rgba(0,245,212,0.25)">
       <div class="kpi-top"><div class="kpi-lbl">USDT Balance</div><div class="kpi-ic" style="color:var(--neon)">◎</div></div>
-      <div class="kpi-val" style="color:var(--t1)" id="w-usdt-bal">≋ 0.00</div>
+      <div class="kpi-val" style="color:var(--neon)" id="w-usdt-bal">≋ 0.00</div>
       <div class="kpi-meta">Available to invest or withdraw</div>
     </div>
     <div class="kpi" style="border-color:rgba(124,58,237,0.25)">
       <div class="kpi-top"><div class="kpi-lbl">SGM Balance</div><div class="kpi-ic" style="color:var(--v2)">Σ</div></div>
-      <div class="kpi-val" style="color:var(--t1)" id="w-sgm-bal">0 SGM</div>
+      <div class="kpi-val" style="color:var(--v2)" id="w-sgm-bal">0 SGM</div>
       <div class="kpi-meta" id="w-sgm-usd">≈ $0.00 USDT</div>
     </div>
     <div class="kpi" style="border-color:rgba(16,185,129,0.25)">
