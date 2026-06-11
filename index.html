@@ -1663,17 +1663,17 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     </div>
 
     <!-- TRADE -->
-    <div class="nav-grp-lbl">TRADE</div>
-    <div class="ni" onclick="nav('trading',this)" id="ni-trading">
+    <div class="nav-grp-lbl admin-only">TRADE</div>
+    <div class="ni admin-only" onclick="nav('trading',this)" id="ni-trading">
       <span class="ni-ic">▲</span><span class="ni-lbl">Live Trading</span>
     </div>
-    <div class="ni" onclick="nav('traders',this)" id="ni-traders">
+    <div class="ni admin-only" onclick="nav('traders',this)" id="ni-traders">
       <span class="ni-ic">◉</span><span class="ni-lbl">Trader Roster</span>
     </div>
 
     <!-- FUND -->
-    <div class="nav-grp-lbl">FUND</div>
-    <div class="ni" onclick="nav('startups',this)" id="ni-startups">
+    <div class="nav-grp-lbl admin-only">FUND</div>
+    <div class="ni admin-only" onclick="nav('startups',this)" id="ni-startups">
       <span class="ni-ic">⊕</span><span class="ni-lbl">Startup Deals</span>
     </div>
 
@@ -3716,6 +3716,14 @@ const PAGE_TITLES = {
 };
 
 async function nav(id, el) {
+  // Access gate: these sections are admin-only (hidden + in-progress).
+  // Non-admins who reach them via a stray link or #hash are bounced to dashboard.
+  const ADMIN_ONLY_PAGES = ['trading','traders','startups','users','kyc','revenue-admin','add-property','fund-portfolio'];
+  const isAdmin = (userProfile?.role === 'super_admin');
+  if (ADMIN_ONLY_PAGES.includes(id) && !isAdmin) {
+    id = 'dashboard';
+    el = document.getElementById('ni-dashboard');
+  }
   closeSidebar(); // Close sidebar on mobile when nav item tapped
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const pg = $('pg-'+id);
