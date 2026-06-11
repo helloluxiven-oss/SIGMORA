@@ -6398,9 +6398,12 @@ function launchMT5Terminal() {
   const statusDot= $('mt5-status-dot');
   const statusTxt= $('mt5-status-txt');
 
-  // Build MT5 Web Terminal URL with credentials
-  // Official MetaQuotes web terminal
-  const mt5Url = `https://trade.mql5.com/trade?servers=${encodeURIComponent(server)}&login=${encodeURIComponent(login)}&password=${encodeURIComponent(pass)}&color-scheme=dark`;
+  // Build MT5 Web Terminal URL.
+  // version=5 forces the MetaTrader 5 terminal (without it, MQL5 serves the MT4 web terminal,
+  // which MT5 accounts cannot log into). Password is intentionally NOT passed in the URL:
+  // the MT5 web terminal does not accept it as a param, and URLs get logged in history/server logs.
+  // We pre-fill server + login so the terminal opens straight to its own secure login dialog.
+  const mt5Url = `https://trade.mql5.com/trade?version=5&servers=${encodeURIComponent(server)}&login=${encodeURIComponent(login)}&color-scheme=dark`;
 
   if (iframe) {
     iframe.src = mt5Url;
@@ -6412,7 +6415,7 @@ function launchMT5Terminal() {
   if (statusDot) { statusDot.style.background = 'var(--mint)'; statusDot.style.boxShadow = '0 0 6px var(--mint)'; }
   if (statusTxt) statusTxt.textContent = 'Connected — ' + login;
 
-  showToast('MT5 Terminal launched! Log in with your credentials.', 'success');
+  showToast('MT5 Terminal loaded — enter your password in the terminal to connect.', 'success');
 }
 
 function disconnectMT5() {
