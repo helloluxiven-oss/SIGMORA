@@ -1686,6 +1686,9 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
       <span class="ni-ic">▣</span><span class="ni-lbl">KYC</span>
       <span class="nbadge nb-r" id="kyc-badge" style="display:none;font-size:11px;padding:1px 5px">0</span>
     </div>
+    <div class="ni admin-only" onclick="nav('support',this)" id="ni-support">
+      <span class="ni-ic">💬</span><span class="ni-lbl">Support Inbox</span>
+    </div>
     <div class="ni admin-only" onclick="nav('revenue-admin',this)" id="ni-revenue-admin">
       <span class="ni-ic">△</span><span class="ni-lbl">Revenue</span>
     </div>
@@ -2710,6 +2713,28 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
   </div>
 
   <!-- ═══ REVENUE ADMIN ═══ -->
+  <div class="page" id="pg-support">
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title"><span class="cdot" style="background:var(--v2)"></span> Support Conversations</div>
+        <div class="card-action" onclick="loadSupport()">↻ REFRESH</div>
+      </div>
+      <div style="display:grid;grid-template-columns:280px 1fr;min-height:480px">
+        <div id="sup-list" style="border-right:1px solid var(--b3);overflow-y:auto;max-height:560px">
+          <div style="padding:20px;color:var(--t4);font-size:12px">Loading…</div>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <div id="sup-thread-hd" style="padding:12px 16px;border-bottom:1px solid var(--b4);font-size:13px;font-weight:700;color:var(--t3)">Select a conversation</div>
+          <div id="sup-thread" style="flex:1;overflow-y:auto;padding:16px;max-height:440px;display:flex;flex-direction:column;gap:8px"></div>
+          <div style="display:flex;gap:8px;padding:12px;border-top:1px solid var(--b4)">
+            <input id="sup-reply" placeholder="Type a reply…" style="flex:1;background:var(--raised);border:1px solid var(--b3);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px" onkeydown="if(event.key==='Enter')supReply()">
+            <button class="btn btn-primary" onclick="supReply()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="pg-revenue-admin">
     <div class="sh"><div class="sh-l"><div class="sh-title">Revenue & Payouts</div><div class="sh-sub">Platform revenue tracking and ROI distribution</div></div></div>
     <div class="g4">
@@ -3707,7 +3732,7 @@ async function loadUserProfile() {
 const PAGE_TITLES = {
   dashboard:'Dashboard', wallet:'My Wallet',
   properties:'Property Listings', 'buy-tokens':'Buy Tokens', 'my-tokens':'My Tokens',
-  'roi-tracker':'ROI Tracker', 'add-property':'Tokenize Property',
+  'roi-tracker':'Transparency', 'add-property':'Tokenize Property', support:'Support Inbox',
   startups:'Entrepreneur Fund', 'apply-funding':'Apply for Funding', 'fund-portfolio':'Fund Portfolio',
   trading:'Live Trading Desk', liquidity:'Liquidity Pool', traders:'Trader Roster',
   users:'User Management', kyc:'KYC / Compliance', tokenomics:'Tokenomics',
@@ -3718,7 +3743,7 @@ const PAGE_TITLES = {
 async function nav(id, el) {
   // Access gate: these sections are admin-only (hidden + in-progress).
   // Non-admins who reach them via a stray link or #hash are bounced to dashboard.
-  const ADMIN_ONLY_PAGES = ['trading','traders','startups','users','kyc','revenue-admin','add-property','fund-portfolio'];
+  const ADMIN_ONLY_PAGES = ['trading','traders','startups','users','kyc','revenue-admin','add-property','fund-portfolio','support'];
   const isAdmin = (userProfile?.role === 'super_admin');
   if (ADMIN_ONLY_PAGES.includes(id) && !isAdmin) {
     id = 'dashboard';
@@ -3759,7 +3784,8 @@ async function loadPageData(id) {
     kyc: loadKYC,
     'revenue-admin': loadRevenue,
     notifs: loadNotifications,
-    settings: loadSettings
+    settings: loadSettings,
+    support: loadSupport
   };
   const fn = loaders[id];
   if (fn) {
@@ -6030,7 +6056,7 @@ function toggleAIChat() {
     aicGreeted = true;
     // Show welcome message
     const name = userProfile?.full_name?.split(' ')[0] || 'there';
-    aicAddMsg(`Hi ${name}! 👋 I'm **SIGMA**, your SIGMORA AI assistant.\n\nI can help you with investing, property details, ROI calculations, the prop trading program, and anything else about the platform. What would you like to know?`, 'bot');
+    aicAddMsg(`Hi ${name}! 👋 I'm **SIGMA**, your SIGMORA assistant.\n\nI can explain how investing works, rental income, SGM, deposits, withdrawals, and safety. Or tap **Talk to support** to chat with our team directly. What would you like to know?`, 'bot');
   }
   if (aicOpen) {
     setTimeout(() => document.getElementById('aic-input')?.focus(), 300);
@@ -6077,11 +6103,90 @@ function aicShowTyping() {
   msgs.scrollTo({ top: msgs.scrollHeight, behavior: 'smooth' });
 }
 
+// ── Built-in knowledge base (no API needed) ──────────────────────────
+const SIGMA_KB = [
+  { k:['guarantee','guaranteed','fixed return','daily roi','roi','double','apy'],
+    a:`Important: SIGMORA does **not** offer fixed or guaranteed returns, and there is no "daily ROI". 📌\n\nYou earn **variable rental income** that comes only from real rent collected on the properties — roughly 6–10% per year net, but it varies and is never guaranteed. If a property collects no rent, no income is paid for that period. That's what makes the platform honest.` },
+  { k:['rental income','how do i earn','earn','income','yield','payout','profit','return'],
+    a:`You earn **rental income from real properties**. 🏠\n\nWhen you hold property tokens, the rent those properties actually collect is distributed to investors in small daily portions, proportional to your holding. Expected net yield is roughly **6–10% per year — variable, never guaranteed**. Income comes only from real rent, never from new deposits. You can see live income data on the **Transparency** page.` },
+  { k:['sgm','token price','peg','stable'],
+    a:`**SGM** is SIGMORA's internal balance token. 💎\n\n• 1 SGM = **$10, always** — it never floats\n• Fully backed 1:1 by your approved deposits\n• It's NOT a speculative or tradeable cryptocurrency\n\nThink of it as your stable wallet balance that you use to buy property tokens.` },
+  { k:['deposit','usdt','bep','add money','fund'],
+    a:`To deposit: go to **Wallet → Deposit USDT**. 💰\n\n• Send USDT on **BEP-20 network only**\n• Your deposit is verified and approved by our team\n• Once approved, it's converted to SGM at 1 SGM = $10, fully backed\n\nThen you're ready to invest in property tokens.` },
+  { k:['withdraw','withdrawal','cash out','take out'],
+    a:`To withdraw: go to **Wallet → Withdraw USDT**. 💸\n\n• Withdraw from your available wallet balance anytime\n• A **1% withdrawal fee** applies\n• Requests are processed by our team\n\nNote: principal invested in property tokens has an 18-month lock — income earned is withdrawable.` },
+  { k:['invest','how to start','buy token','property token','buy tokens','start'],
+    a:`Getting started is simple: 🚀\n\n1. Complete **KYC** verification\n2. **Deposit** USDT (BEP-20) → converted to SGM\n3. Browse **Properties** and pick one\n4. **Buy property tokens** — fractional ownership of that property\n5. Earn variable rental income from real rent collected\n\nPrincipal locks for 18 months; income is paid throughout.` },
+  { k:['safe','security','solvency','protect','trust','scam','risk'],
+    a:`SIGMORA is built honest by design: 🛡️\n\n• Income is paid **only from real rent collected** — never from new deposits\n• Funds sit in **segregated pools** (principal, income, fees never mixed)\n• An **automated solvency check** runs before every payout — if reserves ever fall below obligations, payouts pause automatically, by code\n• The **Transparency** page shows the live solvency ratio publicly\n\nNo guaranteed-return promises — and that's exactly why it's trustworthy. Investments still carry risk; only invest what you can afford.` },
+  { k:['lock','18 month','locked','how long','period','maturity'],
+    a:`Property token principal is locked for **18 months** from purchase. 🔒\n\nDuring the lock you still receive your share of rental income — only the principal itself is locked. This keeps the platform stable for all investors.` },
+  { k:['kyc','verify','verification','identity','documents'],
+    a:`**KYC verification is required before investing.** 🪪\n\nGo to Settings (or you'll be prompted when investing), submit your ID and details, and our team reviews it — usually quickly. This keeps the platform compliant and safe for everyone.` },
+  { k:['properties','property','available','dubai','listing','real estate','buildings'],
+    a:`Browse all listings on the **Properties** page. 🏛️\n\nSIGMORA focuses on premium real estate in leading global markets. Each listing shows the property's expected net rental yield, valuation, and lock period. We're in early access — first properties are being onboarded now.` },
+  { k:['transparency','reserve','ratio','proof'],
+    a:`The **Transparency** page shows live, public platform data: 📊\n\n• Current solvency / reserve ratio\n• Total rent collected\n• Property backing status\n\nIt updates from the same engine that pays income — nothing hidden.` },
+  { k:['what is sigmora','about','platform','how does it work','sigmora'],
+    a:`**SIGMORA** lets you invest in fractional ownership of premium real estate through digital tokens. 🏙️\n\nDeposit USDT → get SGM ($10 fixed, fully backed) → buy property tokens → earn **variable rental income from real rent**. Safety is enforced by code: segregated pools, automated solvency checks, and full transparency. Currently in early access.` },
+  { k:['trading','trader','mt5','forex','prop','startup','startups'],
+    a:`Trading and startup-funding features are **not part of the SIGMORA platform**. SIGMORA is focused on one thing: honest, tokenized real estate investing with income from real rental earnings.` },
+  { k:['fee','fees','charge','cost','commission'],
+    a:`Fees are simple: 🧾\n\n• A small platform fee on property token purchases\n• **1% withdrawal fee**\n• No hidden charges — all amounts are shown before you confirm any action.` },
+];
+
+function aicMatchKB(text) {
+  const t = ' ' + text.toLowerCase().replace(/[^a-z0-9 %$]/g,' ') + ' ';
+  let best = null, bestScore = 0;
+  for (const item of SIGMA_KB) {
+    let score = 0;
+    for (const kw of item.k) if (t.includes(kw)) score += kw.length;
+    if (score > bestScore) { bestScore = score; best = item; }
+  }
+  return bestScore > 0 ? best.a : null;
+}
+
+// ── Live support mode (human chat with SIGMORA team) ─────────────────
+let aicSupportMode = false;
+let aicSupportChannel = null;
+
+async function startSupportChat() {
+  if (!aicOpen) toggleAIChat();
+  if (!currentUser) { aicAddMsg('Please sign in first, then I can connect you to our team. 🔑', 'bot'); return; }
+  if (aicSupportMode) { aicAddMsg('You are already connected to support — type your message below. 💬', 'bot'); return; }
+  aicSupportMode = true;
+  document.getElementById('aic-suggestions')?.style.setProperty('display','none');
+
+  // Load existing thread history
+  try {
+    const { data } = await sb.from('support_messages')
+      .select('*').eq('user_id', currentUser.id)
+      .order('created_at', { ascending: true }).limit(100);
+    (data || []).forEach(m => aicAddMsg(m.content, m.sender === 'admin' ? 'bot' : 'user'));
+    await sb.from('support_messages').update({ read_by_user: true })
+      .eq('user_id', currentUser.id).eq('sender','admin').eq('read_by_user', false);
+  } catch(_) {}
+
+  aicAddMsg(`🧑‍💼 **You're connected to SIGMORA support.**\nSend your message below — our team will reply right here. You may also get an answer a little later; your conversation is saved.`, 'bot');
+
+  // Realtime: receive admin replies instantly
+  try {
+    aicSupportChannel = sb.channel('support-user-' + currentUser.id)
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `user_id=eq.${currentUser.id}` },
+        payload => {
+          if (payload.new?.sender === 'admin') {
+            aicAddMsg(payload.new.content, 'bot');
+            sb.from('support_messages').update({ read_by_user: true }).eq('id', payload.new.id).then(()=>{});
+          }
+        })
+      .subscribe();
+  } catch(_) {}
+}
+
 async function aicSend(text) {
   text = text?.trim();
   if (!text || aicBusy) return;
-
-  // Ensure chat is open
   if (!aicOpen) toggleAIChat();
 
   aicBusy = true;
@@ -6094,43 +6199,39 @@ async function aicSend(text) {
   const input = document.getElementById('aic-input');
   if (input) { input.value = ''; input.style.height = 'auto'; }
 
-  aicShowTyping();
-
   try {
-    // Get the current session token to authenticate with Edge Function
-    const { data: { session } } = await sb.auth.getSession();
-    const token = session?.access_token ?? '';
-
-    const res = await fetch(
-      `${SUPABASE_URL}/functions/v1/sigma-chat`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ messages: aicHistory }),
+    if (aicSupportMode) {
+      // Live human chat: store message for the team
+      const { error } = await sb.from('support_messages')
+        .insert({ user_id: currentUser.id, sender: 'user', content: text.slice(0, 4000) });
+      if (error) aicAddMsg('Message failed to send — please try again. 🔄', 'bot');
+    } else {
+      // Built-in knowledge bot
+      aicShowTyping();
+      await new Promise(r => setTimeout(r, 500));
+      const wantsHuman = /\b(human|agent|support|someone|real person|talk to (you|team|us)|contact)\b/i.test(text);
+      const answer = aicMatchKB(text);
+      if (wantsHuman) {
+        document.getElementById('aic-msgs')?.querySelector('.typing')?.remove();
+        await startSupportChat();
+      } else if (answer) {
+        aicAddMsg(answer, 'bot');
+      } else {
+        aicAddMsg(`I'm not sure about that one. 🤔\n\nTry asking about deposits, SGM, rental income, withdrawals, safety, or KYC — or tap below to chat with our team directly.`, 'bot');
+        const msgs = document.getElementById('aic-msgs');
+        if (msgs) {
+          const b = document.createElement('div');
+          b.className = 'aic-bubble bot';
+          b.innerHTML = '<span style="color:var(--v2);cursor:pointer;font-weight:700" onclick="startSupportChat()">🧑‍💼 Talk to support →</span>';
+          msgs.appendChild(b);
+          msgs.scrollTo({ top: msgs.scrollHeight, behavior: 'smooth' });
+        }
       }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || 'API error');
     }
-
-    const reply = data.reply || "Sorry, I couldn\'t generate a response.";
-    aicHistory.push({ role: 'assistant', content: reply });
-
-    // Keep history manageable (last 20 turns)
     if (aicHistory.length > 20) aicHistory = aicHistory.slice(-20);
-
-    aicAddMsg(reply, 'bot');
   } catch (e) {
-    const msgs = document.getElementById('aic-msgs');
-    msgs?.querySelector('.typing')?.remove();
-    aicAddMsg('Sorry, I\'m having trouble connecting right now. Please try again in a moment. 🔄', 'bot');
-    aicHistory.pop(); // remove the failed user message
+    document.getElementById('aic-msgs')?.querySelector('.typing')?.remove();
+    aicAddMsg('Sorry, something went wrong. Please try again. 🔄', 'bot');
   } finally {
     aicBusy = false;
     if (sendBtn) sendBtn.disabled = false;
@@ -6141,6 +6242,110 @@ async function aicSend(text) {
 function aicSendInput() {
   const val = document.getElementById('aic-input')?.value?.trim();
   if (val) aicSend(val);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ADMIN SUPPORT INBOX — live chat with users
+// ══════════════════════════════════════════════════════════════════════
+let supCurrentUid = null;
+let supUsersCache = {};
+let supChannel = null;
+
+async function loadSupport() {
+  const list = document.getElementById('sup-list');
+  if (!list) return;
+  try {
+    const { data: msgs, error } = await sb.from('support_messages')
+      .select('*').order('created_at', { ascending: false }).limit(500);
+    if (error) throw error;
+
+    // Group latest message + unread count per user
+    const convs = {};
+    (msgs || []).forEach(m => {
+      if (!convs[m.user_id]) convs[m.user_id] = { latest: m, unread: 0 };
+      if (m.sender === 'user' && !m.read_by_admin) convs[m.user_id].unread++;
+    });
+    const uids = Object.keys(convs);
+    if (!uids.length) {
+      list.innerHTML = '<div style="padding:20px;color:var(--t4);font-size:12px">No support conversations yet.</div>';
+      return;
+    }
+    // Fetch user names/emails
+    const { data: us } = await sb.from('users').select('id,email,full_name').in('id', uids);
+    (us || []).forEach(u => supUsersCache[u.id] = u);
+
+    list.innerHTML = uids.map(uid => {
+      const c = convs[uid];
+      const u = supUsersCache[uid] || {};
+      const name = u.full_name || u.email || uid.slice(0, 8);
+      const badge = c.unread ? `<span style="background:var(--rose);color:#fff;border-radius:10px;font-size:10px;padding:1px 7px;margin-left:6px">${c.unread}</span>` : '';
+      const preview = (c.latest.content || '').slice(0, 38);
+      const active = uid === supCurrentUid ? 'background:var(--vd);' : '';
+      return `<div onclick="openSupportThread('${uid}')" style="${active}padding:12px 14px;border-bottom:1px solid var(--b4);cursor:pointer">
+        <div style="font-size:13px;font-weight:700;color:var(--t1)">${name}${badge}</div>
+        <div style="font-size:11px;color:var(--t4);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.latest.sender === 'admin' ? 'You: ' : ''}${preview}</div>
+      </div>`;
+    }).join('');
+
+    // Realtime: refresh on new user messages (subscribe once)
+    if (!supChannel) {
+      supChannel = sb.channel('support-admin')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, payload => {
+          if (payload.new?.sender === 'user') {
+            if (payload.new.user_id === supCurrentUid) supAppendMsg(payload.new);
+            loadSupport();
+          }
+        })
+        .subscribe();
+    }
+  } catch (e) {
+    list.innerHTML = '<div style="padding:20px;color:var(--rose);font-size:12px">Failed to load conversations.</div>';
+  }
+}
+
+function supAppendMsg(m) {
+  const th = document.getElementById('sup-thread');
+  if (!th) return;
+  const mine = m.sender === 'admin';
+  const d = document.createElement('div');
+  d.style.cssText = `max-width:75%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.45;` +
+    (mine ? 'align-self:flex-end;background:var(--v1);color:#fff' : 'align-self:flex-start;background:var(--raised);color:var(--t1);border:1px solid var(--b3)');
+  d.textContent = m.content;
+  th.appendChild(d);
+  th.scrollTo({ top: th.scrollHeight });
+}
+
+async function openSupportThread(uid) {
+  supCurrentUid = uid;
+  const u = supUsersCache[uid] || {};
+  const hd = document.getElementById('sup-thread-hd');
+  if (hd) hd.textContent = (u.full_name || u.email || uid.slice(0, 8));
+  const th = document.getElementById('sup-thread');
+  if (th) th.innerHTML = '';
+  try {
+    const { data } = await sb.from('support_messages')
+      .select('*').eq('user_id', uid).order('created_at', { ascending: true }).limit(200);
+    (data || []).forEach(supAppendMsg);
+    await sb.from('support_messages').update({ read_by_admin: true })
+      .eq('user_id', uid).eq('sender', 'user').eq('read_by_admin', false);
+    loadSupport();
+  } catch (_) {}
+}
+
+async function supReply() {
+  const inp = document.getElementById('sup-reply');
+  const text = inp?.value?.trim();
+  if (!text || !supCurrentUid) return;
+  inp.value = '';
+  try {
+    const { data, error } = await sb.from('support_messages')
+      .insert({ user_id: supCurrentUid, sender: 'admin', content: text.slice(0, 4000) })
+      .select().single();
+    if (error) throw error;
+    supAppendMsg(data);
+  } catch (e) {
+    showToast('Reply failed to send', 'error');
+  }
 }
 
 // Close chat on outside click
@@ -8251,6 +8456,7 @@ async function loadWalletTransactions() {
       <span class="aic-sug" onclick="aicSend(this.textContent)">💎 What is SGM?</span>
       <span class="aic-sug" onclick="aicSend(this.textContent)">💰 How to invest?</span>
       <span class="aic-sug" onclick="aicSend(this.textContent)">🔐 Is my investment safe?</span>
+      <span class="aic-sug" onclick="startSupportChat()">🧑‍💼 Talk to support</span>
     </div>
 
     <!-- Input row -->
