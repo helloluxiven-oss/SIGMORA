@@ -1974,6 +1974,18 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     </div>
   </div>
 
+  <!-- ══ 1b. LOCKED TIER BONUSES (shown only when present) ══ -->
+  <div id="wallet-locked-bonus" style="display:none;margin-bottom:24px;padding:14px 18px;
+    background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.28);border-radius:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">🔒</span>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--v2)">Locked tier bonuses: <span id="wlb-total">$0</span></div>
+        <div style="font-size:11px;color:var(--t4);margin-top:2px" id="wlb-detail">Releases to your wallet when each triggering investment's lock period ends.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ 2. DEPOSIT & WITHDRAW ══ -->
   <div class="g2" style="margin-bottom:24px">
 
@@ -2273,7 +2285,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
           <div class="ob-lbl">ORDER SUMMARY</div>
           <div class="ob-row">Token Price <span id="ob-price">—</span></div>
           <div class="ob-row">Quantity <span id="ob-qty">—</span></div>
-          <div class="ob-row">Platform Fee (1%) <span id="ob-fee">—</span></div>
+          <div class="ob-row"><span id="ob-fee-label">Platform Fee (1%)</span> <span id="ob-fee">—</span></div>
           <div class="ob-total">Total <span id="ob-total">—</span></div>
           <div class="ob-note">Est. net rental yield: <b id="ob-roi">~6–10%/yr*</b> · 18-month lock-in</div>
         </div>
@@ -3992,6 +4004,28 @@ async function loadWallet() {
   const wkEarn = $('wk-earned'); if (wkEarn) wkEarn.textContent = fmtUSD(u.total_earned_usd);
   const wkAvail = $('wk-avail'); if (wkAvail) wkAvail.textContent = fmtUSD(u.wallet_balance_usd);
 
+  // Locked tier bonuses (released to wallet when the triggering purchase's lock period ends)
+  const lbBox = $('wallet-locked-bonus');
+  if (lbBox) {
+    const { data: locked } = await sb.from('tier_bonus_claims')
+      .select('amount_usd,unlock_at').eq('user_id',currentUser.id).eq('status','locked')
+      .order('unlock_at',{ascending:true});
+    const total = (locked||[]).reduce((s,c)=>s+parseFloat(c.amount_usd||0),0);
+    if (total > 0) {
+      lbBox.style.display='block';
+      const tEl=$('wlb-total'); if(tEl) tEl.textContent=fmtUSD(total);
+      const dEl=$('wlb-detail');
+      if(dEl){
+        const next = locked[0]?.unlock_at;
+        dEl.textContent = next
+          ? `${(locked||[]).length} bonus${locked.length>1?'es':''} · next releases ${fmtDate(next)}.`
+          : 'Releases to your wallet when each triggering investment’s lock period ends.';
+      }
+    } else {
+      lbBox.style.display='none';
+    }
+  }
+
   const { data: txs } = await sb.from('transactions')
     .select('*, properties(name)').eq('user_id',currentUser.id)
     .order('created_at',{ascending:false}).limit(30);
@@ -4523,10 +4557,14 @@ function updateBuyOrder() {
   const price = parseFloat(opt.dataset.price||0);
   const roi   = parseFloat(opt.dataset.roi||0);
   const bep   = parseInt(opt.dataset.bep||0);
-  const gross = price*qty, fee=gross*0.01, total=gross+fee;
+  // Fee is the user's CURRENT tier fee (the tier they're already in), matching buy_property_tokens.
+  const myTier = getUserTier(parseFloat(userProfile?.total_invested_usd||0));
+  const feePct = (myTier?.fee ?? 1.00) / 100;
+  const gross = price*qty, fee=gross*feePct, total=gross+fee;
   if (ob) ob.style.display='block';
   const obPrice=$('ob-price');if(obPrice)obPrice.textContent=fmtUSD(price);
   const obQty=$('ob-qty');if(obQty)obQty.textContent=qty.toLocaleString();
+  const obFeeLbl=$('ob-fee-label');if(obFeeLbl)obFeeLbl.textContent=`Platform Fee (${myTier.fee.toFixed(2)}%)`;
   const obFee=$('ob-fee');if(obFee)obFee.textContent=fmtUSD(fee);
   const obTotal=$('ob-total');if(obTotal)obTotal.textContent=fmtUSD(total);
   // ob-roi/ob-bep intentionally left static (honest rental-income copy in markup); no daily-ROI overwrite
@@ -6510,12 +6548,14 @@ async function recordIncome() {
 // ══════════════════════════════════════════════════════════════════
 const SGM_RATE = 10; // 1 SGM = $10 USDT (fixed)
 
+// Mirrors public.tier_config (single source of truth lives in the DB).
+// fee = buy/withdraw fee % for the tier; bonus = one-time USD milestone bonus on CROSSING INTO the tier.
 const TIERS = [
-  { level:1, name:'Starter',  icon:'🌱', color:'#696389', min:100,  sgm:10,  bonusRoi:0     },
-  { level:2, name:'Growth',   icon:'📈', color:'#10b981', min:250,  sgm:25,  bonusRoi:0.01  },
-  { level:3, name:'Premium',  icon:'💎', color:'#38bdf8', min:500,  sgm:50,  bonusRoi:0.025 },
-  { level:4, name:'Elite',    icon:'⭐', color:'#9d5cff', min:1000, sgm:100, bonusRoi:0.05  },
-  { level:5, name:'Platinum', icon:'👑', color:'#fbbf24', min:2500, sgm:250, bonusRoi:0.10  },
+  { level:1, name:'Starter',  icon:'🌱', color:'#696389', min:0,      fee:1.00, bonus:0,   perk:'Standard access'            },
+  { level:2, name:'Bronze',   icon:'🥉', color:'#cd7f32', min:1000,   fee:0.90, bonus:100, perk:'Priority property access'   },
+  { level:3, name:'Silver',   icon:'🥈', color:'#c0c0c0', min:5000,   fee:0.75, bonus:200, perk:'24h early access'           },
+  { level:4, name:'Gold',     icon:'🥇', color:'#fbbf24', min:25000,  fee:0.50, bonus:300, perk:'First access + reports'     },
+  { level:5, name:'Platinum', icon:'👑', color:'#9d5cff', min:100000, fee:0.25, bonus:400, perk:'First access + advisory'    },
 ];
 
 function getUserTier(totalInvested) {
