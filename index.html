@@ -2320,7 +2320,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
     <div class="card">
       <div class="card-hd"><div class="card-title"><span class="cdot" style="background:var(--v2)"></span>Token Holdings</div></div>
       <table class="tbl">
-        <thead><tr><th>Property</th><th>Symbol</th><th>Tokens</th><th>Token Price</th><th>Value</th><th>Income Earned</th><th>Total Earned</th></tr></thead>
+        <thead><tr><th>Property</th><th>Symbol</th><th>Tokens</th><th>Token Price</th><th>Value</th><th>Est. Income/yr</th><th>Total Earned</th></tr></thead>
         <tbody id="my-tokens-table"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--t4)">Loading...</td></tr></tbody>
       </table>
     </div>
@@ -3917,7 +3917,7 @@ function renderDashboardProps(props) {
         <span style="font-family:var(--f-mono);font-size:11px;color:rgba(255,255,255,0.9);background:rgba(0,0,0,0.5);padding:3px 8px;border-radius:6px;position:relative;z-index:1">${p.city}, ${p.country}</span>
       </div>
       <div style="font-size:13px;font-weight:800;margin-bottom:2px">${p.name}</div>
-      <div style="font-family:var(--f-mono);font-size:11px;color:var(--v3);margin-bottom:6px">${p.token_symbol} · ${fmtPct(p.daily_roi_percent)} daily</div>
+      <div style="font-family:var(--f-mono);font-size:11px;color:var(--v3);margin-bottom:6px">${p.token_symbol} · ~6–10%/yr · variable</div>
       <div style="height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--v1),var(--neon));border-radius:2px"></div>
       </div>
@@ -4048,7 +4048,7 @@ async function loadWallet() {
 // ═══════════════════════════════════════════════
 async function loadPortfolio() {
   const { data: invs } = await sb.from('investments')
-    .select('*, properties(name,token_symbol,token_price_usd,daily_roi_percent)')
+    .select('*, properties(name,token_symbol,token_price_usd,net_rental_yield_pct)')
     .eq('user_id',currentUser.id).eq('is_active',true);
   const tb = $('portfolio-table');
   if (!tb) return;
@@ -4066,12 +4066,13 @@ async function loadPortfolio() {
   const pfCnt = $('pf-count'); if(pfCnt) pfCnt.textContent = invs.length;
   tb.innerHTML = invs.map(inv => {
     const p = inv.properties||{};
-    const dailyROI = parseFloat(inv.tokens_owned)*parseFloat(p.token_price_usd||0)*parseFloat(p.daily_roi_percent||0)/100;
+    // Honest: estimated ANNUAL rental income from variable net yield (never a per-day rate)
+    const estAnnual = parseFloat(inv.tokens_owned)*parseFloat(p.token_price_usd||0)*(parseFloat(p.net_rental_yield_pct)||6)/100;
     return `<tr>
       <td style="color:var(--t1);font-weight:700">${p.name||'—'}</td>
       <td class="mono">${parseInt(inv.tokens_owned).toLocaleString()} ${p.token_symbol||''}</td>
       <td class="mono">${fmtUSD(inv.total_invested_usd)}</td>
-      <td class="mono" style="color:var(--mint)">${fmtUSD(dailyROI)}/day</td>
+      <td class="mono" style="color:var(--mint)">~${fmtUSD(estAnnual)}/yr · var</td>
       <td class="mono" style="color:var(--gold)">${fmtUSD(inv.total_roi_earned_usd)}</td>
       <td>${statusChip(inv.is_active?'active':'closed')}</td>
     </tr>`;
@@ -4119,11 +4120,12 @@ async function loadProperties(filter='') {
   // Update stats
   if (allProperties.length) {
     const tvl = allProperties.reduce((s,p)=>s+parseFloat(p.total_value_usd||0),0);
-    const avgRoi = allProperties.reduce((s,p)=>s+parseFloat(p.daily_roi_percent||0),0)/allProperties.length;
+    // Honest: average variable NET ANNUAL yield across active properties (not a daily ROI)
+    const avgRoi = allProperties.reduce((s,p)=>s+(parseFloat(p.net_rental_yield_pct)||6),0)/allProperties.length;
     const countries = new Set(allProperties.map(p=>p.country)).size;
     const psc = $('prop-stat-count'); if(psc) psc.textContent = allProperties.length;
     const pst = $('prop-stat-tvl'); if(pst) pst.textContent = '$'+(tvl/1e6).toFixed(1)+'M';
-    const psr = $('prop-stat-roi'); if(psr) psr.textContent = avgRoi.toFixed(2)+'%';
+    const psr = $('prop-stat-roi'); if(psr) psr.textContent = '~'+avgRoi.toFixed(1)+'%/yr';
     const pscnt = $('prop-stat-countries'); if(pscnt) pscnt.textContent = countries;
   }
   renderPropertiesGrid(allProperties);
@@ -4157,7 +4159,7 @@ function renderPropertiesGrid(props) {
     const t=themes[p.property_type]||themes.commercial;
       const heroCard = getPropImage(p);
     const flag=flags[p.country]||'🌍';
-    const ann=(parseFloat(p.daily_roi_percent)*365).toFixed(1);
+    const ann=(parseFloat(p.net_rental_yield_pct)||6).toFixed(1);
     const typeLabel = heroCard?.label || (p.property_type||'property').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     return `<div class="pc" onclick="openPropertyModal('${p.id}')">
       <div class="pc-img" style="background:${t.grad}">
@@ -4170,7 +4172,7 @@ function renderPropertiesGrid(props) {
           </div>
           <div style="display:flex;align-items:flex-end;justify-content:space-between">
             <div class="pc-location"><span class="pc-location-pin">${flag}</span><span class="pc-country">${p.city}, ${p.country}</span></div>
-            <div class="pc-roi-pill">+${parseFloat(p.daily_roi_percent).toFixed(2)}% / day</div>
+            <div class="pc-roi-pill">~${(parseFloat(p.net_rental_yield_pct)||6).toFixed(0)}%/yr · variable</div>
           </div>
         </div>
       </div>
@@ -4178,7 +4180,7 @@ function renderPropertiesGrid(props) {
         <div class="pc-name">${p.name}</div>
         <div class="pc-token">${p.token_symbol} · ${fmtUSD(p.token_price_usd)} per token</div>
         <div class="pc-stats">
-          <div class="pc-stat"><div class="pc-sl">Annual Yield</div><div class="pc-sv" style="color:${t.roiColor}">${ann}%</div></div>
+          <div class="pc-stat"><div class="pc-sl">Annual Yield</div><div class="pc-sv" style="color:${t.roiColor}">~${ann}%/yr</div></div>
           <div class="pc-stat"><div class="pc-sl">Asset Value</div><div class="pc-sv">${p.total_value_usd>=1e6?'$'+(p.total_value_usd/1e6).toFixed(1)+'M':fmtUSD(p.total_value_usd)}</div></div>
           <div class="pc-stat"><div class="pc-sl">BEP Days</div><div class="pc-sv" style="color:var(--gold)">${p.bep_days||'—'}</div></div>
         </div>
@@ -4208,7 +4210,7 @@ async function openPropertyModal(propId) {
   const pct    = Math.round(sold / supply * 100);
   const isAdmin = ['admin','super_admin'].includes(userProfile?.role);
   const heroImg = getPropImage(prop);
-  const ann     = (parseFloat(prop.daily_roi_percent) * 365).toFixed(1);
+  const ann     = (parseFloat(prop.net_rental_yield_pct) || 6).toFixed(1);
 
   // Fetch gallery photos
   const { data: photos } = await sb
@@ -4310,8 +4312,8 @@ async function openPropertyModal(propId) {
             <div style="font-family:var(--f-mono);font-weight:700;font-size:15px">${fmtUSD(prop.token_price_usd)}</div>
           </div>
           <div style="text-align:center;border-left:1px solid var(--b3)">
-            <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Income Earned</div>
-            <div style="font-family:var(--f-mono);color:var(--mint);font-weight:700;font-size:15px">${fmtPct(prop.daily_roi_percent)}</div>
+            <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Est. Yield</div>
+            <div style="font-family:var(--f-mono);color:var(--mint);font-weight:700;font-size:15px">~${ann}%/yr</div>
           </div>
           <div style="text-align:center;border-left:1px solid var(--b3)">
             <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">BEP Days</div>
@@ -4323,8 +4325,8 @@ async function openPropertyModal(propId) {
         <div style="display:flex;gap:10px;margin-bottom:16px">
           <div style="flex:1;background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(0,245,212,0.05));
             border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Annual Yield</div>
-            <div style="font-size:20px;font-weight:900;color:var(--mint)">${ann}%</div>
+            <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Annual Yield · variable</div>
+            <div style="font-size:20px;font-weight:900;color:var(--mint)">~${ann}%</div>
           </div>
           <div style="flex:1;background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(159,128,255,0.05));
             border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:12px;text-align:center">
@@ -4341,7 +4343,7 @@ async function openPropertyModal(propId) {
         <!-- Description -->
         <div style="font-size:13px;color:var(--t3);line-height:1.75;margin-bottom:16px;
           padding:12px;background:var(--b4);border-radius:8px;border-left:3px solid var(--v1)">
-          ${prop.description||'Premium tokenized real estate asset offering stable daily returns.'}
+          ${prop.description||'Premium tokenized real estate asset. Earn variable rental income from real rent — returns vary and are never guaranteed.'}
         </div>
 
         <!-- Token sale progress -->
@@ -4538,13 +4540,13 @@ async function loadBuyTokens() {
   // Render tier progress banner
   renderTierUI();
   const { data: props } = await sb.from('properties')
-    .select('id,name,token_symbol,token_price_usd,daily_roi_percent,bep_days,wallet_balance_usd')
+    .select('id,name,token_symbol,token_price_usd,bep_days,wallet_balance_usd')
     .eq('status','active');
   const sel = $('buy-prop-select');
   if (!sel) return;
   sel.innerHTML = '<option value="">Select a property...</option>';
   (props||[]).forEach(p => {
-    sel.innerHTML += `<option value="${p.id}" data-price="${p.token_price_usd}" data-roi="${p.daily_roi_percent}" data-bep="${p.bep_days||0}">${p.name} (${p.token_symbol} · ${fmtUSD(p.token_price_usd)}/token)</option>`;
+    sel.innerHTML += `<option value="${p.id}" data-price="${p.token_price_usd}" data-bep="${p.bep_days||0}">${p.name} (${p.token_symbol} · ${fmtUSD(p.token_price_usd)}/token)</option>`;
   });
 }
 
@@ -4555,7 +4557,6 @@ function updateBuyOrder() {
   if (!sel?.value || !qty) { if(ob) ob.style.display='none'; return; }
   const opt = sel.selectedOptions[0];
   const price = parseFloat(opt.dataset.price||0);
-  const roi   = parseFloat(opt.dataset.roi||0);
   const bep   = parseInt(opt.dataset.bep||0);
   // Fee is the user's CURRENT tier fee (the tier they're already in), matching buy_property_tokens.
   const myTier = getUserTier(parseFloat(userProfile?.total_invested_usd||0));
@@ -4643,7 +4644,7 @@ function clearBuyForm() {
 // ═══════════════════════════════════════════════
 async function loadMyTokens() {
   const { data: invs } = await sb.from('investments')
-    .select('*, properties(name,token_symbol,token_price_usd,daily_roi_percent)')
+    .select('*, properties(name,token_symbol,token_price_usd,net_rental_yield_pct)')
     .eq('user_id',currentUser.id).eq('is_active',true);
   const tb = $('my-tokens-table');
   if (!tb) return;
@@ -4651,14 +4652,15 @@ async function loadMyTokens() {
   tb.innerHTML = invs.map(inv=>{
     const p=inv.properties||{};
     const val=parseFloat(inv.tokens_owned)*parseFloat(p.token_price_usd||0);
-    const daily=val*parseFloat(p.daily_roi_percent||0)/100;
+    // Honest: estimated ANNUAL rental income from variable net yield (never a per-day figure)
+    const estAnnual=val*(parseFloat(p.net_rental_yield_pct)||6)/100;
     return `<tr>
       <td style="color:var(--t1);font-weight:700">${p.name||'—'}</td>
       <td class="mono" style="color:var(--v3)">${p.token_symbol||'—'}</td>
       <td class="mono">${parseInt(inv.tokens_owned).toLocaleString()}</td>
       <td class="mono">${fmtUSD(p.token_price_usd)}</td>
       <td class="mono" style="color:var(--mint)">${fmtUSD(val)}</td>
-      <td class="mono" style="color:var(--gold)">${fmtUSD(daily)}</td>
+      <td class="mono" style="color:var(--gold)">~${fmtUSD(estAnnual)}/yr</td>
       <td class="mono" style="color:var(--mint)">${fmtUSD(inv.total_roi_earned_usd)}</td>
     </tr>`;
   }).join('');
@@ -7724,8 +7726,6 @@ function notifAction(navTarget, extraFn) {
 // ══════════════════════════════════════════════════════════════
 // LANDING PAGE
 // ══════════════════════════════════════════════════════════════
-let _currentModal_roi = 0.35; // default, updated per property
-
 function showAuthFromLanding(tab) {
   const lp = $('landing-page');
   const auth = $('auth-screen');
@@ -7744,7 +7744,7 @@ function scrollToHowItWorks() {
 
 async function loadLandingProperties() {
   const { data: props } = await sb.from('properties')
-    .select('id,name,token_symbol,token_price_usd,daily_roi_percent,city,country,total_supply,tokens_sold,cover_image_url')
+    .select('id,name,token_symbol,token_price_usd,net_rental_yield_pct,city,country,total_supply,tokens_sold,cover_image_url')
     .eq('status','active').eq('featured',true).order('sort_order').limit(3);
 
   const container = $('lp-properties');
@@ -7760,7 +7760,8 @@ async function loadLandingProperties() {
       ? `<img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;object-position:${imgPos}"/>`
       : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px">🏢</div>`;
 
-    const yearly = (parseFloat(p.token_price_usd) * (parseFloat(p.daily_roi_percent)/100) * 365).toFixed(0);
+    // Honest: variable NET ANNUAL yield (%), not a daily rate or annualized daily figure
+    const annYield = (parseFloat(p.net_rental_yield_pct)||6).toFixed(1);
 
     return `
       <div style="background:var(--raised);border:1px solid var(--b1);border-radius:16px;
@@ -7773,7 +7774,7 @@ async function loadLandingProperties() {
           <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);
             backdrop-filter:blur(4px);border-radius:20px;padding:4px 10px;
             font-size:11px;color:var(--mint);font-family:var(--f-mono);font-weight:700">
-            ${p.daily_roi_percent}%/day
+            ~${annYield}%/yr · var
           </div>
         </div>
         <div style="padding:16px">
@@ -7785,8 +7786,8 @@ async function loadLandingProperties() {
               <div style="font-size:16px;font-weight:800;color:var(--neon)">$${p.token_price_usd}</div>
             </div>
             <div style="text-align:right">
-              <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">YEARLY ROI</div>
-              <div style="font-size:16px;font-weight:800;color:var(--gold)">${yearly}%</div>
+              <div style="font-size:11px;color:var(--t4);font-family:var(--f-mono);letter-spacing:1px">ANNUAL YIELD</div>
+              <div style="font-size:16px;font-weight:800;color:var(--gold)">~${annYield}%</div>
             </div>
           </div>
           <div style="height:4px;background:var(--b3);border-radius:2px;overflow:hidden;margin-bottom:4px">
@@ -7802,31 +7803,6 @@ async function loadLandingProperties() {
 
   const countEl = $('lp-prop-count');
   if (countEl) countEl.textContent = props.length + '+';
-}
-
-// ══════════════════════════════════════════════════════════════
-// ROI CALCULATOR
-// ══════════════════════════════════════════════════════════════
-function updateROICalc(amount, roiPct, tokenPrice) {
-  const usd = parseFloat(amount) || 1000;
-  const roi = roiPct || _currentModal_roi || 0.35;
-  const price = tokenPrice || 10;
-
-  const daily   = usd * (roi / 100);
-  const monthly = daily * 30;
-  const yearly  = daily * 365;
-  const tokens  = Math.floor(usd / price);
-
-  const fmt = (n) => '$' + n.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const el = (id) => $(id);
-  if (el('calc-amount-display')) el('calc-amount-display').textContent = fmt(usd);
-  if (el('calc-daily'))          el('calc-daily').textContent   = fmt(daily);
-  if (el('calc-monthly'))        el('calc-monthly').textContent = fmt(monthly);
-  if (el('calc-yearly'))         el('calc-yearly').textContent  = fmt(yearly);
-  if (el('calc-tokens-info'))    el('calc-tokens-info').textContent =
-    `${tokens} tokens at $${price} each · 18-month lock-in`;
-  if (el('roi-calc-slider'))     el('roi-calc-slider').value = usd;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -8960,7 +8936,7 @@ async function loadDashboard() {
             display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">▣</div>
           <div style="flex:1;min-width:0">
             <div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
-            <div style="font-size:11px;color:var(--t4)">${p.token_symbol} · ${p.daily_roi_percent}%/day</div>
+            <div style="font-size:11px;color:var(--t4)">${p.token_symbol} · ~6–10%/yr · variable</div>
           </div>
           <div style="text-align:right;flex-shrink:0">
             <div style="font-size:12px;font-weight:700;color:var(--mint)">≋ ${p.user_tokens || 0}</div>
@@ -9014,7 +8990,7 @@ async function loadDashboard() {
             <div style="font-size:12px;font-weight:700;margin-bottom:2px">${p.name}</div>
             <div style="font-size:11px;color:var(--t4);margin-bottom:8px">${p.location||'Premium Location'}</div>
             <div style="display:flex;justify-content:space-between;font-size:11px">
-              <span style="color:var(--mint)">${p.daily_roi_percent}%/day</span>
+              <span style="color:var(--mint)">~6–10%/yr · variable</span>
               <span style="color:var(--v2)">≋ ${p.token_price_usd}/token</span>
             </div>
           </div>
