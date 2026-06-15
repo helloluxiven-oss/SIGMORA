@@ -1918,7 +1918,7 @@ body[data-theme="light"] .card,.body[data-theme="light"] .kpi{
         </div>
         <div style="text-align:right">
           <div style="font-size:11px;color:var(--t4)">Next tier</div>
-          <div style="font-size:13px;font-weight:700;color:var(--v2)" id="dash-tier-next">Growth</div>
+          <div style="font-size:13px;font-weight:700;color:var(--v2)" id="dash-tier-next">Bronze</div>
         </div>
       </div>
       <div style="height:6px;background:var(--b2);border-radius:3px;overflow:hidden">
@@ -8902,24 +8902,19 @@ async function loadDashboard() {
   setText('dash-earned',   '≋ ' + fmtUSD(earn).replace('$',''));
   setText('sf-bal',        '≋ ' + fmtUSD(bal).replace('$',''));
 
-  // Tier
-  const tiers = [
-    {name:'Starter',  min:0,    next:'Growth',  nextMin:10},
-    {name:'Growth',   min:10,   next:'Premium', nextMin:25},
-    {name:'Premium',  min:25,   next:'Elite',   nextMin:50},
-    {name:'Elite',    min:50,   next:'Platinum',nextMin:100},
-    {name:'Platinum', min:100,  next:'—',       nextMin:null},
-  ];
-  const currentTier = tiers.filter(t => sgm >= t.min).pop() || tiers[0];
-  setText('dash-tier-name', currentTier.name);
+  // Tier — single source of truth: TIERS / getUserTier (USD, keyed off total_invested_usd).
+  // Mirrors public.tier_config; keeps the dashboard in sync with renderTierUI / buy page.
+  const tier     = getUserTier(inv);
+  const nextTier = TIERS.find(t => t.level === tier.level + 1);
+  setText('dash-tier-name', tier.name);
   setText('dash-tier-sgm', sgm + ' SGM');
-  setText('dash-tier-next', currentTier.next);
+  setText('dash-tier-next', nextTier ? nextTier.name : '—');
   const bar = $('dash-tier-bar');
   const prog = $('dash-tier-progress');
-  if (bar && currentTier.nextMin) {
-    const pct = Math.min(100, Math.round((sgm - currentTier.min) / (currentTier.nextMin - currentTier.min) * 100));
+  if (bar && nextTier) {
+    const pct = Math.min(100, Math.round((inv - tier.min) / (nextTier.min - tier.min) * 100));
     bar.style.width = pct + '%';
-    if (prog) prog.textContent = sgm + ' / ' + currentTier.nextMin + ' SGM to ' + currentTier.next;
+    if (prog) prog.textContent = '$' + inv.toLocaleString() + ' / $' + nextTier.min.toLocaleString() + ' to ' + nextTier.name;
   } else if (bar) {
     bar.style.width = '100%';
     if (prog) prog.textContent = 'Max tier reached 🏆';
