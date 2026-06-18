@@ -8172,10 +8172,11 @@ function switchWalletTab(tab) {
 
 function loadWalletPage() {
   if (!userProfile) return;
-  const bal  = parseFloat(profile.wallet_balance_usd || userProfile?.wallet_balance_usd || 0);
-  const sgm  = parseFloat(profile.sgm_balance || userProfile?.sgm_balance || 0);
-  const inv  = parseFloat(profile.total_invested_usd || userProfile?.total_invested_usd || 0);
-  const earn = parseFloat(profile.total_earned_usd || userProfile?.total_earned_usd || 0);
+  const profile = userProfile || {};
+  const bal  = parseFloat(profile.wallet_balance_usd || 0);
+  const sgm  = parseFloat(profile.sgm_balance || 0);
+  const inv  = parseFloat(profile.total_invested_usd || 0);
+  const earn = parseFloat(profile.total_earned_usd || 0);
 
   const set = (id, v) => { const el=$(id); if(el) el.textContent=v; };
   set('w-usdt-bal', fmtUSD(bal));
@@ -8890,10 +8891,10 @@ async function loadDashboard() {
   });
 
   // Balances
-  const bal  = parseFloat(userProfile.wallet_balance_usd || 0);
-  const sgm  = parseFloat(userProfile.sgm_balance || 0);
-  const inv  = parseFloat(userProfile.total_invested_usd || 0);
-  const earn = parseFloat(userProfile.total_earned_usd || 0);
+  const bal  = parseFloat(profile.wallet_balance_usd || 0);
+  const sgm  = parseFloat(profile.sgm_balance || 0);
+  const inv  = parseFloat(profile.total_invested_usd || 0);
+  const earn = parseFloat(profile.total_earned_usd || 0);
 
   setText('dash-usdt',     '≋ ' + fmtUSD(bal).replace('$',''));
   setText('dash-sgm',      sgm.toLocaleString() + ' SGM');
